@@ -1,0 +1,536 @@
+/* カスタムCSS */
+
+/* Bootstrap変数のオーバーライド */
+:root {
+  --bs-primary: #64748b;
+  --bs-primary-rgb: 100, 116, 139;
+  --bs-secondary: #6c757d;
+  --bs-success: #198754;
+  --bs-warning: #ffc107;
+  --bs-danger: #dc3545;
+  --bs-info: #0dcaf0;
+  --bs-light: #f8f9fa;
+  --bs-dark: #212529;
+
+  /* カスタムカラー - 落ち着いたブルーグレー系 */
+  --beauty-primary: #64748b;
+  --beauty-secondary: #334155;
+  --beauty-accent: #d97706;
+  --beauty-gradient: linear-gradient(135deg, #64748b 0%, #334155 100%);
+}
+
+/* 基本スタイル - 視認性改善 */
+body {
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  line-height: 1.6;
+  color: #1f2937; /* より濃い文字色で視認性向上 */
+}
+
+/* ヘッダー・ナビゲーション */
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+/* ボタンスタイル - 視認性・コントラスト改善 */
+.btn {
+  border-radius: 0.5rem;
+  font-weight: 600; /* より太いフォント */
+  padding: 0.75rem 1.5rem; /* より大きなパディング */
+  transition: all 0.2s ease;
+  font-size: 1rem; /* フォントサイズ明確化 */
+  border: 2px solid transparent; /* 境界線追加 */
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+  background: var(--beauty-gradient);
+  border: none;
+  color: #ffffff; /* 明確な白文字 */
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+  box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+  color: #ffffff;
+}
+
+.btn-warning {
+  background-color: var(--beauty-accent);
+  border: none;
+  color: #ffffff; /* より良いコントラスト */
+  font-weight: 600;
+}
+
+.btn-warning:hover,
+.btn-warning:focus {
+  background-color: #b45309;
+  color: #ffffff;
+}
+
+.btn-outline-primary {
+  color: var(--beauty-primary);
+  border: 2px solid var(--beauty-primary);
+  background-color: transparent;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--beauty-primary);
+  color: #ffffff;
+}
+
+/* カードスタイル */
+.card {
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  border-radius: 1rem 1rem 0 0 !important;
+  background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+  font-weight: 600;
+}
+
+/* フォームスタイル - 視認性大幅改善 */
+.form-control {
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem; /* パディング増加 */
+  border: 2px solid #d1d5db; /* 境界線を太く明確に */
+  background-color: #ffffff;
+  color: #1f2937; /* 濃い文字色 */
+  font-size: 1rem; /* フォントサイズ明確化 */
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--beauty-primary);
+  box-shadow: 0 0 0 0.2rem rgba(100, 116, 139, 0.25);
+  outline: none;
+  background-color: #f8fafc; /* フォーカス時の背景色 */
+}
+
+.form-control::placeholder {
+  color: #6b7280; /* プレースホルダーを見やすく */
+  opacity: 1;
+}
+
+.form-label {
+  font-weight: 600; /* より太く */
+  margin-bottom: 0.5rem;
+  color: #374151; /* より濃く */
+  font-size: 0.975rem; /* 少し大きく */
+}
+
+/* 認証レイアウト */
+.auth-layout {
+  background: var(--beauty-gradient);
+  min-height: 100vh;
+}
+
+.auth-layout .card {
+  border: none;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+/* アラート - 視認性改善 */
+.alert {
+  border-radius: 0.75rem;
+  border: 2px solid transparent; /* 境界線追加 */
+  font-weight: 500;
+  padding: 1rem 1.25rem; /* パディング増加 */
+  margin-bottom: 1rem;
+}
+
+.alert-danger {
+  background-color: #fef2f2;
+  color: #991b1b; /* より濃いエラー色 */
+  border-color: #fca5a5;
+}
+
+.alert-success {
+  background-color: #f0fdf4;
+  color: #166534; /* より濃い成功色 */
+  border-color: #86efac;
+}
+
+/* バッジ */
+.badge {
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+/* スピナー */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* =====================================
+   モバイル最適化・タッチ操作対応
+   ===================================== */
+
+/* タッチターゲット最適化 */
+.btn,
+button,
+a[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.nav-link,
+.dropdown-item {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* タッチフィードバック */
+  -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+  touch-action: manipulation;
+}
+
+/* スワイプ操作対応 */
+.swipeable,
+.carousel,
+.calendar-grid {
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ピンチズーム制御 */
+.form-control,
+input,
+textarea,
+select {
+  touch-action: manipulation;
+  /* iOS zoom prevention */
+  font-size: 16px;
+}
+
+/* モバイルブラウザ最適化 */
+.mobile-optimized {
+  /* GPU acceleration */
+  transform: translateZ(0);
+  /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* Contain layout */
+  contain: layout;
+}
+
+/* レスポンシブユーティリティ */
+@media (max-width: 575.98px) {
+  /* スマートフォン専用調整 */
+  .navbar-brand {
+    font-size: 1.125rem;
+  }
+
+  .display-4 {
+    font-size: 2rem;
+  }
+
+  .lead {
+    font-size: 1rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.25rem;
+    width: 100%;
+  }
+
+  /* モバイル専用スタック */
+  .btn-group-mobile-stack {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .btn-group-mobile-stack .btn {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* フォーム最適化 - モバイル視認性向上 */
+  .form-control {
+    padding: 1rem 1rem; /* モバイルでより大きなタッチターゲット */
+    font-size: 1.125rem; /* モバイルでの読みやすさ向上 */
+    border-width: 2px; /* モバイルでも明確な境界線 */
+  }
+
+  /* カード調整 */
+  .card {
+    margin: 0.5rem 0;
+    border-radius: 0.75rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* モーダル最適化 */
+  .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .modal-content {
+    border-radius: 0.75rem;
+  }
+
+  /* テーブル横スクロール */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ナビゲーション調整 */
+  .navbar-collapse {
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  /* タブレット縦向け */
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .display-4 {
+    font-size: 2.25rem;
+  }
+
+  .btn-group-tablet {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-group-tablet .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  /* タブレット横向け */
+  .display-4 {
+    font-size: 2.5rem;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* =====================================
+   iOS Safari 特化対応
+   ===================================== */
+@supports (-webkit-touch-callout: none) {
+  /* Safe area対応 */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* iOS固有のフォーム調整 */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* iOS Safariでのビューポート高さ問題対応 */
+  .vh-100-mobile {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  /* iOS scrolling optimization */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+}
+
+/* =====================================
+   Android Chrome 特化対応
+   ===================================== */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  /* Android keyboard appearance対応 */
+  .form-control:focus {
+    zoom: 1; /* keyboard zoom prevention */
+  }
+
+  /* Android specific viewport fixes */
+  .container-fluid {
+    overflow-x: hidden;
+  }
+
+  /* Material Design ripple effect */
+  .btn-material {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-material::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  .btn-material:active::before {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bs-body-bg: #1a1a1a;
+    --bs-body-color: #ffffff;
+  }
+}
+
+/* アニメーション */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* スクロールバー */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--beauty-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--beauty-secondary);
+}
+
+/* カスタムコンポーネント */
+.hero-section {
+  background: var(--beauty-gradient);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+  opacity: 0.3;
+}
+
+.service-card {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.service-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* フォーカス管理 */
+.focus-visible {
+  outline: 2px solid var(--beauty-primary);
+  outline-offset: 2px;
+}
+
+/* プリント用スタイル */
+@media print {
+  .navbar,
+  .footer,
+  .btn {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+}

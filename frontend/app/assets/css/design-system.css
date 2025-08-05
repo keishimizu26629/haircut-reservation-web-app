@@ -1,0 +1,990 @@
+/**
+ * 統一デザインシステム
+ * アニメーション・フォント・ダークモード・印刷スタイル
+ */
+
+/* =====================================
+   デザイントークン・CSS Custom Properties
+   ===================================== */
+
+:root {
+  /* カラーパレット */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* Beauty Salon専用カラー - 落ち着いたブルーグレー系 */
+  --beauty-primary: #64748b;
+  --beauty-primary-light: #94a3b8;
+  --beauty-primary-dark: #475569;
+  --beauty-secondary: #334155;
+  --beauty-secondary-light: #64748b;
+  --beauty-secondary-dark: #1e293b;
+  --beauty-accent: #d97706;
+  --beauty-accent-light: #f59e0b;
+  --beauty-accent-dark: #b45309;
+
+  /* グラデーション */
+  --beauty-gradient-primary: linear-gradient(135deg, var(--beauty-primary) 0%, var(--beauty-secondary) 100%);
+  --beauty-gradient-light: linear-gradient(135deg, var(--beauty-primary-light) 0%, var(--beauty-secondary-light) 100%);
+  --beauty-gradient-dark: linear-gradient(135deg, var(--beauty-primary-dark) 0%, var(--beauty-secondary-dark) 100%);
+
+  /* ニュートラルカラー */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  /* セマンティックカラー */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* フォント */
+  --font-family-primary: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-headings: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-mono: 'Fira Code', 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+
+  /* フォントサイズスケール */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.875rem;    /* 30px */
+  --font-size-4xl: 2.25rem;     /* 36px */
+  --font-size-5xl: 3rem;        /* 48px */
+  --font-size-6xl: 3.75rem;     /* 60px */
+
+  /* フォントウェイト */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* ライン高 */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* スペーシング */
+  --space-px: 1px;
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+
+  /* ボーダー半径 */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;    /* 2px */
+  --radius-base: 0.25rem;   /* 4px */
+  --radius-md: 0.375rem;    /* 6px */
+  --radius-lg: 0.5rem;      /* 8px */
+  --radius-xl: 0.75rem;     /* 12px */
+  --radius-2xl: 1rem;       /* 16px */
+  --radius-3xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
+
+  /* シャドウ */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+
+  /* アニメーション */
+  --duration-75: 75ms;
+  --duration-100: 100ms;
+  --duration-150: 150ms;
+  --duration-200: 200ms;
+  --duration-300: 300ms;
+  --duration-500: 500ms;
+  --duration-700: 700ms;
+  --duration-1000: 1000ms;
+
+  /* イージング */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-beauty: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Z-index スケール */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-offcanvas: 1050;
+  --z-modal: 1060;
+  --z-popover: 1070;
+  --z-tooltip: 1080;
+}
+
+/* =====================================
+   タイポグラフィシステム
+   ===================================== */
+
+/* 基本タイポグラフィ */
+html {
+  font-size: 16px;
+  font-family: var(--font-family-primary);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: #111827; /* より濃い色で視認性向上 */
+  background-color: var(--color-gray-50);
+}
+
+/* 見出しスタイル - 視認性改善 */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-headings);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: #0f172a; /* 最も濃い色で明確な階層を作る */
+  margin-bottom: var(--space-4);
+}
+
+.heading-1 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: var(--line-height-tight);
+}
+
+.heading-2 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+.heading-3 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+}
+
+.heading-4 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+}
+
+.heading-5 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+}
+
+.heading-6 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+}
+
+/* 本文スタイル */
+.text-lead {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-gray-700);
+}
+
+.text-body {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--color-gray-700);
+}
+
+.text-small {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--color-gray-600);
+}
+
+.text-caption {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =====================================
+   アニメーションシステム
+   ===================================== */
+
+/* 基本トランジション */
+.transition-none { transition: none; }
+.transition-all { transition: all var(--duration-150) var(--ease-in-out); }
+.transition-beauty { transition: all var(--duration-200) var(--ease-beauty); }
+.transition-bounce { transition: all var(--duration-300) var(--ease-bounce); }
+
+/* フェードアニメーション */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* スケールアニメーション */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* スライドアニメーション */
+@keyframes slideInUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ローディングアニメーション */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Beauty Salon専用アニメーション */
+@keyframes beautyGlow {
+  0% { box-shadow: 0 0 5px var(--beauty-primary); }
+  50% { box-shadow: 0 0 20px var(--beauty-primary), 0 0 30px var(--beauty-secondary); }
+  100% { box-shadow: 0 0 5px var(--beauty-primary); }
+}
+
+@keyframes beautyShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* アニメーションクラス */
+.animate-fade-in { animation: fadeIn var(--duration-300) var(--ease-out); }
+.animate-fade-in-up { animation: fadeInUp var(--duration-500) var(--ease-out); }
+.animate-fade-in-down { animation: fadeInDown var(--duration-500) var(--ease-out); }
+.animate-fade-in-left { animation: fadeInLeft var(--duration-500) var(--ease-out); }
+.animate-fade-in-right { animation: fadeInRight var(--duration-500) var(--ease-out); }
+.animate-scale-in { animation: scaleIn var(--duration-200) var(--ease-out); }
+.animate-slide-in-up { animation: slideInUp var(--duration-300) var(--ease-out); }
+.animate-slide-in-down { animation: slideInDown var(--duration-300) var(--ease-out); }
+.animate-spin { animation: spin var(--duration-1000) linear infinite; }
+.animate-pulse { animation: pulse var(--duration-1000) var(--ease-in-out) infinite; }
+.animate-bounce { animation: bounce var(--duration-1000) infinite; }
+.animate-beauty-glow { animation: beautyGlow 2s ease-in-out infinite; }
+
+/* ホバーアニメーション */
+.hover-lift {
+  transition: transform var(--duration-200) var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-scale {
+  transition: transform var(--duration-200) var(--ease-out);
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-glow {
+  transition: box-shadow var(--duration-200) var(--ease-out);
+}
+.hover-glow:hover {
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+/* =====================================
+   ダークモードシステム
+   ===================================== */
+
+/* ダークモード変数 */
+[data-theme="dark"],
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* ダークモードカラー */
+    --color-gray-50: #111827;
+    --color-gray-100: #1f2937;
+    --color-gray-200: #374151;
+    --color-gray-300: #4b5563;
+    --color-gray-400: #6b7280;
+    --color-gray-500: #9ca3af;
+    --color-gray-600: #d1d5db;
+    --color-gray-700: #e5e7eb;
+    --color-gray-800: #f3f4f6;
+    --color-gray-900: #f9fafb;
+
+    /* ダークモード対応beauty colors */
+    --beauty-primary: #8fa5ff;
+    --beauty-primary-light: #b4c6ff;
+    --beauty-primary-dark: #667eea;
+    --beauty-secondary: #9d6cc8;
+    --beauty-secondary-light: #b994d3;
+    --beauty-secondary-dark: #764ba2;
+
+    /* ダークモードグラデーション */
+    --beauty-gradient-primary: linear-gradient(135deg, var(--beauty-primary) 0%, var(--beauty-secondary) 100%);
+  }
+
+  body {
+    background-color: var(--color-gray-50);
+    color: var(--color-gray-900);
+  }
+
+  /* カード・コンポーネント */
+  .card,
+  .modal-content,
+  .dropdown-menu {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-200);
+    color: var(--color-gray-900);
+  }
+
+  /* フォーム要素 */
+  .form-control,
+  input,
+  textarea,
+  select {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-300);
+    color: var(--color-gray-900);
+  }
+
+  .form-control:focus {
+    border-color: var(--beauty-primary);
+    box-shadow: 0 0 0 0.2rem rgba(143, 165, 255, 0.25);
+  }
+
+  /* ボタン */
+  .btn-outline-primary {
+    color: var(--beauty-primary);
+    border-color: var(--beauty-primary);
+  }
+
+  .btn-outline-primary:hover {
+    background-color: var(--beauty-primary);
+    color: var(--color-gray-50);
+  }
+
+  /* テーブル */
+  .table {
+    color: var(--color-gray-900);
+  }
+
+  .table-striped > tbody > tr:nth-of-type(odd) > td,
+  .table-striped > tbody > tr:nth-of-type(odd) > th {
+    background-color: var(--color-gray-100);
+  }
+
+  /* ナビゲーション */
+  .navbar-dark {
+    background-color: var(--color-gray-100) !important;
+  }
+
+  .navbar-dark .navbar-nav .nav-link {
+    color: var(--color-gray-700);
+  }
+
+  .navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--beauty-primary);
+  }
+}
+
+/* ダークモード切り替えボタン */
+.theme-toggle {
+  position: relative;
+  background: none;
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--radius-full);
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  transition: all var(--duration-200) var(--ease-in-out);
+}
+
+.theme-toggle:hover {
+  border-color: var(--beauty-primary);
+  transform: scale(1.1);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  transition: all var(--duration-200) var(--ease-in-out);
+}
+
+/* =====================================
+   印刷スタイルシステム
+   ===================================== */
+
+@media print {
+  /* 印刷用リセット */
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* ページ設定 */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  /* 基本スタイル */
+  body {
+    font-family: 'Times New Roman', serif;
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+  }
+
+  /* 見出し */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #000;
+    page-break-after: avoid;
+    margin-top: 0;
+    margin-bottom: 0.5em;
+  }
+
+  h1 { font-size: 18pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 14pt; }
+  h4, h5, h6 { font-size: 12pt; }
+
+  /* パラグラフ */
+  p {
+    margin: 0 0 0.5em 0;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* リスト */
+  ul, ol {
+    margin: 0 0 0.5em 0;
+    padding-left: 2em;
+  }
+
+  li {
+    margin-bottom: 0.25em;
+  }
+
+  /* テーブル */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1em;
+  }
+
+  th, td {
+    border: 1px solid #000;
+    padding: 0.25em 0.5em;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  /* ページブレーク */
+  .page-break-before { page-break-before: always; }
+  .page-break-after { page-break-after: always; }
+  .page-break-inside-avoid { page-break-inside: avoid; }
+
+  .no-page-break,
+  tr,
+  th,
+  td {
+    page-break-inside: avoid;
+  }
+
+  /* 不要要素を非表示 */
+  .no-print,
+  nav,
+  .navbar,
+  .sidebar,
+  footer,
+  .footer,
+  button:not(.print-button),
+  .btn:not(.print-button),
+  .modal,
+  .tooltip,
+  .popover,
+  .dropdown-menu,
+  .alert,
+  .badge,
+  .progress,
+  form:not(.print-form),
+  input:not(.print-input),
+  select:not(.print-select),
+  textarea:not(.print-textarea) {
+    display: none !important;
+  }
+
+  /* リンク処理 */
+  a {
+    text-decoration: underline;
+    color: #000;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after,
+  a[href^="mailto:"]:after,
+  a[href^="tel:"]:after {
+    content: "";
+  }
+
+  /* 画像 */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+  }
+
+  /* カード・セクション */
+  .card,
+  .section {
+    border: 1px solid #ddd;
+    border-radius: 0;
+    margin-bottom: 1em;
+    padding: 1em;
+    page-break-inside: avoid;
+  }
+
+  .card-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.5em;
+    font-weight: bold;
+  }
+
+  /* 美容室専用印刷スタイル */
+  .appointment-card {
+    border: 2px solid #000;
+    padding: 1em;
+    margin-bottom: 1em;
+    page-break-inside: avoid;
+  }
+
+  .appointment-time {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+
+  .customer-info {
+    font-size: 11pt;
+    margin-bottom: 0.5em;
+  }
+
+  .service-details {
+    font-size: 10pt;
+    margin-bottom: 0.5em;
+  }
+
+  /* 印刷用ヘッダー・フッター */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 0.5em;
+    margin-bottom: 1em;
+  }
+
+  .print-footer {
+    display: block !important;
+    text-align: center;
+    border-top: 1px solid #000;
+    padding-top: 0.5em;
+    margin-top: 1em;
+    font-size: 9pt;
+  }
+
+  /* QRコード・バーコード */
+  .qr-code,
+  .barcode {
+    max-width: 2in;
+    height: auto;
+    margin: 0.5em 0;
+  }
+}
+
+/* =====================================
+   アクセシビリティ強化
+   ===================================== */
+
+/* フォーカス管理 */
+.focus-visible {
+  outline: 2px solid var(--beauty-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* スクリーンリーダー専用テキスト */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: var(--z-tooltip);
+  padding: var(--space-2) var(--space-4);
+  background: var(--beauty-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+}
+
+.skip-link:focus {
+  left: var(--space-4);
+  top: var(--space-4);
+}
+
+/* 高コントラストモード対応 */
+@media (prefers-contrast: high) {
+  :root {
+    --beauty-primary: #000080;
+    --beauty-secondary: #800080;
+  }
+
+  .btn,
+  .form-control,
+  .card {
+    border-width: 2px;
+  }
+}
+
+/* モーション削減対応 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .hover-lift:hover,
+  .hover-scale:hover {
+    transform: none;
+  }
+}
+
+/* =====================================
+   レスポンシブタイポグラフィ
+   ===================================== */
+
+/* Fluid typography */
+.text-fluid-xs { font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); }
+.text-fluid-sm { font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); }
+.text-fluid-base { font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem); }
+.text-fluid-lg { font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); }
+.text-fluid-xl { font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); }
+.text-fluid-2xl { font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem); }
+.text-fluid-3xl { font-size: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem); }
+.text-fluid-4xl { font-size: clamp(2.25rem, 1.9rem + 1.75vw, 3rem); }
+
+/* モバイル最適化タイポグラフィ */
+@media (max-width: 575.98px) {
+  .heading-1 { font-size: var(--font-size-3xl); }
+  .heading-2 { font-size: var(--font-size-2xl); }
+  .heading-3 { font-size: var(--font-size-xl); }
+  .text-lead { font-size: var(--font-size-lg); }
+}
+
+/* =====================================
+   ユーティリティクラス
+   ===================================== */
+
+/* スペーシング */
+.p-0 { padding: 0; }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+
+.m-0 { margin: 0; }
+.m-1 { margin: var(--space-1); }
+.m-2 { margin: var(--space-2); }
+.m-3 { margin: var(--space-3); }
+.m-4 { margin: var(--space-4); }
+.m-5 { margin: var(--space-5); }
+.m-6 { margin: var(--space-6); }
+
+/* カラー */
+.text-primary { color: var(--beauty-primary); }
+.text-secondary { color: var(--beauty-secondary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+.text-info { color: var(--color-info); }
+
+.bg-primary { background-color: var(--beauty-primary); }
+.bg-secondary { background-color: var(--beauty-secondary); }
+.bg-gradient { background: var(--beauty-gradient-primary); }
+
+/* 境界線 */
+.border { border: 1px solid var(--color-gray-200); }
+.border-primary { border-color: var(--beauty-primary); }
+.border-secondary { border-color: var(--beauty-secondary); }
+
+.rounded { border-radius: var(--radius-base); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* シャドウ */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow { box-shadow: var(--shadow-base); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+
+/* ディスプレイ */
+.d-none { display: none; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+
+/* Flexbox */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+/* テキスト */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* Beauty Salon専用クラス */
+.beauty-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+  transition: all var(--duration-200) var(--ease-beauty);
+}
+
+.beauty-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.beauty-button {
+  background: var(--beauty-gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-6);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--duration-200) var(--ease-beauty);
+  cursor: pointer;
+}
+
+.beauty-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.beauty-input {
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  transition: all var(--duration-200) var(--ease-in-out);
+}
+
+.beauty-input:focus {
+  outline: none;
+  border-color: var(--beauty-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}

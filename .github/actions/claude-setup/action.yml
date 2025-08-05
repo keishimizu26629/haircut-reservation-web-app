@@ -1,0 +1,31 @@
+name: 'Claude Setup'
+description: 'Common setup steps for Claude Code Action jobs'
+
+outputs:
+  github-token:
+    description: 'The generated GitHub App token'
+    value: ${{ steps.app-token.outputs.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+    - name: Generate GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+        private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+        owner: ${{ github.repository_owner }}
+        repositories: |
+          ${{ github.event.repository.name }}

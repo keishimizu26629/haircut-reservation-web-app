@@ -1,0 +1,756 @@
+/**
+ * クロスブラウザ対応CSS
+ * Chrome・Safari・Firefox・Edge・iOS・Android完全対応
+ */
+
+/* =====================================
+   CSS Reset・Normalize
+   ===================================== */
+
+/* Universal box-sizing fix */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margins and paddings */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Improve text rendering across browsers */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+/* Cross-browser font family fallbacks */
+body {
+  font-family: 
+    /* Modern system fonts */
+    -apple-system, BlinkMacSystemFont,
+    /* Segoe UI for Windows */
+    "Segoe UI",
+    /* Roboto for Android */
+    Roboto,
+    /* Oxygen for KDE */
+    Oxygen,
+    /* Ubuntu for Ubuntu */  
+    Ubuntu, Cantarell,
+    /* Fira Sans for older systems */
+    "Fira Sans",
+    /* Droid Sans for older Android */
+    "Droid Sans",
+    /* Helvetica for macOS/iOS fallback */
+    "Helvetica Neue", Helvetica,
+    /* Arial for universal fallback */
+    Arial,
+    /* Japanese fonts */
+    "Noto Sans CJK JP", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", Meiryo,
+    /* Generic fallback */
+    sans-serif,
+    /* Emoji fonts */
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    
+  /* Consistent line height across browsers */
+  line-height: 1.6;
+  
+  /* Better text selection across browsers */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* =====================================
+   Flexbox Cross-Browser Fixes
+   ===================================== */
+
+.flex-cross-browser {
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -webkit-flex;     /* NEW - Safari 6.1+ */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: flex;             /* NEW, Spec - Firefox, Chrome, Opera */
+}
+
+.flex-direction-column {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.flex-wrap {
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.align-items-center {
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.justify-content-center {
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.justify-content-space-between {
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+/* =====================================
+   Transform Cross-Browser
+   ===================================== */
+
+.transform-cross-browser {
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  -o-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* =====================================
+   Transition Cross-Browser
+   ===================================== */
+
+.transition-cross-browser {
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+/* =====================================
+   Border Radius Cross-Browser
+   ===================================== */
+
+.border-radius-cross-browser {
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+/* =====================================
+   Box Shadow Cross-Browser
+   ===================================== */
+
+.box-shadow-cross-browser {
+  -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================
+   Chrome特化対応
+   ===================================== */
+
+/* Chrome/Webkit specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* Chrome form styling */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="%23666"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>') no-repeat center;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Chrome scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* Chrome input focus outline */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+  }
+
+  /* Chrome autofill styling */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #333 !important;
+  }
+}
+
+/* =====================================
+   Safari特化対応
+   ===================================== */
+
+/* Safari specific */
+@supports (-webkit-appearance: none) {
+  /* Safari form appearance reset */
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari date/time inputs */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: #333;
+  }
+
+  /* Safari select styling */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 9L1.5 4.5h9z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    padding-right: 3rem;
+  }
+
+  /* Safari button styling */
+  button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Safari textarea resize */
+  textarea {
+    resize: vertical;
+  }
+}
+
+/* =====================================
+   Firefox特化対応
+   ===================================== */
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+  /* Firefox form styling */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Firefox select arrow */
+  select {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 9L1.5 4.5h9z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 3rem;
+  }
+
+  /* Firefox button styling */
+  button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+  }
+
+  /* Firefox input number */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox scrollbar styling */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
+  }
+}
+
+/* =====================================
+   Edge特化対応
+   ===================================== */
+
+/* Edge/IE specific */
+@supports (-ms-ime-align: auto) {
+  /* Edge form styling */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Edge select styling */
+  select::-ms-expand {
+    display: none;
+  }
+
+  select {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="%23666" d="M6 9L1.5 4.5h9z"/></svg>');  
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    padding-right: 3rem;
+  }
+
+  /* Edge button styling */
+  button {
+    border: none;
+    background: transparent;
+  }
+
+  /* Edge grid fixes */
+  .grid-container {
+    display: -ms-grid;
+    display: grid;
+  }
+}
+
+/* =====================================
+   iOS Safari特化対応
+   ===================================== */
+
+/* iOS Safari specific */
+@supports (-webkit-touch-callout: none) {
+  /* iOS safe area support */
+  .ios-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+  }
+
+  /* iOS form zoom prevention */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevent zoom on focus */
+    transform: translateZ(0); /* Trigger hardware acceleration */
+  }
+
+  /* iOS button styling */
+  button,
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  /* iOS scroll behavior */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-scrolling: touch;
+  }
+
+  /* iOS viewport height fix */
+  .full-height-ios {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+
+  /* iOS hover states (disable) */
+  @media (hover: none) and (pointer: coarse) {
+    .hover-disabled-on-touch:hover {
+      /* Reset hover styles on touch devices */
+      background: initial;
+      color: initial;
+      transform: none;
+    }
+  }
+
+  /* iOS input appearance fixes */
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0.5rem;
+  }
+
+  input[type="submit"],
+  input[type="button"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0.5rem;
+  }
+}
+
+/* =====================================
+   Android Chrome特化対応
+   ===================================== */
+
+/* Android Chrome specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  /* Android form styling */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Prevent zoom on focus */
+  }
+
+  /* Android button styling */
+  button,
+  .btn {
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+    touch-action: manipulation;
+  }
+
+  /* Android viewport fixes */
+  .android-viewport-fix {
+    width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Android keyboard fixes */
+  .form-container {
+    position: relative;
+  }
+
+  .form-container input:focus {
+    /* Prevent layout shift on keyboard appearance */
+    transform: translateZ(0);
+  }
+
+  /* Android material ripple effect */
+  .material-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .material-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+  }
+
+  .material-ripple:active::before {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* =====================================
+   Internet Explorer 11対応（レガシー）
+   ===================================== */
+
+/* IE11 specific (if needed for legacy support) */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  /* IE11 flexbox fixes */
+  .flex-ie11-fix {
+    display: -ms-flexbox;
+    display: flex;
+  }
+
+  .flex-column-ie11 {
+    -ms-flex-direction: column;
+    flex-direction: column;
+  }
+
+  .flex-center-ie11 {
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+  }
+
+  /* IE11 grid fallback */
+  .grid-ie11-fallback {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  /* IE11 object-fit fallback */
+  .object-fit-ie11 {
+    /* Fallback for IE11 */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+
+/* =====================================
+   High DPI/Retina Display対応
+   ===================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders on high DPI displays */
+  .sharp-border {
+    border-width: 0.5px;
+  }
+
+  /* Crisp 1px lines */
+  .hairline-border {
+    border-width: 0.5px;
+    border-style: solid;
+    border-color: #e0e0e0;
+  }
+
+  /* High DPI background images */
+  .high-dpi-bg {
+    background-image: url('image@2x.png');
+    background-size: 50% 50%;
+  }
+}
+
+/* =====================================
+   Print Cross-Browser対応
+   ===================================== */
+
+@media print {
+  /* Universal print resets */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Remove unnecessary elements */
+  nav,
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Optimize for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000;
+    background: #fff;
+  }
+
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid;
+  }
+
+  /* Link handling */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+}
+
+/* =====================================
+   アクセシビリティ対応
+   ===================================== */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .contrast-border {
+    border: 2px solid currentColor;
+  }
+
+  .contrast-focus:focus {
+    outline: 3px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Force colors mode (Windows high contrast) */
+@media (forced-colors: active) {
+  .forced-colors-border {
+    border: 1px solid ButtonText;
+  }
+
+  .forced-colors-bg {
+    background-color: ButtonFace;
+    color: ButtonText;
+  }
+}
+
+/* =====================================
+   デバッグ・開発者ツール対応
+   ===================================== */
+
+/* Development/Debug mode styles */
+.debug-grid {
+  background-image: 
+    linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.debug-outline * {
+  outline: 1px solid red;
+}
+
+/* Browser detection classes for debugging */
+.chrome .chrome-only,
+.safari .safari-only,
+.firefox .firefox-only,
+.edge .edge-only,
+.ios .ios-only,
+.android .android-only {
+  display: block;
+}
+
+.chrome .not-chrome,
+.safari .not-safari,
+.firefox .not-firefox,
+.edge .not-edge,
+.ios .not-ios,
+.android .not-android {
+  display: none;
+}
+
+/* =====================================
+   フォールバック・グレースフルデグレード
+   ===================================== */
+
+/* CSS Grid fallback for older browsers */
+.grid-fallback {
+  display: block; /* Fallback */
+  display: grid; /* Modern browsers */
+}
+
+.grid-fallback > * {
+  margin-bottom: 1rem; /* Fallback spacing */
+}
+
+/* Flexbox fallback */
+.flex-fallback {
+  display: block; /* Fallback */
+  display: flex; /* Modern browsers */
+}
+
+.flex-fallback > * {
+  display: inline-block; /* Fallback */
+  vertical-align: top;
+  width: 50%; /* Fallback */
+}
+
+/* Modern CSS features with fallbacks */
+.modern-features {
+  /* Fallback */
+  background: #667eea;
+  padding: 1rem;
+  border-radius: 4px;
+  
+  /* Modern */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: clamp(1rem, 4vw, 2rem);
+  border-radius: max(4px, min(1rem, calc(100vw - 100%) * 9999));
+  backdrop-filter: blur(10px);
+}
+
+/* Feature queries for progressive enhancement */
+@supports (display: grid) {
+  .supports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .supports-backdrop-filter {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.8);
+  }
+}
+
+@supports (gap: 1rem) {
+  .supports-gap {
+    gap: 1rem;
+  }
+}
+
+/* Container queries fallback (when supported) */
+@supports (container-type: inline-size) {
+  .container-query {
+    container-type: inline-size;
+  }
+  
+  @container (min-width: 400px) {
+    .container-responsive {
+      padding: 2rem;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Beauty Salon Reservation System",
+  "short_name": "HaircutBooking",
+  "description": "Professional beauty salon reservation system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

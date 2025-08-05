@@ -1,0 +1,566 @@
+name: Claude Assistant
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned, labeled]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  # 変更ファイルを検知
+  detect-changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      terraform: ${{ steps.filter.outputs.terraform }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - '.agentrules/frontend/**'
+              - 'src/frontend/**'
+              - '*.tsx'
+              - '*.ts'
+              - '*.jsx'
+              - '*.js'
+              - 'package.json'
+              - 'package-lock.json'
+            backend:
+              - '.agentrules/backend/**'
+              - 'src/backend/**'
+              - 'api/**'
+              - '*.go'
+              - '*.py'
+              - '*.java'
+              - 'requirements.txt'
+              - 'go.mod'
+              - 'pom.xml'
+            terraform:
+              - '.agentrules/terraform/**'
+              - 'infra/**'
+              - '*.tf'
+              - '*.tfvars'
+
+  # Frontend レビュー
+  claude-frontend-review:
+    needs: detect-changes
+    if: |
+      github.event_name == 'pull_request' && 
+      needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-frontend"
+          settings: ".claude/frontend-review.settings.json"
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff"
+          direct_prompt: |
+            **【Frontend自動レビュー】**
+            このプルリクエスト（PR）のフロントエンド関連の変更をレビューし、GitHub のレビュー機能を使ってフィードバックをしてください。
+
+            **レビュー手順:**
+            1. `mcp__github__create_pending_pull_request_review` を使って、保留中のレビューを開始します。
+            2. `mcp__github__get_pull_request_diff` を使って、コードの変更点や行番号を把握します。
+            3. 改善点があるコードの行には `mcp__github__add_pull_request_review_comment_to_pending_review` を使ってインラインコメントを追加してください。
+            4. `mcp__github__submit_pending_pull_request_review` を使って、イベントタイプを「COMMENT」に設定してレビューを提出してください。
+
+            **フロントエンドレビュー観点:**
+            - Nuxt 3/Vue 3/TypeScript ベストプラクティス
+            - Clean Architecture 準拠性
+            - パフォーマンス最適化
+            - アクセシビリティ基準
+            - CSS/スタイリングの一貫性
+            - セキュリティ脆弱性（XSS対策等）
+            - .agentrules/frontend/CLAUDE-REVIEW.md のガイドライン準拠
+
+            **重要:** レビューは「COMMENT」タイプで提出し、PRをブロックしないでください。日本語でフィードバックしてください。
+          timeout_minutes: "30"
+          max_turns: "5"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "gemini-2.5-flash"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Backend レビュー
+  claude-backend-review:
+    needs: detect-changes
+    if: |
+      github.event_name == 'pull_request' && 
+      needs.detect-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-backend"
+          settings: ".claude/backend-review.settings.json"
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff"
+          direct_prompt: |
+            **【Backend自動レビュー】**
+            このプルリクエスト（PR）のバックエンド関連の変更をレビューし、GitHub のレビュー機能を使ってフィードバックをしてください。
+
+            **レビュー手順:**
+            1. `mcp__github__create_pending_pull_request_review` を使って、保留中のレビューを開始します。
+            2. `mcp__github__get_pull_request_diff` を使って、コードの変更点や行番号を把握します。
+            3. 改善点があるコードの行には `mcp__github__add_pull_request_review_comment_to_pending_review` を使ってインラインコメントを追加してください。
+            4. `mcp__github__submit_pending_pull_request_review` を使って、イベントタイプを「COMMENT」に設定してレビューを提出してください。
+
+            **バックエンドレビュー観点:**
+            - API設計とRESTful原則
+            - データベースクエリ最適化
+            - セキュリティ脆弱性（SQLインジェクション、認証等）
+            - エラーハンドリングとログ出力
+            - パフォーマンスとスケーラビリティ
+            - .agentrules/backend/CLAUDE-REVIEW.md のガイドライン準拠
+
+            **重要:** レビューは「COMMENT」タイプで提出し、PRをブロックしないでください。日本語でフィードバックしてください。
+          timeout_minutes: "30"
+          max_turns: "5"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "gemini-2.5-flash"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Terraform レビュー
+  claude-terraform-review:
+    needs: detect-changes
+    if: |
+      github.event_name == 'pull_request' && 
+      needs.detect-changes.outputs.terraform == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-terraform"
+          settings: ".claude/terraform-review.settings.json"
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,Bash(terraform fmt -check),Bash(terraform validate)"
+          direct_prompt: |
+            **【Terraform自動レビュー】**
+            このプルリクエスト（PR）のTerraform/インフラ関連の変更をレビューし、GitHub のレビュー機能を使ってフィードバックをしてください。
+
+            **レビュー手順:**
+            1. `mcp__github__create_pending_pull_request_review` を使って、保留中のレビューを開始します。
+            2. `mcp__github__get_pull_request_diff` を使って、コードの変更点や行番号を把握します。
+            3. 必要に応じて `terraform fmt -check` や `terraform validate` でコードをチェックしてください。
+            4. 改善点があるコードの行には `mcp__github__add_pull_request_review_comment_to_pending_review` を使ってインラインコメントを追加してください。
+            5. `mcp__github__submit_pending_pull_request_review` を使って、イベントタイプを「COMMENT」に設定してレビューを提出してください。
+
+            **Terraformレビュー観点:**
+            - セキュリティベストプラクティス
+            - コスト最適化
+            - リソース命名規則
+            - 状態管理
+            - モジュール再利用性
+            - .agentrules/terraform/CLAUDE-REVIEW.md のガイドライン準拠
+
+            **重要:** レビューは「COMMENT」タイプで提出し、PRをブロックしないでください。日本語でフィードバックしてください。
+          timeout_minutes: "30"
+          max_turns: "5"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "gemini-2.5-flash"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Frontend実装
+  claude-frontend-implementation:
+    if: |
+      github.event_name == 'issue_comment' && 
+      contains(github.event.comment.body, '@claude-impl-frontend')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-impl-frontend"
+          settings: ".claude/frontend-impl.settings.json"
+          override_prompt: |
+            You are a Frontend Developer. Your role is to:
+            1. Implement React/TypeScript components
+            2. Follow the implementation guidelines in .agentrules/frontend/CLAUDE-IMPL.md
+            3. Create tests for new components
+            4. Ensure accessibility and performance
+            
+            Use modern React patterns and TypeScript best practices.
+            
+            Request: $TRIGGER_COMMENT
+          timeout_minutes: "60"
+          max_turns: "10"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Backend実装
+  claude-backend-implementation:
+    if: |
+      github.event_name == 'issue_comment' && 
+      contains(github.event.comment.body, '@claude-impl-backend')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-impl-backend"
+          settings: ".claude/backend-impl.settings.json"
+          override_prompt: |
+            You are a Backend Developer. Your role is to:
+            1. Implement APIs and backend services
+            2. Follow the implementation guidelines in .agentrules/backend/CLAUDE-IMPL.md
+            3. Write unit and integration tests
+            4. Ensure security and performance
+            
+            Focus on clean architecture and proper error handling.
+            
+            Request: $TRIGGER_COMMENT
+          timeout_minutes: "60"
+          max_turns: "10"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Terraform実装
+  claude-terraform-implementation:
+    if: |
+      github.event_name == 'issue_comment' && 
+      contains(github.event.comment.body, '@claude-impl-terraform')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude-impl-terraform"
+          settings: ".claude/terraform-impl.settings.json"
+          override_prompt: |
+            You are an Infrastructure Developer. Your role is to:
+            1. Implement Terraform configurations
+            2. Follow the implementation guidelines in .agentrules/terraform/CLAUDE-IMPL.md
+            3. Ensure security and cost optimization
+            4. Create reusable modules
+            
+            Always validate with terraform fmt and terraform validate.
+            
+            Request: $TRIGGER_COMMENT
+          timeout_minutes: "45"
+          max_turns: "8"
+          allowed_tools: |
+            Read
+            Edit
+            MultiEdit
+            Write
+            Grep
+            Glob
+            LS
+            Bash(terraform init)
+            Bash(terraform fmt)
+            Bash(terraform validate)
+            Bash(terraform plan)
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # Issue分析（仕様策定）
+  claude-issue-analysis:
+    if: |
+      github.event_name == 'issues' && 
+      github.event.action == 'opened' &&
+      contains(github.event.issue.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude"
+          settings: ".claude/issue-analysis.settings.json"
+          override_prompt: |
+            You are an Issue Analyst. Your role is to:
+            1. Analyze the issue and understand requirements
+            2. Break down complex tasks into smaller steps
+            3. Identify potential technical challenges
+            4. Suggest implementation approach
+            5. List affected components/files
+            
+            IMPORTANT: First, read ALL available CLAUDE.md files:
+            - .agentrules/frontend/CLAUDE.md for Frontend standards
+            - .agentrules/backend/CLAUDE.md for Backend standards
+            - .agentrules/terraform/CLAUDE.md for Infrastructure standards
+            
+            Base your analysis on these project-specific guidelines.
+            DO NOT implement code. Only provide analysis and planning.
+            
+            Issue: $TRIGGER_COMMENT
+          timeout_minutes: "15"
+          max_turns: "3"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # PRレビューコメントでの手動レビュー
+  claude-pr-manual-review:
+    if: |
+      github.event_name == 'pull_request_review_comment' && 
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude"
+          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff"
+          direct_prompt: |
+            **【レビュー依頼の場合】**
+            このプルリクエスト（PR）をレビューし、GitHub のレビュー機能を使ってフィードバックをしてください。作業は次の手順に沿って進めてください：
+            1.  **レビューを開始する:** `mcp__github__create_pending_pull_request_review` を使って、保留中のレビューを開始します。
+            2.  **変更内容を確認する:** `mcp__github__get_pull_request_diff` を使って、コードの変更点や行番号を把握します。
+            3.  **インラインコメントを追加する:** 改善点や懸念事項があるコードの行には `mcp__github__add_pull_request_review_comment_to_pending_review` を使ってコメントを追加してください。修正方針が明確な場合には積極的にsuggestionを利用してください。
+            4.  **レビューを提出する:** `mcp__github__submit_pending_pull_request_review` を使って、イベントタイプを「COMMENT」に設定し、全体のまとめコメントと共にレビューを提出してください（※「REQUEST_CHANGES」は使わないでください）。
+
+            **コメントの書き方に関する重要事項**
+
+            * **インラインコメントの構成:**
+                * **結論を先に:** 各インラインコメントの冒頭で、指摘内容の要点を一行で簡潔に述べてください。
+                * **理由と提案:** 結論の後に、そのように判断した理由や背景、具体的な修正案を詳しく説明してください。
+                * **指摘中心に:** インラインコメントは、修正提案、バグの可能性、可読性の問題など、具体的な改善点に焦点を当ててください。
+
+            * **ポジティブなフィードバックについて:**
+                * **インラインでは控えめに:** インラインで言及するのは、特に優れた設計や他の開発者の参考になるような独創的な実装など、特筆すべき点に限定します。
+                * **まとめコメントで言及:** 全体的に良かった点や、PR全体に対するポジティブな感想は、レビュー提出時の「まとめコメント」に集約して記述してください。
+
+            **レビューの観点**
+
+            レビューでは以下の点に注目してください：
+            * .agentrules/のガイドラインに従っているか
+            * コードの品質やベストプラクティスに沿っているか
+            * バグやセキュリティリスクがないか
+            * パフォーマンス上の懸念がないか
+            * 保守性や可読性は十分か
+            * 設計やアーキテクチャに妥当性があるか
+
+            **その他**
+
+            * 日本語でのフィードバックをお願いします。
+            * 具体的で実行可能なフィードバックをお願いします。
+            * **重要:** レビューの提出は必ず「COMMENT」タイプで行い、PR をブロックしないようにしてください。
+          timeout_minutes: "60"
+          max_turns: "10"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
+
+  # 汎用的なコメント対応
+  claude-general:
+    if: |
+      github.event_name == 'issue_comment' && 
+      contains(github.event.comment.body, '@claude') &&
+      !contains(github.event.comment.body, '@claude-impl-frontend') &&
+      !contains(github.event.comment.body, '@claude-impl-backend') &&
+      !contains(github.event.comment.body, '@claude-impl-terraform') &&
+      !contains(github.event.comment.body, '@claude-frontend') &&
+      !contains(github.event.comment.body, '@claude-backend') &&
+      !contains(github.event.comment.body, '@claude-terraform')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID_FOR_CLAUDE_CODE }}
+          private-key: ${{ secrets.PRIVATE_KEY_FOR_CLAUDE_CODE }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+      - uses: anthropics/claude-code-action@beta
+        with:
+          trigger_phrase: "@claude"
+          direct_prompt: |
+            あなたは役立つAIアシスタントです。ユーザーから、 `@claude` というメンションに対して、以下の条件から簡潔かつ正確な回答を提供してください。
+            - リクエストがコードに関連する場合は、問題や質問に対応するコードスニペットを提供してください。
+          timeout_minutes: "30"
+          max_turns: "5"
+          github_token: ${{ steps.app-token.outputs.token }}
+          use_vertex: "true"
+          model: "claude-3-7-sonnet@20250219"
+        env:
+          ANTHROPIC_VERTEX_PROJECT_ID: ${{ secrets.DEV_GOOGLE_CLOUD_PROJECT_ID }}
+          CLOUD_ML_REGION: us-east5
