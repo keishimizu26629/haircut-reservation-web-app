@@ -7,8 +7,12 @@
         <div class="brand-logo">
           <i class="bi bi-scissors" aria-hidden="true"></i>
         </div>
-        <h1 class="brand-title">新規アカウント作成</h1>
-        <p class="brand-subtitle">美容室予約システムのアカウントを作成してください</p>
+        <h1 class="brand-title">
+          美容室予約システム
+        </h1>
+        <p class="brand-subtitle">
+          新規アカウント作成
+        </p>
       </div>
 
       <!-- メイン登録フォーム -->
@@ -893,7 +897,7 @@ onMounted(() => {
 
 .register-button {
   width: 100%;
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
+  background: var(--primary-600);
   color: var(--neutral-0);
   border: none;
   padding: var(--space-3) var(--space-6);
@@ -911,11 +915,13 @@ onMounted(() => {
 }
 
 .register-button:hover:not(:disabled) {
+  background: var(--primary-700);
   transform: translateY(-1px);
   box-shadow: var(--shadow-xl);
 }
 
 .register-button:active:not(:disabled) {
+  background: var(--primary-800);
   transform: translateY(0);
 }
 
