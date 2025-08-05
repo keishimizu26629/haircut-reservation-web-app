@@ -227,7 +227,7 @@
                 type="checkbox"
                 :aria-invalid="!!errors.acceptTerms"
                 :aria-describedby="errors.acceptTerms ? 'terms-error' : undefined"
-                @change="clearFieldError('acceptTerms')"
+                @change="clearFieldError('acceptTerms'); console.log('Terms checkbox changed:', form.acceptTerms)"
               >
               <span class="checkmark"></span>
               <span class="terms-text">
@@ -237,6 +237,11 @@
                 に同意します
               </span>
             </label>
+            <!-- デバッグ用表示 -->
+            <div style="margin-top: 8px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 12px;">
+              <strong>チェックボックス状態:</strong> {{ form.acceptTerms ? 'チェック済み' : 'チェックなし' }}<br>
+              <strong>フォーム有効:</strong> {{ isFormValid ? 'はい' : 'いいえ' }}
+            </div>
             <transition name="error-slide">
               <div
                 v-if="errors.acceptTerms"
@@ -273,6 +278,7 @@
             class="register-button"
             :disabled="loading || !isFormValid"
             :aria-label="loading ? 'アカウント作成中...' : 'アカウントを作成'"
+            :title="!isFormValid ? '全ての必須項目を入力し、利用規約に同意してください' : ''"
           >
             <span v-if="loading">
               <svg class="loading-spinner" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
@@ -377,7 +383,7 @@ const errors = reactive({
 // =====================================
 
 const isFormValid = computed(() => {
-  return form.name.trim().length > 0 &&
+  const isValid = form.name.trim().length > 0 &&
          form.email.length > 0 &&
          form.password.length >= 6 &&
          form.confirmPassword.length > 0 &&
@@ -388,6 +394,20 @@ const isFormValid = computed(() => {
          !errors.password &&
          !errors.confirmPassword &&
          !errors.acceptTerms
+  
+  // デバッグ用ログ
+  console.log('Form validation status:', {
+    name: form.name.trim().length > 0,
+    email: form.email.length > 0,
+    password: form.password.length >= 6,
+    confirmPassword: form.confirmPassword.length > 0,
+    passwordMatch: form.password === form.confirmPassword,
+    acceptTerms: form.acceptTerms,
+    noErrors: !errors.name && !errors.email && !errors.password && !errors.confirmPassword && !errors.acceptTerms,
+    isValid
+  })
+  
+  return isValid
 })
 
 // =====================================
@@ -622,7 +642,7 @@ onMounted(() => {
 
 .register-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
 }
 
 .register-header {
@@ -670,7 +690,7 @@ onMounted(() => {
 
 /* フォーム要素のスタイリング */
 .form-field {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
 }
 
 .form-label {
@@ -769,7 +789,7 @@ onMounted(() => {
   border: 1px solid var(--error-200);
   border-radius: var(--radius-lg);
   color: var(--error-600);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
   gap: var(--space-1);
@@ -799,12 +819,13 @@ onMounted(() => {
   position: relative;
   width: var(--space-5);
   height: var(--space-5);
-  border: 2px solid var(--neutral-300);
+  border: 2px solid var(--neutral-400);
   border-radius: var(--radius-base);
   background: var(--neutral-0);
   transition: all var(--transition-fast);
   flex-shrink: 0;
   margin-top: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .terms-checkbox input[type="checkbox"]:checked + .checkmark {
@@ -897,7 +918,7 @@ onMounted(() => {
 
 .register-button {
   width: 100%;
-  background: var(--primary-600);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%);
   color: var(--neutral-0);
   border: none;
   padding: var(--space-3) var(--space-6);
@@ -915,13 +936,11 @@ onMounted(() => {
 }
 
 .register-button:hover:not(:disabled) {
-  background: var(--primary-700);
   transform: translateY(-1px);
   box-shadow: var(--shadow-xl);
 }
 
 .register-button:active:not(:disabled) {
-  background: var(--primary-800);
   transform: translateY(0);
 }
 
@@ -1075,7 +1094,7 @@ onMounted(() => {
   }
 
   .form-field {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 }
 
