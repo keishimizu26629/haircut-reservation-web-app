@@ -1,0 +1,18 @@
+{
+  "model": "claude-sonnet-4@20250514",
+  "max_turns": 3,
+  "temperature": 0.2,
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "LS",
+    "WebSearch"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[ISSUE ANALYSIS MODE] Analyzing requirements...'"
+    }
+  },
+  "custom_instructions": "You are analyzing an issue. Read ALL available CLAUDE.md files (frontend/CLAUDE.md, backend/CLAUDE.md, terraform/CLAUDE.md) to understand the project structure and standards. Provide comprehensive analysis based on these guidelines."
+}

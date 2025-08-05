@@ -1,0 +1,235 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // =====================================
+    // 本番環境用 Firebase Storage セキュリティルール
+    // 厳格なセキュリティ設定
+    // =====================================
+    
+    // ヘルパー関数群
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.admin == true;
+    }
+    
+    function isStaff() {
+      return request.auth != null && 
+             (request.auth.token.admin == true || 
+              request.auth.token.staff == true);
+    }
+    
+    function isTenantOwner(tenantId) {
+      return request.auth != null &&
+             request.auth.token.tenantOwner == true &&
+             request.auth.token.tenantId == tenantId;
+    }
+    
+    function isTenantStaff(tenantId) {
+      return request.auth != null &&
+             (request.auth.token.staff == true ||
+              request.auth.token.tenantOwner == true) &&
+             request.auth.token.tenantId == tenantId;
+    }
+    
+    // ファイル形式検証
+    function isImageFile() {
+      return resource.contentType.matches('image/.*');
+    }
+    
+    function isAllowedImageType() {
+      return resource.contentType in [
+        'image/jpeg', 'image/png', 'image/webp', 'image/gif'
+      ];
+    }
+    
+    function isValidFileSize(maxSizeMB) {
+      return resource.size < maxSizeMB * 1024 * 1024;
+    }
+    
+    // ファイル名検証（セキュリティ）
+    function hasSecureFilename() {
+      // 危険な文字列を含まない
+      return !resource.name.matches('.*[<>:"/\\|?*].*') &&
+             !resource.name.matches('.*\\.(exe|bat|cmd|scr|js|jar|com|pif)$');
+    }
+    
+    // =====================================
+    // プロフィール画像（アバター）
+    // =====================================
+    match /avatars/{userId}/{fileName} {
+      // 読み取り：認証済みユーザー
+      allow read: if isAuthenticated();
+      
+      // 書き込み：本人または管理者のみ
+      allow write: if isAuthenticated() && 
+                      (isOwner(userId) || isAdmin()) &&
+                      isAllowedImageType() &&
+                      isValidFileSize(5) && // 5MB制限
+                      hasSecureFilename();
+      
+      // 削除：本人または管理者のみ
+      allow delete: if isAuthenticated() && 
+                       (isOwner(userId) || isAdmin());
+    }
+    
+    // =====================================
+    // スタイリストポートフォリオ
+    // =====================================
+    match /portfolios/{tenantId}/{staffId}/{fileName} {
+      // 読み取り：公開（誰でも）
+      allow read: if true;
+      
+      // 書き込み：該当テナントのスタッフまたは管理者
+      allow write: if isAuthenticated() && 
+                      (isTenantStaff(tenantId) || isAdmin()) &&
+                      isAllowedImageType() &&
+                      isValidFileSize(10) && // 10MB制限
+                      hasSecureFilename();
+      
+      // 削除：該当テナントのオーナーまたは管理者
+      allow delete: if isAuthenticated() && 
+                       (isTenantOwner(tenantId) || isAdmin());
+    }
+    
+    // =====================================
+    // メニュー・サービス画像
+    // =====================================
+    match /menu-images/{tenantId}/{serviceId}/{fileName} {
+      // 読み取り：公開（誰でも）
+      allow read: if true;
+      
+      // 書き込み：該当テナントのスタッフまたは管理者
+      allow write: if isAuthenticated() && 
+                      (isTenantStaff(tenantId) || isAdmin()) &&
+                      isAllowedImageType() &&
+                      isValidFileSize(8) && // 8MB制限
+                      hasSecureFilename();
+      
+      // 削除：該当テナントのスタッフまたは管理者
+      allow delete: if isAuthenticated() && 
+                       (isTenantStaff(tenantId) || isAdmin());
+    }
+    
+    // =====================================
+    // テナント別アセット
+    // =====================================
+    match /tenant-assets/{tenantId}/{category}/{fileName} {
+      // 読み取り：認証済みユーザー
+      allow read: if isAuthenticated();
+      
+      // 書き込み：該当テナントのスタッフまたは管理者
+      allow write: if isAuthenticated() && 
+                      (isTenantStaff(tenantId) || isAdmin()) &&
+                      isAllowedImageType() &&
+                      isValidFileSize(15) && // 15MB制限
+                      hasSecureFilename();
+      
+      // 削除：該当テナントのオーナーまたは管理者
+      allow delete: if isAuthenticated() && 
+                       (isTenantOwner(tenantId) || isAdmin());
+    }
+    
+    // =====================================
+    // 一時アップロード
+    // =====================================
+    match /temp-uploads/{userId}/{fileName} {
+      // 読み取り：本人のみ
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // 書き込み：本人のみ（24時間制限）
+      allow write: if isAuthenticated() && 
+                      isOwner(userId) &&
+                      isAllowedImageType() &&
+                      isValidFileSize(20) && // 20MB制限
+                      hasSecureFilename();
+      
+      // 削除：本人または管理者（自動削除対象）
+      allow delete: if isAuthenticated() && 
+                       (isOwner(userId) || isAdmin());
+    }
+    
+    // =====================================
+    // レポート・ドキュメント（管理者専用）
+    // =====================================
+    match /reports/{tenantId}/{fileName} {
+      // 読み取り：該当テナントのオーナーまたは管理者
+      allow read: if isAuthenticated() && 
+                     (isTenantOwner(tenantId) || isAdmin());
+      
+      // 書き込み：管理者のみ
+      allow write: if isAdmin() &&
+                      resource.contentType.matches('application/.*') &&
+                      isValidFileSize(50) && // 50MB制限
+                      hasSecureFilename();
+      
+      // 削除：管理者のみ
+      allow delete: if isAdmin();
+    }
+    
+    // =====================================
+    // バックアップデータ（管理者専用）
+    // =====================================
+    match /backups/{fileName} {
+      // 読み取り：管理者のみ
+      allow read: if isAdmin();
+      
+      // 書き込み：管理者のみ
+      allow write: if isAdmin() &&
+                      hasSecureFilename();
+      
+      // 削除：管理者のみ
+      allow delete: if isAdmin();
+    }
+    
+    // =====================================
+    // システムアセット（読み取り専用）
+    // =====================================
+    match /system-assets/{fileName} {
+      // 読み取り：公開
+      allow read: if true;
+      
+      // 書き込み・削除：管理者のみ
+      allow write, delete: if isAdmin();
+    }
+    
+    // =====================================
+    // セキュリティ強化設定
+    // =====================================
+    
+    // 機密ファイルへのアクセス完全禁止
+    match /sensitive/{allPaths=**} {
+      allow read, write: if false;
+    }
+    
+    // 設定ファイルの保護
+    match /config/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if false; // 設定ファイルは読み取り専用
+    }
+    
+    // ログファイルの保護
+    match /logs/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if false; // ログは追記のみ（別システムで管理）
+    }
+    
+    // テスト用ファイル（本番環境では無効）
+    match /test-files/{allPaths=**} {
+      allow read, write: if false; // 本番環境ではテストファイル無効
+    }
+    
+    // デフォルト拒否ルール
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

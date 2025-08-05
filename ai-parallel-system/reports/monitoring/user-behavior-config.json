@@ -1,0 +1,88 @@
+{
+  "pages": {
+    "home": {
+      "key_interactions": [
+        "hero_cta_click",
+        "booking_button_click",
+        "service_selection",
+        "scroll_to_features"
+      ],
+      "conversion_goals": [
+        "booking_initiation",
+        "login_completion",
+        "service_inquiry"
+      ]
+    },
+    "booking": {
+      "key_interactions": [
+        "date_selection",
+        "time_selection",
+        "service_selection",
+        "stylist_selection",
+        "form_submission"
+      ],
+      "conversion_goals": [
+        "booking_completion",
+        "payment_initiation"
+      ],
+      "funnel_steps": [
+        "page_load",
+        "service_selected",
+        "date_selected",
+        "time_selected",
+        "details_entered",
+        "booking_confirmed"
+      ]
+    },
+    "login": {
+      "key_interactions": [
+        "email_field_focus",
+        "password_field_focus",
+        "login_button_click",
+        "forgot_password_click",
+        "register_link_click"
+      ],
+      "conversion_goals": [
+        "successful_login",
+        "account_creation"
+      ]
+    }
+  },
+  "experiments": [
+    {
+      "id": "landing_page_redesign",
+      "name": "Landing Page Redesign Impact",
+      "description": "Measure impact of new landing page structure on conversion",
+      "variants": [
+        "control",
+        "new_design"
+      ],
+      "metrics": [
+        "booking_conversion_rate",
+        "time_to_booking",
+        "bounce_rate",
+        "page_load_time"
+      ],
+      "duration_days": 14,
+      "traffic_split": 0.5
+    }
+  ],
+  "cohorts": {
+    "new_users": {
+      "definition": "first_visit_date",
+      "metrics": [
+        "retention_day_1",
+        "retention_day_7",
+        "first_booking_rate"
+      ]
+    },
+    "returning_users": {
+      "definition": "visit_count > 1",
+      "metrics": [
+        "booking_frequency",
+        "session_duration",
+        "feature_usage"
+      ]
+    }
+  }
+}

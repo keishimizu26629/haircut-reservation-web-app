@@ -1,0 +1,263 @@
+{
+  "timestamp": "2025-08-03T05:20:17.219Z",
+  "summary": {
+    "totalFindings": 5,
+    "totalRecommendations": 6,
+    "criticalIssues": 0,
+    "highIssues": 1,
+    "mediumIssues": 3,
+    "lowIssues": 2
+  },
+  "findings": [
+    {
+      "category": "Firestore Rules",
+      "status": "analyzed",
+      "details": {
+        "hasAuthentication": true,
+        "hasRoleBasedAccess": true,
+        "hasOwnershipChecks": true,
+        "hasFieldValidation": true,
+        "hasDefaultDeny": true,
+        "publicReadAccess": []
+      },
+      "timestamp": "2025-08-03T05:20:17.216Z"
+    },
+    {
+      "category": "Storage Rules",
+      "status": "analyzed",
+      "details": {
+        "hasAuthentication": true,
+        "allowsPublicRead": true,
+        "hasFileSizeLimit": true,
+        "hasFileTypeValidation": true
+      },
+      "timestamp": "2025-08-03T05:20:17.218Z"
+    },
+    {
+      "category": "Nuxt Configuration",
+      "status": "analyzed",
+      "details": {
+        "hasCSP": true,
+        "hasSecurityHeaders": true,
+        "hasHTTPSRedirect": true,
+        "hasHSTS": false,
+        "usesSSR": true,
+        "hasAuthRoutes": true,
+        "hasRoleBasedRoutes": false
+      },
+      "timestamp": "2025-08-03T05:20:17.219Z"
+    },
+    {
+      "category": "Authentication Flow",
+      "status": "analyzed",
+      "details": [
+        {
+          "step": "User Registration",
+          "security": {
+            "inputValidation": true,
+            "passwordRequirements": true,
+            "emailVerification": true,
+            "rateLimiting": false
+          },
+          "risks": [
+            "Weak password policy",
+            "No email verification",
+            "Brute force attacks"
+          ]
+        },
+        {
+          "step": "User Login",
+          "security": {
+            "authenticationRequired": true,
+            "sessionManagement": true,
+            "multiFactorAuth": false,
+            "accountLockout": false
+          },
+          "risks": [
+            "Session hijacking",
+            "Credential stuffing",
+            "No MFA"
+          ]
+        },
+        {
+          "step": "Protected Route Access",
+          "security": {
+            "authenticationCheck": true,
+            "roleBasedAccess": true,
+            "tokenValidation": true,
+            "sessionExpiry": true
+          },
+          "risks": [
+            "Token manipulation",
+            "Session fixation",
+            "Privilege escalation"
+          ]
+        },
+        {
+          "step": "Data Access",
+          "security": {
+            "ownershipValidation": true,
+            "fieldLevelSecurity": true,
+            "auditLogging": true,
+            "dataEncryption": false
+          },
+          "risks": [
+            "Unauthorized data access",
+            "Data leakage",
+            "Insufficient logging"
+          ]
+        }
+      ],
+      "timestamp": "2025-08-03T05:20:17.219Z"
+    },
+    {
+      "category": "Page Structure Impact",
+      "status": "analyzed",
+      "details": {
+        "currentStructure": {
+          "routes": [
+            "/login",
+            "/register",
+            "/dashboard",
+            "/booking",
+            "/admin"
+          ],
+          "authRequired": [
+            "/dashboard",
+            "/booking",
+            "/admin"
+          ],
+          "publicAccess": [
+            "/login",
+            "/register",
+            "/"
+          ]
+        },
+        "proposedChanges": {
+          "newLandingPage": "/",
+          "directBookingAccess": "/booking",
+          "simplifiedAuth": true,
+          "reducedComplexity": true
+        },
+        "securityImplications": {
+          "positiveImpacts": [
+            "Reduced attack surface with simplified structure",
+            "Faster initial load reduces timing attack windows",
+            "Clearer separation of public and protected content"
+          ],
+          "potentialRisks": [
+            "Direct booking access may bypass some validation",
+            "Simplified auth flow needs proper implementation",
+            "New routes need security rule updates"
+          ],
+          "mitigationStrategies": [
+            "Implement client-side and server-side validation",
+            "Update Firebase rules for new route structure",
+            "Add proper authentication checks to all booking flows",
+            "Implement comprehensive audit logging"
+          ]
+        }
+      },
+      "timestamp": "2025-08-03T05:20:17.219Z"
+    }
+  ],
+  "recommendations": [
+    "MEDIUM: Implement rate limiting for authentication endpoints",
+    "LOW: Consider implementing MFA for admin users",
+    "MEDIUM: Add account lockout mechanism",
+    "HIGH: Update Firebase rules for new page structure",
+    "MEDIUM: Add validation for direct booking access",
+    "LOW: Implement audit logging for route changes"
+  ],
+  "authenticationFlows": [
+    {
+      "step": "User Registration",
+      "security": {
+        "inputValidation": true,
+        "passwordRequirements": true,
+        "emailVerification": true,
+        "rateLimiting": false
+      },
+      "risks": [
+        "Weak password policy",
+        "No email verification",
+        "Brute force attacks"
+      ]
+    },
+    {
+      "step": "User Login",
+      "security": {
+        "authenticationRequired": true,
+        "sessionManagement": true,
+        "multiFactorAuth": false,
+        "accountLockout": false
+      },
+      "risks": [
+        "Session hijacking",
+        "Credential stuffing",
+        "No MFA"
+      ]
+    },
+    {
+      "step": "Protected Route Access",
+      "security": {
+        "authenticationCheck": true,
+        "roleBasedAccess": true,
+        "tokenValidation": true,
+        "sessionExpiry": true
+      },
+      "risks": [
+        "Token manipulation",
+        "Session fixation",
+        "Privilege escalation"
+      ]
+    },
+    {
+      "step": "Data Access",
+      "security": {
+        "ownershipValidation": true,
+        "fieldLevelSecurity": true,
+        "auditLogging": true,
+        "dataEncryption": false
+      },
+      "risks": [
+        "Unauthorized data access",
+        "Data leakage",
+        "Insufficient logging"
+      ]
+    }
+  ],
+  "complianceStatus": {
+    "owasp": {
+      "score": 85,
+      "areas": {
+        "authentication": "Good",
+        "authorization": "Good",
+        "dataValidation": "Needs improvement",
+        "cryptography": "Good (Firebase managed)",
+        "errorHandling": "Needs review",
+        "logging": "Needs improvement"
+      }
+    },
+    "gdpr": {
+      "score": 70,
+      "areas": {
+        "dataMinimization": "Good",
+        "consentManagement": "Needs implementation",
+        "rightToErasure": "Needs implementation",
+        "dataPortability": "Needs implementation",
+        "privacyByDesign": "Partially implemented"
+      }
+    },
+    "firebaseBestPractices": {
+      "score": 90,
+      "areas": {
+        "securityRules": "Good",
+        "authentication": "Good",
+        "dataStructure": "Good",
+        "indexing": "Needs review",
+        "monitoring": "Needs improvement"
+      }
+    }
+  }
+}

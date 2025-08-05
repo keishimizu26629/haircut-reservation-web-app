@@ -1,0 +1,22 @@
+{
+  "model": "claude-sonnet-4@20250514",
+  "max_turns": 3,
+  "temperature": 0.1,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash(terraform fmt -check)",
+    "Bash(terraform validate)",
+    "Bash(terraform plan)"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo 'Reviewing Infrastructure code...'"
+    }
+  },
+  "custom_instructions": "Focus on security best practices, cost optimization, and proper resource management. Ensure all resources have proper tags and follow naming conventions."
+}

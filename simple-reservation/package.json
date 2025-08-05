@@ -1,0 +1,27 @@
+{
+  "name": "simple-reservation-backend",
+  "version": "1.0.0",
+  "description": "Firebase backend for simple reservation management system",
+  "main": "index.js",
+  "scripts": {
+    "start": "firebase emulators:start",
+    "start:dev": "firebase emulators:start --only firestore,auth,ui",
+    "deploy": "firebase deploy",
+    "build": "tsc",
+    "test": "jest",
+    "init-data": "node scripts/init-sample-data.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  },
+  "engines": {
+    "node": "18"
+  }
+}

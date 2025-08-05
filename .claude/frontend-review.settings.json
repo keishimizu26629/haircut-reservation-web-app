@@ -1,0 +1,17 @@
+{
+  "model": "gemini-2.5-flash",
+  "max_turns": 3,
+  "temperature": 0.1,
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "LS"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[REVIEW MODE] Analyzing Frontend code...'"
+    }
+  },
+  "custom_instructions": "You are in REVIEW MODE. Focus only on code review feedback. Check Nuxt 3/Vue 3/TypeScript patterns, Clean Architecture compliance, performance, security (XSS), and accessibility. DO NOT modify code, only provide feedback. Read and follow the review guidelines in .agentrules/frontend/CLAUDE-REVIEW.md."
+}

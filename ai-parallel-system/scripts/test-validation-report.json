@@ -1,0 +1,111 @@
+{
+  "timestamp": "2025-08-05T21:23:05.338Z",
+  "testFiles": [
+    {
+      "file": "admin-management.e2e.test.ts",
+      "testCases": 0,
+      "testSuites": 0,
+      "types": [
+        "認証ログイン",
+        "管理者機能",
+        "予約機能",
+        "システム"
+      ],
+      "size": "31KB",
+      "hasSetup": true,
+      "hasCleanup": true,
+      "usesFirebase": true
+    },
+    {
+      "file": "auth-login.e2e.test.ts",
+      "testCases": 13,
+      "testSuites": 1,
+      "types": [
+        "認証ログイン",
+        "ユーザー登録",
+        "予約機能",
+        "システム"
+      ],
+      "size": "9KB",
+      "hasSetup": true,
+      "hasCleanup": false,
+      "usesFirebase": true
+    },
+    {
+      "file": "auth-register.e2e.test.ts",
+      "testCases": 18,
+      "testSuites": 1,
+      "types": [
+        "認証ログイン",
+        "ユーザー登録",
+        "予約機能",
+        "システム"
+      ],
+      "size": "15KB",
+      "hasSetup": true,
+      "hasCleanup": false,
+      "usesFirebase": true
+    },
+    {
+      "file": "booking-complete-flow.e2e.test.ts",
+      "testCases": 0,
+      "testSuites": 0,
+      "types": [
+        "管理者機能",
+        "予約機能",
+        "システム"
+      ],
+      "size": "26KB",
+      "hasSetup": true,
+      "hasCleanup": true,
+      "usesFirebase": true
+    },
+    {
+      "file": "system-reliability.e2e.test.ts",
+      "testCases": 0,
+      "testSuites": 0,
+      "types": [
+        "管理者機能",
+        "予約機能",
+        "システム"
+      ],
+      "size": "29KB",
+      "hasSetup": true,
+      "hasCleanup": true,
+      "usesFirebase": true
+    }
+  ],
+  "playwrightConfig": {
+    "valid": true,
+    "checks": {
+      "hasTestDir": true,
+      "hasTestMatch": true,
+      "hasBaseURL": true,
+      "hasGlobalSetup": true,
+      "hasReporter": true,
+      "targetsE2E": true
+    },
+    "path": "/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/playwright.config.ts"
+  },
+  "packageScripts": {
+    "scripts": {
+      "test:e2e": "playwright test",
+      "test:e2e:ui": "playwright test --ui",
+      "dev": "nuxt dev --host 0.0.0.0",
+      "build": "nuxt build"
+    },
+    "hasPlaywright": "^1.54.2"
+  },
+  "dependencies": {
+    "setupExists": true,
+    "globalSetupExists": true,
+    "setupSize": 3467,
+    "globalSetupSize": 652
+  },
+  "dryRun": {
+    "exitCode": 1,
+    "stdout": "Listing tests:\nTotal: 0 tests in 0 files\n",
+    "stderr": "\nError: Vitest cannot be imported in a CommonJS module using require(). Please use \"import\" instead.\n\nIf you are using \"import\" in your source code, then it's possible it was bundled into require() automatically by your bundler. In that case, do not bundle CommonJS output since it will never work with Vitest, or use dynamic import() which is available in all CommonJS modules.\n\n   at admin-management.e2e.test.ts:4\n\n  2 | // 管理者による予約管理、設定変更、システム監視の完全テスト\n  3 |\n> 4 | import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'\n    | ^\n  5 | import { mount, VueWrapper } from '@vue/test-utils'\n  6 | import AdminDashboard from '~/pages/admin/index.vue'\n  7 | import AdminBookings from '~/pages/admin/bookings.vue'\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/node_modules/vitest/index.cjs:1:7)\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/tests/e2e/admin-management.e2e.test.ts:4:1)\n\nError: Vitest cannot be imported in a CommonJS module using require(). Please use \"import\" instead.\n\nIf you are using \"import\" in your source code, then it's possible it was bundled into require() automatically by your bundler. In that case, do not bundle CommonJS output since it will never work with Vitest, or use dynamic import() which is available in all CommonJS modules.\n\n   at booking-complete-flow.e2e.test.ts:4\n\n  2 | // ブラウザ環境での実際のユーザー操作をシミュレート\n  3 |\n> 4 | import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'\n    | ^\n  5 | import { mount, VueWrapper } from '@vue/test-utils'\n  6 | import BookingPage from '~/pages/booking.vue'\n  7 | import AdminDashboard from '~/pages/admin/index.vue'\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/node_modules/vitest/index.cjs:1:7)\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/tests/e2e/booking-complete-flow.e2e.test.ts:4:1)\n\nError: Vitest cannot be imported in a CommonJS module using require(). Please use \"import\" instead.\n\nIf you are using \"import\" in your source code, then it's possible it was bundled into require() automatically by your bundler. In that case, do not bundle CommonJS output since it will never work with Vitest, or use dynamic import() which is available in all CommonJS modules.\n\n   at system-reliability.e2e.test.ts:4\n\n  2 | // 実際の運用環境で発生する可能性のある問題とその対処をテスト\n  3 |\n> 4 | import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'\n    | ^\n  5 | import { mount, VueWrapper } from '@vue/test-utils'\n  6 | import BookingPage from '~/pages/booking.vue'\n  7 | import AdminDashboard from '~/pages/admin/index.vue'\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/node_modules/vitest/index.cjs:1:7)\n    at Object.<anonymous> (/Users/keisukeshimizu/Development/DockerProject/haircut-reservation/frontend/tests/e2e/system-reliability.e2e.test.ts:4:1)\n",
+    "success": false
+  }
+}

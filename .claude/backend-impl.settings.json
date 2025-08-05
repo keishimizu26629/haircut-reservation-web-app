@@ -1,0 +1,23 @@
+{
+  "model": "claude-3-7-sonnet@20250219",
+  "max_turns": 10,
+  "temperature": 0.3,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Write",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash",
+    "WebSearch",
+    "TodoWrite"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[IMPLEMENTATION MODE] Creating Backend code...'"
+    }
+  },
+  "custom_instructions": "You are in IMPLEMENTATION MODE. Actively write backend code. Create APIs, services, repositories, and tests. Focus on clean architecture, proper validation, and error handling. Always create unit and integration tests."
+}
