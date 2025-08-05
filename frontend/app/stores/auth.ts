@@ -35,24 +35,38 @@ function getFirebaseInstances() {
     if (process.dev && process.client) {
       console.log('🔐 [Firebase] Attempting emulator connection...')
       try {
-        // Emulator接続状態をチェック（より安全な方法）
-        if (!(auth as any).config?.emulator && !(auth as any)._config?.emulator) {
-          connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true })
-          console.log('🔐 [Firebase] Auth emulator connected')
+        // Auth Emulator接続
+        const authEmulatorUrl = 'http://localhost:9099'
+        const isAuthConnected = (auth as any).config?.emulator || (auth as any)._config?.emulator
+        
+        if (!isAuthConnected) {
+          connectAuthEmulator(auth, authEmulatorUrl, { disableWarnings: true })
+          console.log('🔐 [Firebase] Auth emulator connected to:', authEmulatorUrl)
         } else {
           console.log('🔐 [Firebase] Auth emulator already connected')
         }
 
-        // Firestoreのemulator接続確認（より安全な方法）
-        const firestoreSettings = (firestore as any)._settings
-        if (!firestoreSettings?.host?.includes('localhost') && !firestoreSettings?.ssl === false) {
+        // Firestore Emulator接続
+        const firestoreSettings = (firestore as any)._settings || {}
+        const isFirestoreConnected = firestoreSettings.host?.includes('localhost') || firestoreSettings.ssl === false
+        
+        if (!isFirestoreConnected) {
           connectFirestoreEmulator(firestore, 'localhost', 8080)
-          console.log('🔐 [Firebase] Firestore emulator connected')
+          console.log('🔐 [Firebase] Firestore emulator connected to: localhost:8080')
         } else {
           console.log('🔐 [Firebase] Firestore emulator already connected')
         }
+
+        // Emulator接続の検証
+        console.log('🔐 [Firebase] Auth config:', {
+          emulator: (auth as any).config?.emulator || (auth as any)._config?.emulator,
+          currentUser: auth.currentUser
+        })
+        console.log('🔐 [Firebase] Firestore settings:', firestoreSettings)
+        
       } catch (emulatorError: any) {
-        console.warn('🔐 [Firebase] Emulator connection info:', emulatorError?.message || 'Unknown error')
+        console.error('🔐 [Firebase] Emulator connection failed:', emulatorError?.message || 'Unknown error')
+        console.error('🔐 [Firebase] Full error:', emulatorError)
       }
     }
 
