@@ -8,6 +8,16 @@
 
 <script setup lang="ts">
 import { useHead } from 'nuxt/app'
+import { useAuthStore } from './stores/auth'
+
+// 認証ストア初期化
+const authStore = useAuthStore()
+
+// アプリ起動時に認証状態を初期化
+onMounted(async () => {
+  console.log('🚀 App: Initializing auth state')
+  await authStore.checkAuthState()
+})
 
 // Meta設定
 useHead({

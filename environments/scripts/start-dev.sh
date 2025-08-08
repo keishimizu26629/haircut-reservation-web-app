@@ -11,9 +11,10 @@ echo "================================================"
 # Check if .env.dev exists
 if [ ! -f "environments/.env.dev" ]; then
     echo "❌ Error: environments/.env.dev not found!"
-    echo "📝 Please create environments/.env.dev with your Firebase Dev configuration"
-    echo "💡 Copy from environments/.env.example and configure Firebase Dev settings"
-    exit 1
+    echo "📝 Creating from template..."
+    cp environments/env.template environments/.env.dev
+    echo "✅ Please edit environments/.env.dev with your Firebase Dev configuration"
+    echo "💡 Use the FIREBASE_DEV_* values from the template"
 fi
 
 # Export environment variables
@@ -26,7 +27,9 @@ REQUIRED_VARS=(
     "FIREBASE_DEV_PROJECT_ID"
     "FIREBASE_DEV_API_KEY"
     "FIREBASE_DEV_AUTH_DOMAIN"
-    "DATABASE_URL_DEV"
+    "FIREBASE_DEV_STORAGE_BUCKET"
+    "FIREBASE_DEV_MESSAGING_SENDER_ID"
+    "FIREBASE_DEV_APP_ID"
 )
 
 for var in "${REQUIRED_VARS[@]}"; do

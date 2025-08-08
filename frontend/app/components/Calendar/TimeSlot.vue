@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <div
     class="time-slot"
     :class="{
       available: isAvailable,
@@ -33,17 +33,17 @@
         <i class="bi bi-check-circle" aria-hidden="true"></i>
         <span class="status-text">予約可能</span>
       </div>
-      
+
       <div v-else-if="isBooked" class="status-indicator booked">
         <i class="bi bi-person-fill" aria-hidden="true"></i>
         <span class="status-text">予約済み</span>
       </div>
-      
+
       <div v-else-if="isPastTime" class="status-indicator past">
         <i class="bi bi-clock-history" aria-hidden="true"></i>
         <span class="status-text">終了</span>
       </div>
-      
+
       <div v-else class="status-indicator unavailable">
         <i class="bi bi-x-circle" aria-hidden="true"></i>
         <span class="status-text">利用不可</span>
@@ -66,9 +66,9 @@
     <!-- Staff Assignment -->
     <div v-if="staff && showStaff" class="staff-info">
       <div class="staff-avatar">
-        <img 
-          v-if="staff.photoURL" 
-          :src="staff.photoURL" 
+        <img
+          v-if="staff.photoURL"
+          :src="staff.photoURL"
           :alt="staff.displayName"
           class="staff-photo"
         >
@@ -90,7 +90,7 @@
         <i class="bi bi-plus" aria-hidden="true"></i>
         <span class="d-none d-sm-inline">予約</span>
       </button>
-      
+
       <button
         v-if="appointment && canEdit"
         class="btn btn-sm btn-outline-secondary action-btn"
@@ -100,7 +100,7 @@
         <i class="bi bi-pencil" aria-hidden="true"></i>
         <span class="d-none d-sm-inline">編集</span>
       </button>
-      
+
       <button
         v-if="appointment && canCancel"
         class="btn btn-sm btn-outline-danger action-btn"
@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { format, isBefore, isAfter, isSameMinute } from 'date-fns'
+import dayjs from 'dayjs'
 
 // Types
 interface Appointment {
@@ -196,16 +196,16 @@ const formattedTime = computed(() => {
 
 const timeSlotLabel = computed(() => {
   const timeStr = formattedTime.value
-  const statusStr = isAvailable.value ? '予約可能' : 
-                   isBooked.value ? '予約済み' : 
+  const statusStr = isAvailable.value ? '予約可能' :
+                   isBooked.value ? '予約済み' :
                    isPastTime.value ? '終了' : '利用不可'
-  
+
   let label = `${timeStr} ${statusStr}`
-  
+
   if (props.appointment) {
     label += ` ${props.appointment.customerName}様 ${props.appointment.serviceName}`
   }
-  
+
   return label
 })
 
@@ -213,7 +213,7 @@ const isCurrentTime = computed(() => {
   const now = new Date()
   const slotStart = props.time
   const slotEnd = new Date(slotStart.getTime() + props.duration * 60000)
-  
+
   return now >= slotStart && now < slotEnd
 })
 
@@ -228,7 +228,7 @@ const isBusinessHours = computed(() => {
 })
 
 const isBreakTime = computed(() => {
-  return props.breakTimes.some(breakTime => 
+  return props.breakTimes.some(breakTime =>
     props.time >= breakTime.start && props.time < breakTime.end
   )
 })
@@ -238,9 +238,9 @@ const isBooked = computed(() => {
 })
 
 const isAvailable = computed(() => {
-  return !isBooked.value && 
-         !isPastTime.value && 
-         isBusinessHours.value && 
+  return !isBooked.value &&
+         !isPastTime.value &&
+         isBusinessHours.value &&
          !isBreakTime.value &&
          !isDisabled.value
 })
@@ -272,7 +272,7 @@ const getInitials = (name: string): string => {
 // Event Handlers
 const handleClick = () => {
   if (isDisabled.value) return
-  
+
   emit('click', props.time)
   emit('select', props.time)
 }
@@ -591,28 +591,28 @@ const handleMouseLeave = () => {
     min-height: 60px;
     padding: var(--space-2);
   }
-  
+
   .time-text {
     font-size: var(--font-size-sm);
   }
-  
+
   .status-text {
     display: none;
   }
-  
+
   .appointment-info {
     padding: var(--space-1);
   }
-  
+
   .appointment-customer {
     font-size: var(--font-size-sm);
   }
-  
+
   .appointment-service,
   .appointment-duration {
     font-size: var(--font-size-xs);
   }
-  
+
   .hover-preview {
     display: none;
   }
@@ -623,19 +623,19 @@ const handleMouseLeave = () => {
     min-height: 50px;
     padding: var(--space-1);
   }
-  
+
   .time-label {
     gap: var(--space-1);
   }
-  
+
   .status-indicator {
     gap: var(--space-1);
   }
-  
+
   .staff-info {
     margin-top: var(--space-1);
   }
-  
+
   .time-slot-actions {
     margin-top: var(--space-1);
     opacity: 1; /* Always show on mobile */
@@ -648,12 +648,12 @@ const handleMouseLeave = () => {
     background: var(--success-900);
     border-color: var(--success-700);
   }
-  
+
   .time-slot.booked {
     background: var(--neutral-800);
     border-color: var(--neutral-600);
   }
-  
+
   .appointment-info {
     background: var(--neutral-800);
     border-color: var(--neutral-600);
@@ -665,15 +665,15 @@ const handleMouseLeave = () => {
   .time-slot {
     border-width: 2px;
   }
-  
+
   .time-slot.available {
     border-color: var(--success-600);
   }
-  
+
   .time-slot.booked {
     border-color: var(--info-600);
   }
-  
+
   .time-slot.disabled {
     border-color: var(--neutral-500);
   }

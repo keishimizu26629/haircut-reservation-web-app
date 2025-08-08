@@ -5,8 +5,8 @@
         <h3 class="modal-title">
           {{ isEditing ? '予約編集' : '新規予約' }}
         </h3>
-        <button 
-          class="btn-close" 
+        <button
+          class="btn-close"
           @click="closeModal"
           aria-label="閉じる"
         >
@@ -40,7 +40,7 @@
                   @change="calculateEndTime"
                 >
                   <option value="">時間を選択</option>
-                  <option 
+                  <option
                     v-for="timeSlot in availableTimeSlots"
                     :key="timeSlot.value"
                     :value="timeSlot.value"
@@ -51,7 +51,7 @@
                 </select>
               </div>
             </div>
-            
+
             <div class="time-info" v-if="formData.startTime && formData.endTime">
               <i class="bi bi-clock"></i>
               <span>{{ formData.startTime }} - {{ formData.endTime }}</span>
@@ -73,7 +73,7 @@
                 required
               />
             </div>
-            
+
             <div class="form-group">
               <label for="customerPhone">電話番号</label>
               <input
@@ -84,7 +84,7 @@
                 placeholder="090-1234-5678"
               />
             </div>
-            
+
             <div class="form-group">
               <label for="customerEmail">メールアドレス</label>
               <input
@@ -101,7 +101,7 @@
           <div class="form-section">
             <h4>サービス</h4>
             <div class="service-selection">
-              <div 
+              <div
                 v-for="service in availableServices"
                 :key="service.id"
                 class="service-item"
@@ -109,7 +109,7 @@
                 @click="toggleService(service.id)"
               >
                 <div class="service-checkbox">
-                  <i 
+                  <i
                     class="bi"
                     :class="selectedServices.includes(service.id) ? 'bi-check-square-fill' : 'bi-square'"
                   ></i>
@@ -129,7 +129,7 @@
           <div class="form-section">
             <h4>スタイリスト</h4>
             <div class="stylist-selection">
-              <label 
+              <label
                 v-for="stylist in availableStylists"
                 :key="stylist.id"
                 class="stylist-item"
@@ -142,7 +142,7 @@
                 />
                 <div class="stylist-info">
                   <div class="stylist-avatar">
-                    <img 
+                    <img
                       v-if="stylist.avatar"
                       :src="stylist.avatar"
                       :alt="stylist.name"
@@ -187,24 +187,24 @@
 
       <div class="modal-footer">
         <div class="button-group">
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="btn btn-outline-secondary"
             @click="closeModal"
           >
             キャンセル
           </button>
-          
-          <button 
+
+          <button
             v-if="isEditing"
-            type="button" 
+            type="button"
             class="btn btn-outline-danger"
             @click="handleDelete"
           >
             削除
           </button>
-          
-          <button 
+
+          <button
             type="button"
             class="btn btn-primary"
             @click="handleSubmit"
@@ -220,7 +220,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue'
-import { useTenant } from '~/composables/useTenant'
+import { useTenant } from '../../composables/useTenant'
 
 // 型定義
 interface Service {
@@ -398,7 +398,7 @@ const calculateEndTime = () => {
   const [hours, minutes] = formData.value.startTime.split(':').map(Number)
   const startDate = new Date()
   startDate.setHours(hours, minutes, 0, 0)
-  
+
   const endDate = new Date(startDate.getTime() + totalDuration.value * 60000)
   formData.value.endTime = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`
 }
@@ -825,15 +825,15 @@ onMounted(() => {
     width: 95vw;
     max-height: 95vh;
   }
-  
+
   .datetime-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .button-group {
     flex-direction: column-reverse;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;

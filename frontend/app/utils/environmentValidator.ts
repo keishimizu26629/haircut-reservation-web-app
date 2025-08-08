@@ -3,7 +3,7 @@
  * 環境設定の妥当性をチェック
  */
 
-import type { FirebaseConfig, EmulatorConfig, Environment } from '~/types/environment'
+import type { FirebaseConfig, EmulatorConfig, Environment } from '../types/environment'
 
 export class EnvironmentValidator {
   /**
@@ -11,10 +11,10 @@ export class EnvironmentValidator {
    */
   static validateFirebaseConfig(config: FirebaseConfig): boolean {
     const requiredFields = [
-      'apiKey', 'authDomain', 'projectId', 
+      'apiKey', 'authDomain', 'projectId',
       'storageBucket', 'messagingSenderId', 'appId'
     ]
-    
+
     return requiredFields.every(field => {
       const value = config[field as keyof FirebaseConfig]
       return value && typeof value === 'string' && value.trim() !== ''
@@ -26,7 +26,7 @@ export class EnvironmentValidator {
    */
   static validateEmulatorConfig(config: EmulatorConfig): boolean {
     const hostPattern = /^[a-zA-Z0-9.-]+:\d+$/
-    
+
     // ホスト形式のチェック（設定されている場合のみ）
     const hosts = [
       config.authHost,
@@ -35,7 +35,7 @@ export class EnvironmentValidator {
       config.storageHost,
       config.functionsHost
     ].filter(Boolean)
-    
+
     return hosts.every(host => hostPattern.test(host!))
   }
 
@@ -80,10 +80,10 @@ export class EnvironmentValidator {
     services: Record<string, boolean>
   }> {
     const services: Record<string, boolean> = {}
-    
+
     const checkService = async (name: string, host?: string): Promise<boolean> => {
       if (!host) return false
-      
+
       try {
         const response = await fetch(`http://${host}`, {
           method: 'GET',
@@ -103,7 +103,7 @@ export class EnvironmentValidator {
     services.functions = await checkService('functions', config.functionsHost)
 
     const connected = Object.values(services).some(Boolean)
-    
+
     return { connected, services }
   }
 
@@ -164,7 +164,7 @@ export class EnvironmentValidator {
     const warnings: string[] = []
     const errors: string[] = []
     const securityIssues: string[] = []
-    
+
     try {
       // Firebase設定チェック
       if (!this.validateFirebaseConfig(config.firebaseConfig)) {

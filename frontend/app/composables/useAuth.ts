@@ -2,7 +2,7 @@
  * Enhanced Authentication Composable
  * マルチテナント対応・複数プロバイダー統合・エンタープライズ機能
  */
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '../stores/auth'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,

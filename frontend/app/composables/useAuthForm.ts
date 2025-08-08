@@ -3,8 +3,8 @@
  * ログイン・登録フォームで共通する機能を提供
  */
 
-import { useAuthStore } from '~/stores/auth'
-import { useFormValidation, validators } from '~/composables/useFormValidation'
+import { useAuthStore } from '../stores/auth'
+import { useFormValidation, validators } from './useFormValidation'
 
 // =====================================
 // Types

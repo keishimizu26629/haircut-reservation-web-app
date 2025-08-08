@@ -78,6 +78,7 @@ PMO
 
 - **指示に従う**
 
+  - 常に塾考する
   - 要件や指示に従って作業を進める
   - 作業の進捗や問題が発生した場合は適宜報告
 
@@ -221,7 +222,7 @@ PMO
 
 ### 要件仕様の確認
 - **最新要件**: `.ai/plan/requirements-simple-reservation.md`を確認してください
-- **実装計画**: `.ai/plan/implementation-plan-simple-reservation.md`を参照してください  
+- **実装計画**: `.ai/plan/implementation-plan-simple-reservation.md`を参照してください
 - **技術スタック**: `.ai/plan/technical-stack-simple-reservation.md`に従ってください
 
 ### 機能実装の制約

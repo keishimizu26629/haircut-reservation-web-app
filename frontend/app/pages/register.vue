@@ -5,10 +5,13 @@
       <!-- ロゴ・ヘッダー部分 -->
       <div class="register-header">
         <div class="brand-logo">
-          <i class="bi bi-scissors" aria-hidden="true"></i>
+          <i
+            class="bi bi-scissors"
+            aria-hidden="true"
+          />
         </div>
         <h1 class="brand-title">
-          美容室予約システム
+          ヘアカット予約システム
         </h1>
         <p class="brand-subtitle">
           新規アカウント作成
@@ -17,7 +20,10 @@
 
       <!-- メイン登録フォーム -->
       <div class="register-form-card">
-        <form @submit.prevent="handleRegister" novalidate>
+        <form
+          novalidate
+          @submit.prevent="handleRegister"
+        >
           <!-- お名前入力 -->
           <div class="form-field">
             <label
@@ -25,7 +31,10 @@
               class="form-label"
               :class="{ 'error': errors.name }"
             >
-              <i class="bi bi-person" aria-hidden="true"></i>
+              <i
+                class="bi bi-person"
+                aria-hidden="true"
+              />
               お名前
             </label>
             <div class="form-input-wrapper">
@@ -46,7 +55,7 @@
                 class="form-icon bi bi-person"
                 :class="{ 'error': errors.name }"
                 aria-hidden="true"
-              ></i>
+              />
             </div>
             <transition name="error-slide">
               <div
@@ -56,7 +65,10 @@
                 role="alert"
                 aria-live="polite"
               >
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i
+                  class="bi bi-exclamation-triangle"
+                  aria-hidden="true"
+                />
                 {{ errors.name }}
               </div>
             </transition>
@@ -69,7 +81,10 @@
               class="form-label"
               :class="{ 'error': errors.email }"
             >
-              <i class="bi bi-envelope" aria-hidden="true"></i>
+              <i
+                class="bi bi-envelope"
+                aria-hidden="true"
+              />
               メールアドレス
             </label>
             <div class="form-input-wrapper">
@@ -90,7 +105,7 @@
                 class="form-icon bi bi-envelope"
                 :class="{ 'error': errors.email }"
                 aria-hidden="true"
-              ></i>
+              />
             </div>
             <transition name="error-slide">
               <div
@@ -100,7 +115,10 @@
                 role="alert"
                 aria-live="polite"
               >
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i
+                  class="bi bi-exclamation-triangle"
+                  aria-hidden="true"
+                />
                 {{ errors.email }}
               </div>
             </transition>
@@ -113,7 +131,10 @@
               class="form-label"
               :class="{ 'error': errors.password }"
             >
-              <i class="bi bi-lock" aria-hidden="true"></i>
+              <i
+                class="bi bi-lock"
+                aria-hidden="true"
+              />
               パスワード
             </label>
             <div class="form-input-wrapper">
@@ -134,7 +155,7 @@
                 class="form-icon bi bi-lock"
                 :class="{ 'error': errors.password }"
                 aria-hidden="true"
-              ></i>
+              />
               <button
                 type="button"
                 class="password-toggle"
@@ -144,7 +165,7 @@
                 <i
                   :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
                   aria-hidden="true"
-                ></i>
+                />
               </button>
             </div>
             <transition name="error-slide">
@@ -155,7 +176,10 @@
                 role="alert"
                 aria-live="polite"
               >
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i
+                  class="bi bi-exclamation-triangle"
+                  aria-hidden="true"
+                />
                 {{ errors.password }}
               </div>
             </transition>
@@ -168,7 +192,10 @@
               class="form-label"
               :class="{ 'error': errors.confirmPassword }"
             >
-              <i class="bi bi-lock-fill" aria-hidden="true"></i>
+              <i
+                class="bi bi-lock-fill"
+                aria-hidden="true"
+              />
               パスワード確認
             </label>
             <div class="form-input-wrapper">
@@ -189,7 +216,7 @@
                 class="form-icon bi bi-lock-fill"
                 :class="{ 'error': errors.confirmPassword }"
                 aria-hidden="true"
-              ></i>
+              />
               <button
                 type="button"
                 class="password-toggle"
@@ -199,7 +226,7 @@
                 <i
                   :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"
                   aria-hidden="true"
-                ></i>
+                />
               </button>
             </div>
             <transition name="error-slide">
@@ -210,7 +237,10 @@
                 role="alert"
                 aria-live="polite"
               >
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i
+                  class="bi bi-exclamation-triangle"
+                  aria-hidden="true"
+                />
                 {{ errors.confirmPassword }}
               </div>
             </transition>
@@ -220,28 +250,34 @@
 
           <!-- 利用規約同意 -->
           <div class="form-field">
-            <label class="terms-checkbox" :class="{ 'error': errors.acceptTerms }">
+            <label
+              class="terms-checkbox"
+              :class="{ 'error': errors.acceptTerms }"
+            >
               <input
                 id="terms"
                 v-model="form.acceptTerms"
                 type="checkbox"
                 :aria-invalid="!!errors.acceptTerms"
                 :aria-describedby="errors.acceptTerms ? 'terms-error' : undefined"
-                @change="clearFieldError('acceptTerms'); console.log('Terms checkbox changed:', form.acceptTerms)"
+                @change="clearFieldError('acceptTerms')"
               >
-              <span class="checkmark"></span>
+              <span class="checkmark" />
               <span class="terms-text">
-                <a href="/terms" target="_blank" class="terms-link">利用規約</a>
+                <a
+                  href="/terms"
+                  target="_blank"
+                  class="terms-link"
+                >利用規約</a>
                 および
-                <a href="/privacy" target="_blank" class="terms-link">プライバシーポリシー</a>
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  class="terms-link"
+                >プライバシーポリシー</a>
                 に同意します
               </span>
             </label>
-            <!-- デバッグ用表示 -->
-            <div style="margin-top: 8px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 12px;">
-              <strong>チェックボックス状態:</strong> {{ form.acceptTerms ? 'チェック済み' : 'チェックなし' }}<br>
-              <strong>フォーム有効:</strong> {{ isFormValid ? 'はい' : 'いいえ' }}
-            </div>
             <transition name="error-slide">
               <div
                 v-if="errors.acceptTerms"
@@ -250,7 +286,10 @@
                 role="alert"
                 aria-live="polite"
               >
-                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <i
+                  class="bi bi-exclamation-triangle"
+                  aria-hidden="true"
+                />
                 {{ errors.acceptTerms }}
               </div>
             </transition>
@@ -264,7 +303,10 @@
               role="alert"
               aria-live="assertive"
             >
-              <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+              <i
+                class="bi bi-exclamation-triangle"
+                aria-hidden="true"
+              />
               <div>
                 <h4>登録エラー</h4>
                 <p>{{ authError }}</p>
@@ -278,17 +320,16 @@
             class="register-button"
             :disabled="loading || !isFormValid"
             :aria-label="loading ? 'アカウント作成中...' : 'アカウントを作成'"
-            :title="!isFormValid ? '全ての必須項目を入力し、利用規約に同意してください' : ''"
           >
             <span v-if="loading">
               <svg class="loading-spinner" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" aria-hidden="true">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               アカウント作成中...
             </span>
             <span v-else>
-              <i class="bi bi-person-plus" aria-hidden="true"></i>
+                  <i class="bi bi-person-plus" aria-hidden="true" />
               アカウントを作成
             </span>
           </button>
@@ -335,6 +376,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { useHead, navigateTo } from 'nuxt/app'
 import { useAuthStore } from '../stores/auth'
 
 // Layout設定
@@ -383,31 +426,17 @@ const errors = reactive({
 // =====================================
 
 const isFormValid = computed(() => {
-  const isValid = form.name.trim().length > 0 &&
-         form.email.length > 0 &&
-         form.password.length >= 6 &&
-         form.confirmPassword.length > 0 &&
-         form.password === form.confirmPassword &&
-         form.acceptTerms &&
-         !errors.name &&
-         !errors.email &&
-         !errors.password &&
-         !errors.confirmPassword &&
-         !errors.acceptTerms
-  
-  // デバッグ用ログ
-  console.log('Form validation status:', {
-    name: form.name.trim().length > 0,
-    email: form.email.length > 0,
-    password: form.password.length >= 6,
-    confirmPassword: form.confirmPassword.length > 0,
-    passwordMatch: form.password === form.confirmPassword,
-    acceptTerms: form.acceptTerms,
-    noErrors: !errors.name && !errors.email && !errors.password && !errors.confirmPassword && !errors.acceptTerms,
-    isValid
-  })
-  
-  return isValid
+  return form.name.trim().length > 0 &&
+          form.email.length > 0 &&
+          form.password.length >= 6 &&
+          form.confirmPassword.length > 0 &&
+          form.password === form.confirmPassword &&
+          form.acceptTerms &&
+          !errors.name &&
+          !errors.email &&
+          !errors.password &&
+          !errors.confirmPassword &&
+          !errors.acceptTerms
 })
 
 // =====================================
@@ -625,7 +654,6 @@ onMounted(() => {
   })
 })
 </script>
-
 <style scoped>
 /* =====================================
    登録画面 - デザインシステム統合
@@ -819,13 +847,12 @@ onMounted(() => {
   position: relative;
   width: var(--space-5);
   height: var(--space-5);
-  border: 2px solid var(--neutral-400);
+  border: 2px solid var(--neutral-300);
   border-radius: var(--radius-base);
   background: var(--neutral-0);
   transition: all var(--transition-fast);
   flex-shrink: 0;
   margin-top: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .terms-checkbox input[type="checkbox"]:checked + .checkmark {

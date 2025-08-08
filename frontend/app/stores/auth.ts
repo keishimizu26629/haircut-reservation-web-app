@@ -38,7 +38,7 @@ function getFirebaseInstances() {
         // Auth Emulator接続
         const authEmulatorUrl = 'http://localhost:9099'
         const isAuthConnected = (auth as any).config?.emulator || (auth as any)._config?.emulator
-        
+
         if (!isAuthConnected) {
           connectAuthEmulator(auth, authEmulatorUrl, { disableWarnings: true })
           console.log('🔐 [Firebase] Auth emulator connected to:', authEmulatorUrl)
@@ -49,7 +49,7 @@ function getFirebaseInstances() {
         // Firestore Emulator接続
         const firestoreSettings = (firestore as any)._settings || {}
         const isFirestoreConnected = firestoreSettings.host?.includes('localhost') || firestoreSettings.ssl === false
-        
+
         if (!isFirestoreConnected) {
           connectFirestoreEmulator(firestore, 'localhost', 8080)
           console.log('🔐 [Firebase] Firestore emulator connected to: localhost:8080')
@@ -63,7 +63,7 @@ function getFirebaseInstances() {
           currentUser: auth.currentUser
         })
         console.log('🔐 [Firebase] Firestore settings:', firestoreSettings)
-        
+
       } catch (emulatorError: any) {
         console.error('🔐 [Firebase] Emulator connection failed:', emulatorError?.message || 'Unknown error')
         console.error('🔐 [Firebase] Full error:', emulatorError)
@@ -147,6 +147,7 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.user,
+    isLoading: (state) => state.loading,
     userDisplayName: (state) => state.userProfile?.displayName || state.user?.displayName || state.user?.email || 'User',
     userEmail: (state) => state.user?.email || '',
     userRole: (state) => state.userProfile?.role || 'customer',
@@ -202,6 +203,54 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // =====================================
+    // Authentication State Management
+    // =====================================
+
+    async checkAuthState() {
+      console.log('🔒 AuthStore: Checking authentication state...')
+      this.setLoading(true)
+
+      try {
+        const { auth } = getFirebaseInstances()
+
+        // Firebase Auth状態の確認を待機
+        return new Promise((resolve) => {
+          const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            console.log('🔒 AuthStore: Auth state changed:', !!user)
+
+            try {
+              if (user) {
+                // ユーザー情報とプロファイル取得
+                this.setUser(user)
+                await this.loadUserProfile(user.uid)
+
+                console.log('🔒 AuthStore: User authenticated')
+                resolve(true)
+              } else {
+                // 未認証状態
+                this.setUser(null)
+                console.log('🔒 AuthStore: User not authenticated')
+                resolve(false)
+              }
+            } catch (error) {
+              console.error('🔒 AuthStore: Error in auth state check:', error)
+              this.setError('認証状態の確認中にエラーが発生しました')
+              resolve(false)
+            } finally {
+              this.setLoading(false)
+              unsubscribe()
+            }
+          })
+        })
+      } catch (error) {
+        console.error('🔒 AuthStore: Failed to check auth state:', error)
+        this.setError('認証状態の確認に失敗しました')
+        this.setLoading(false)
+        return false
+      }
+    },
+
+    // =====================================
     // Security Functions
     // =====================================
 
@@ -216,8 +265,8 @@ export const useAuthStore = defineStore('auth', {
 
         // Firestoreに記録
         if (email) {
-          const { $firestore } = useNuxtApp() as any
-          const attemptsRef = doc($firestore, 'loginAttempts', email)
+          const { firestore } = getFirebaseInstances()
+          const attemptsRef = doc(firestore, 'loginAttempts', email)
           const attemptsDoc = await getDoc(attemptsRef)
 
           const existingAttempts = attemptsDoc.exists() ? attemptsDoc.data().attempts || [] : []
@@ -236,8 +285,8 @@ export const useAuthStore = defineStore('auth', {
 
     async checkAccountLockStatus(email: string): Promise<boolean> {
       try {
-        const { $firestore } = useNuxtApp() as any
-        const userRef = doc($firestore, 'users', email.replace('@', '_at_').replace('.', '_dot_'))
+        const { firestore } = getFirebaseInstances()
+        const userRef = doc(firestore, 'users', email.replace('@', '_at_').replace('.', '_dot_'))
         const userDoc = await getDoc(userRef)
 
         if (userDoc.exists()) {
@@ -267,8 +316,8 @@ export const useAuthStore = defineStore('auth', {
 
     async updateSecuritySettings(userId: string, updates: Partial<SecuritySettings>) {
       try {
-        const { $firestore } = useNuxtApp() as any
-        const userRef = doc($firestore, 'users', userId)
+        const { firestore } = getFirebaseInstances()
+        const userRef = doc(firestore, 'users', userId)
 
         await updateDoc(userRef, {
           'security': {
@@ -419,14 +468,14 @@ export const useAuthStore = defineStore('auth', {
       this.setError(null)
 
       try {
-        const { $auth } = useNuxtApp() as any
+        const { auth } = getFirebaseInstances()
         const provider = new GoogleAuthProvider()
 
         // 追加のスコープ要求
         provider.addScope('profile')
         provider.addScope('email')
 
-        const credential = await signInWithPopup($auth, provider)
+        const credential = await signInWithPopup(auth, provider)
 
         // 新規ユーザーの場合、プロフィール作成
         const isNewUser = credential.user.metadata.creationTime === credential.user.metadata.lastSignInTime
@@ -461,8 +510,8 @@ export const useAuthStore = defineStore('auth', {
 
     async loadUserProfile(userId: string) {
       try {
-        const { $firestore } = useNuxtApp() as any
-        const userRef = doc($firestore, 'users', userId)
+        const { firestore } = getFirebaseInstances()
+        const userRef = doc(firestore, 'users', userId)
         const userDoc = await getDoc(userRef)
 
         if (userDoc.exists()) {
@@ -499,8 +548,8 @@ export const useAuthStore = defineStore('auth', {
 
     async loadTenantInfo(tenantId: string) {
       try {
-        const { $firestore } = useNuxtApp() as any
-        const tenantRef = doc($firestore, 'tenants', tenantId)
+        const { firestore } = getFirebaseInstances()
+        const tenantRef = doc(firestore, 'tenants', tenantId)
         const tenantDoc = await getDoc(tenantRef)
 
         if (tenantDoc.exists()) {
@@ -522,8 +571,8 @@ export const useAuthStore = defineStore('auth', {
 
     async createUserProfile(user: User, signInMethod: string) {
       try {
-        const { $firestore } = useNuxtApp() as any
-        const userRef = doc($firestore, 'users', user.uid)
+        const { firestore } = getFirebaseInstances()
+        const userRef = doc(firestore, 'users', user.uid)
 
         const profile = {
           displayName: user.displayName || '',
@@ -553,8 +602,8 @@ export const useAuthStore = defineStore('auth', {
 
     async sendPasswordReset(email: string) {
       try {
-        const { $auth } = useNuxtApp() as any
-        await sendPasswordResetEmail($auth, email)
+        const { auth } = getFirebaseInstances()
+        await sendPasswordResetEmail(auth, email)
       } catch (error: any) {
         const errorMessage = this.getFirebaseErrorMessage(error.code)
         throw new Error(errorMessage)
@@ -610,8 +659,8 @@ export const useAuthStore = defineStore('auth', {
       this.setError(null)
 
       try {
-        const { $auth } = useNuxtApp() as any
-        await signOut($auth)
+        const { auth } = getFirebaseInstances()
+        await signOut(auth)
         this.setUser(null)
 
         // Remember me設定をクリア
@@ -632,37 +681,35 @@ export const useAuthStore = defineStore('auth', {
     // =====================================
 
     getFirebaseErrorMessage(errorCode: string): string {
-      const { $t } = useNuxtApp() as any
-
       switch (errorCode) {
         case 'auth/user-not-found':
-          return $t?.('auth.errors.userNotFound') || 'ユーザーが見つかりません'
+          return 'ユーザーが見つかりません'
         case 'auth/wrong-password':
-          return $t?.('auth.errors.wrongPassword') || 'パスワードが正しくありません'
+          return 'パスワードが正しくありません'
         case 'auth/email-already-in-use':
-          return $t?.('auth.errors.emailAlreadyInUse') || 'このメールアドレスは既に使用されています'
+          return 'このメールアドレスは既に使用されています'
         case 'auth/weak-password':
-          return $t?.('auth.errors.weakPassword') || 'パスワードが弱すぎます'
+          return 'パスワードが弱すぎます'
         case 'auth/invalid-email':
-          return $t?.('auth.errors.invalidEmail') || 'メールアドレスが無効です'
+          return 'メールアドレスが無効です'
         case 'auth/too-many-requests':
-          return $t?.('auth.errors.tooManyRequests') || 'リクエストが多すぎます'
+          return 'リクエストが多すぎます'
         case 'auth/user-disabled':
-          return $t?.('auth.errors.userDisabled') || 'ユーザーが無効化されています'
+          return 'ユーザーが無効化されています'
         case 'auth/requires-recent-login':
-          return $t?.('auth.errors.sessionExpired') || 'セッションが期限切れです'
+          return 'セッションが期限切れです'
         case 'auth/network-request-failed':
-          return $t?.('auth.errors.networkError') || 'ネットワークエラーです'
+          return 'ネットワークエラーです'
         case 'auth/popup-closed-by-user':
-          return $t?.('auth.errors.popupClosed') || 'ポップアップが閉じられました'
+          return 'ポップアップが閉じられました'
         case 'auth/popup-blocked':
-          return $t?.('auth.errors.popupBlocked') || 'ポップアップがブロックされました'
+          return 'ポップアップがブロックされました'
         case 'auth/invalid-credential':
-          return $t?.('auth.errors.invalidEmail') || '認証情報が無効です'
+          return '認証情報が無効です'
         case 'auth/account-exists-with-different-credential':
-          return $t?.('auth.errors.emailAlreadyInUse') || 'アカウントが既に存在します'
+          return 'アカウントが既に存在します'
         default:
-          return $t?.('notifications.error.unknownError') || '不明なエラーが発生しました'
+          return '不明なエラーが発生しました'
       }
     },
 
@@ -671,10 +718,10 @@ export const useAuthStore = defineStore('auth', {
     // =====================================
 
     async initializeAuth() {
-      const { $auth } = useNuxtApp() as any
+      const { auth } = getFirebaseInstances()
 
       return new Promise<void>((resolve) => {
-        const unsubscribe = $auth.onAuthStateChanged(async (user: any) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user: any) => {
           if (user) {
             await this.loadUserProfile(user.uid)
             // セッション復元

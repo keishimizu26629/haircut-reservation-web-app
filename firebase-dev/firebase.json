@@ -1,0 +1,32 @@
+{
+  "projects": {
+    "default": "haircut-reservation-dev"
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "../frontend/dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "database": {
+    "rules": "database.rules.json"
+  }
+}

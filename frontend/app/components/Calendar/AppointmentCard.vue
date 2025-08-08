@@ -1,9 +1,9 @@
 <template>
-  <div 
+  <div
     class="appointment-card"
     :class="[
       `status-${appointment.status}`,
-      { 
+      {
         selected: isSelected,
         dragging: isDragging,
         'past-appointment': isPast,
@@ -73,9 +73,9 @@
       <div v-if="appointment.staff" class="staff-assignment">
         <div class="staff-info">
           <div class="staff-avatar">
-            <img 
-              v-if="appointment.staff.photoURL" 
-              :src="appointment.staff.photoURL" 
+            <img
+              v-if="appointment.staff.photoURL"
+              :src="appointment.staff.photoURL"
               :alt="appointment.staff.displayName"
               class="staff-photo"
             >
@@ -111,7 +111,7 @@
           <i class="bi bi-pencil" aria-hidden="true"></i>
           <span class="btn-text">編集</span>
         </button>
-        
+
         <button
           v-if="canReschedule"
           class="btn btn-sm btn-outline-secondary action-btn"
@@ -121,7 +121,7 @@
           <i class="bi bi-calendar-event" aria-hidden="true"></i>
           <span class="btn-text">変更</span>
         </button>
-        
+
         <button
           v-if="canComplete && appointment.status === 'confirmed'"
           class="btn btn-sm btn-outline-success action-btn"
@@ -131,7 +131,7 @@
           <i class="bi bi-check-lg" aria-hidden="true"></i>
           <span class="btn-text">完了</span>
         </button>
-        
+
         <button
           v-if="canCancel && appointment.status !== 'cancelled'"
           class="btn btn-sm btn-outline-danger action-btn"
@@ -151,15 +151,15 @@
 
     <!-- Notification Indicators -->
     <div v-if="hasNotifications" class="notification-indicators">
-      <div 
-        v-if="appointment.hasReminder" 
+      <div
+        v-if="appointment.hasReminder"
         class="notification-item"
         title="リマインダー設定済み"
       >
         <i class="bi bi-bell-fill"></i>
       </div>
-      <div 
-        v-if="appointment.hasConfirmation" 
+      <div
+        v-if="appointment.hasConfirmation"
         class="notification-item"
         title="確認メール送信済み"
       >
@@ -168,8 +168,8 @@
     </div>
 
     <!-- Priority Indicator -->
-    <div 
-      v-if="appointment.priority === 'high'" 
+    <div
+      v-if="appointment.priority === 'high'"
       class="priority-indicator high-priority"
       title="優先予約"
     >
@@ -177,8 +177,8 @@
     </div>
 
     <!-- Recurring Appointment Indicator -->
-    <div 
-      v-if="appointment.isRecurring" 
+    <div
+      v-if="appointment.isRecurring"
       class="recurring-indicator"
       title="繰り返し予約"
     >
@@ -203,7 +203,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { format, isBefore, isAfter, isSameDay } from 'date-fns'
+import dayjs from 'dayjs'
 
 // Types
 interface Staff {
@@ -275,7 +275,7 @@ const appointmentLabel = computed(() => {
   const customerStr = `${props.appointment.customerName}様`
   const serviceStr = `${props.appointment.serviceName}`
   const statusStr = statusText.value
-  
+
   return `${timeStr} ${customerStr} ${serviceStr} ${statusStr}`
 })
 
@@ -297,7 +297,7 @@ const isPast = computed(() => {
 const isUpcoming = computed(() => {
   const now = new Date()
   const thirtyMinutesFromNow = new Date(now.getTime() + 30 * 60000)
-  return isAfter(props.appointment.startTime, now) && 
+  return isAfter(props.appointment.startTime, now) &&
          isBefore(props.appointment.startTime, thirtyMinutesFromNow)
 })
 
@@ -767,7 +767,7 @@ const handleDragEnd = () => {
   .btn-text {
     display: inline;
   }
-  
+
   .action-buttons {
     justify-content: flex-end;
   }
@@ -777,25 +777,25 @@ const handleDragEnd = () => {
   .appointment-card {
     padding: var(--space-3);
   }
-  
+
   .appointment-time {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
-  
+
   .time-range {
     font-size: var(--font-size-base);
   }
-  
+
   .customer-name {
     font-size: var(--font-size-base);
   }
-  
+
   .staff-info {
     gap: var(--space-2);
   }
-  
+
   .appointment-actions {
     opacity: 1;
   }
@@ -805,17 +805,17 @@ const handleDragEnd = () => {
   .appointment-card {
     padding: var(--space-2);
   }
-  
+
   .service-info {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-1);
   }
-  
+
   .action-buttons {
     gap: var(--space-1);
   }
-  
+
   .action-btn {
     font-size: 10px;
     padding: var(--space-1);
@@ -827,23 +827,23 @@ const handleDragEnd = () => {
   .appointment-card.status-completed {
     background: var(--success-900);
   }
-  
+
   .appointment-card.upcoming {
     background: var(--warning-900);
   }
-  
+
   .appointment-card.current {
     background: var(--info-900);
   }
-  
+
   .service-info {
     background: var(--neutral-800);
   }
-  
+
   .staff-assignment {
     background: var(--primary-900);
   }
-  
+
   .appointment-notes {
     background: var(--warning-900);
   }
@@ -856,7 +856,7 @@ const handleDragEnd = () => {
     box-shadow: none;
     border: 1px solid var(--neutral-400);
   }
-  
+
   .appointment-actions,
   .drag-handle,
   .selection-overlay,

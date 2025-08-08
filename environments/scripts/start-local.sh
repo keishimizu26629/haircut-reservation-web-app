@@ -12,7 +12,7 @@ echo "================================================"
 if [ ! -f "environments/.env.local" ]; then
     echo "⚠️  Warning: environments/.env.local not found!"
     echo "📝 Creating from template..."
-    cp environments/.env.example environments/.env.local
+    cp environments/env.template environments/.env.local
     echo "✅ Please edit environments/.env.local with your configuration"
 fi
 
@@ -35,5 +35,5 @@ echo "🔥 Firebase Emulator:  http://localhost:4000"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
 echo "================================================"
-echo "🛑 To stop: cd environments && docker compose -f base.yml -f local.yml down"
-echo "📋 To view logs: cd environments && docker compose -f base.yml -f local.yml logs -f"
+echo "🛑 To stop: docker compose -f base.yml -f local.yml down"
+echo "📋 To view logs: docker compose -f base.yml -f local.yml logs -f"

@@ -1,486 +1,213 @@
 <template>
-  <div v-if="show" class="modal-overlay" @click="closeModal">
-    <div class="modal-container" @click.stop>
+  <div class="modal-overlay" @click="closeModal">
+    <div class="modal-content" @click.stop>
       <div class="modal-header">
         <h3 class="modal-title">
-          {{ isEditing ? '予約編集' : '新規予約' }}
+          {{ isEdit ? '予約編集' : '新規予約' }}
         </h3>
-        <button 
-          class="btn-close" 
-          @click="closeModal"
-          aria-label="閉じる"
-        >
+        <button @click="closeModal" class="close-btn">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
 
-      <div class="modal-body">
-        <form @submit.prevent="handleSubmit">
-          <!-- 日付・時間選択 -->
-          <div class="form-section">
-            <h4>日時</h4>
-            <div class="datetime-grid">
-              <div class="form-group">
-                <label for="date">日付 *</label>
-                <input
-                  id="date"
-                  v-model="formData.date"
-                  type="date"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.date }"
-                  required
-                />
-                <div v-if="errors.date" class="invalid-feedback">
-                  {{ errors.date }}
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="time">時間 *</label>
-                <input
-                  id="time"
-                  v-model="formData.time"
-                  type="time"
-                  class="form-control"
-                  :class="{ 'is-invalid': errors.time }"
-                  required
-                />
-                <div v-if="errors.time" class="invalid-feedback">
-                  {{ errors.time }}
-                </div>
-              </div>
-            </div>
+      <form @submit.prevent="handleSubmit" class="modal-body">
+        <!-- 日時表示 -->
+        <div class="datetime-display">
+          <div class="datetime-info">
+            <i class="bi bi-calendar"></i>
+            <span>{{ formatDate(date) }} {{ timeSlot }}</span>
           </div>
-
-          <!-- 顧客情報 -->
-          <div class="form-section">
-            <h4>顧客情報</h4>
-            <div class="form-group">
-              <label for="customerName">お名前 *</label>
-              <input
-                id="customerName"
-                v-model="formData.customerName"
-                type="text"
-                class="form-control"
-                :class="{ 'is-invalid': errors.customerName }"
-                placeholder="お客様のお名前"
-                required
-              />
-              <div v-if="errors.customerName" class="invalid-feedback">
-                {{ errors.customerName }}
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="customerPhone">電話番号</label>
-              <input
-                id="customerPhone"
-                v-model="formData.customerPhone"
-                type="tel"
-                class="form-control"
-                :class="{ 'is-invalid': errors.customerPhone }"
-                placeholder="090-1234-5678"
-              />
-              <div v-if="errors.customerPhone" class="invalid-feedback">
-                {{ errors.customerPhone }}
-              </div>
-            </div>
-          </div>
-
-          <!-- カテゴリー選択 -->
-          <div class="form-section">
-            <h4>カテゴリー</h4>
-            <div class="category-selection">
-              <div 
-                v-for="category in availableCategories"
-                :key="category.value"
-                class="category-item"
-                :class="{ selected: formData.category === category.value }"
-                @click="selectCategory(category.value)"
-              >
-                <div class="category-icon">
-                  <i :class="category.icon"></i>
-                </div>
-                <div class="category-info">
-                  <div class="category-name">{{ category.label }}</div>
-                  <div class="category-description">{{ category.description }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 自由テキスト入力 -->
-          <div class="form-section">
-            <h4>詳細・メモ</h4>
-            <div class="form-group">
-              <label for="details">予約内容</label>
-              <textarea
-                id="details"
-                v-model="formData.details"
-                class="form-control"
-                :class="{ 'is-invalid': errors.details }"
-                rows="4"
-                placeholder="具体的な施術内容、ご要望、注意事項などを自由にご記入ください"
-              ></textarea>
-              <div v-if="errors.details" class="invalid-feedback">
-                {{ errors.details }}
-              </div>
-              <div class="form-text">
-                例：カット＋カラー、前回と同じスタイル、アレルギーあり など
-              </div>
-            </div>
-          </div>
-
-          <!-- ステータス選択（編集時のみ） -->
-          <div v-if="isEditing" class="form-section">
-            <h4>ステータス</h4>
-            <div class="status-selection">
-              <label 
-                v-for="status in availableStatuses"
-                :key="status.value"
-                class="status-item"
-                :class="{ selected: formData.status === status.value }"
-              >
-                <input
-                  v-model="formData.status"
-                  type="radio"
-                  :value="status.value"
-                  name="status"
-                />
-                <div class="status-info">
-                  <div class="status-icon" :class="`status-${status.value}`">
-                    <i :class="status.icon"></i>
-                  </div>
-                  <div class="status-details">
-                    <div class="status-name">{{ status.label }}</div>
-                    <div class="status-description">{{ status.description }}</div>
-                  </div>
-                </div>
-              </label>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <div class="button-group">
-          <button 
-            type="button" 
-            class="btn btn-outline-secondary"
-            @click="closeModal"
-          >
-            キャンセル
-          </button>
-          
-          <button 
-            v-if="isEditing"
-            type="button" 
-            class="btn btn-outline-danger"
-            @click="handleDelete"
-          >
-            <i class="bi bi-trash"></i>
-            削除
-          </button>
-          
-          <button 
-            type="button"
-            class="btn btn-primary"
-            @click="handleSubmit"
-            :disabled="!isFormValid"
-          >
-            <i class="bi" :class="isEditing ? 'bi-check-lg' : 'bi-plus-lg'"></i>
-            {{ isEditing ? '更新' : '予約作成' }}
-          </button>
         </div>
-      </div>
+
+        <!-- 予約内容入力 -->
+        <div class="form-group">
+          <label for="content" class="form-label">予約内容</label>
+          <textarea
+            id="content"
+            v-model="form.content"
+            class="form-textarea"
+            placeholder="例：田中様 カット"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+
+        <!-- カテゴリ選択 -->
+        <div class="form-group">
+          <label class="form-label">メニューカテゴリ</label>
+          <div class="category-options">
+            <label class="category-option" :class="getCategoryClass('cut')">
+              <input type="radio" v-model="form.category" value="cut">
+              <span class="category-label">カット</span>
+            </label>
+            <label class="category-option" :class="getCategoryClass('color')">
+              <input type="radio" v-model="form.category" value="color">
+              <span class="category-label">カラー</span>
+            </label>
+            <label class="category-option" :class="getCategoryClass('perm')">
+              <input type="radio" v-model="form.category" value="perm">
+              <span class="category-label">パーマ</span>
+            </label>
+            <label class="category-option" :class="getCategoryClass('straight')">
+              <input type="radio" v-model="form.category" value="straight">
+              <span class="category-label">縮毛矯正</span>
+            </label>
+            <label class="category-option" :class="getCategoryClass('other')">
+              <input type="radio" v-model="form.category" value="other">
+              <span class="category-label">その他</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ボタン -->
+        <div class="modal-actions">
+          <div class="action-buttons">
+            <button
+              v-if="isEdit"
+              type="button"
+              @click="handleDelete"
+              class="btn-delete"
+              :disabled="loading"
+            >
+              <i class="bi bi-trash"></i>
+              削除
+            </button>
+            <div class="primary-actions">
+              <button
+                type="button"
+                @click="closeModal"
+                class="btn-cancel"
+                :disabled="loading"
+              >
+                キャンセル
+              </button>
+              <button
+                type="submit"
+                class="btn-save"
+                :disabled="loading || !isFormValid"
+              >
+                <i class="bi bi-check2" v-if="!loading"></i>
+                <i class="bi bi-hourglass-split spin" v-if="loading"></i>
+                {{ loading ? '保存中...' : '保存' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import dayjs from 'dayjs'
+import 'dayjs/locale/ja'
 
-// 型定義
-interface ReservationData {
-  id?: string
-  date: string
-  time: string
-  customerName: string
-  customerPhone: string
-  category: string
-  details: string
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-  createdAt?: Date
-  updatedAt?: Date
-}
+dayjs.locale('ja')
 
-interface Category {
-  value: string
-  label: string
-  description: string
-  icon: string
-}
-
-interface Status {
-  value: string
-  label: string
-  description: string
-  icon: string
-}
-
-interface ValidationErrors {
-  date?: string
-  time?: string
-  customerName?: string
-  customerPhone?: string
-  details?: string
-}
-
-// Props
-const props = defineProps<{
-  show: boolean
-  selectedDate?: Date
-  reservation?: ReservationData | null
-}>()
-
-// Emit
-const emit = defineEmits<{
-  close: []
-  save: [reservation: ReservationData]
-  delete: [reservationId: string]
-}>()
-
-// リアクティブ状態
-const formData = ref({
-  date: '',
-  time: '',
-  customerName: '',
-  customerPhone: '',
-  category: '',
-  details: '',
-  status: 'pending' as const
+const props = defineProps({
+  date: {
+    type: String,
+    required: true
+  },
+  timeSlot: {
+    type: String,
+    required: true
+  },
+  reservation: {
+    type: Object,
+    default: null
+  }
 })
 
-const errors = ref<ValidationErrors>({})
+const emit = defineEmits(['close', 'save', 'delete'])
 
-// カテゴリー定義
-const availableCategories = ref<Category[]>([
-  {
-    value: 'cut',
-    label: 'カット',
-    description: 'ヘアカット・スタイリング',
-    icon: 'bi bi-scissors'
-  },
-  {
-    value: 'color',
-    label: 'カラー',
-    description: 'ヘアカラー・ブリーチ',
-    icon: 'bi bi-palette'
-  },
-  {
-    value: 'perm',
-    label: 'パーマ',
-    description: 'パーマ・縮毛矯正',
-    icon: 'bi bi-hurricane'
-  },
-  {
-    value: 'treatment',
-    label: 'トリートメント',
-    description: 'ヘアケア・頭皮ケア',
-    icon: 'bi bi-droplet'
-  },
-  {
-    value: 'set',
-    label: 'セット',
-    description: 'ヘアセット・着付け',
-    icon: 'bi bi-brush'
-  },
-  {
-    value: 'other',
-    label: 'その他',
-    description: 'その他のサービス',
-    icon: 'bi bi-three-dots'
-  }
-])
+const loading = ref(false)
 
-// ステータス定義
-const availableStatuses = ref<Status[]>([
-  {
-    value: 'pending',
-    label: '予約済み',
-    description: '予約受付済み、来店待ち',
-    icon: 'bi bi-clock'
-  },
-  {
-    value: 'confirmed',
-    label: '確認済み',
-    description: '予約確認完了',
-    icon: 'bi bi-check-circle'
-  },
-  {
-    value: 'completed',
-    label: '来店完了',
-    description: '施術完了',
-    icon: 'bi bi-check-circle-fill'
-  },
-  {
-    value: 'cancelled',
-    label: 'キャンセル',
-    description: 'キャンセル済み',
-    icon: 'bi bi-x-circle'
-  }
-])
+// フォームデータ
+const form = ref({
+  content: '',
+  category: 'cut'
+})
 
-// 計算プロパティ
-const isEditing = computed(() => !!props.reservation)
+// 編集モード判定
+const isEdit = computed(() => !!props.reservation)
 
+// フォームバリデーション
 const isFormValid = computed(() => {
-  return !!(
-    formData.value.date &&
-    formData.value.time &&
-    formData.value.customerName.trim() &&
-    formData.value.category
-  ) && Object.keys(errors.value).length === 0
+  return form.value.content.trim() !== '' && form.value.category !== ''
 })
 
-// バリデーション
-const validateForm = (): boolean => {
-  const newErrors: ValidationErrors = {}
+// カテゴリクラス取得
+const getCategoryClass = (category) => {
+  const baseClass = 'category-option'
+  const selectedClass = form.value.category === category ? 'selected' : ''
+  const categoryClasses = {
+    cut: 'category-cut',
+    color: 'category-color',
+    perm: 'category-perm',
+    straight: 'category-straight',
+    other: 'category-other'
+  }
+  return `${baseClass} ${categoryClasses[category]} ${selectedClass}`
+}
 
-  // 日付バリデーション
-  if (!formData.value.date) {
-    newErrors.date = '日付を選択してください'
-  } else {
-    const selectedDate = new Date(formData.value.date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    if (selectedDate < today) {
-      newErrors.date = '過去の日付は選択できません'
+// 日付フォーマット
+const formatDate = (dateString) => {
+  return dayjs(dateString).format('M月D日（ddd）')
+}
+
+// フォーム送信
+const handleSubmit = async () => {
+  if (!isFormValid.value || loading.value) return
+
+  loading.value = true
+
+  try {
+    const reservationData = {
+      date: props.date,
+      timeSlot: props.timeSlot,
+      content: form.value.content.trim(),
+      category: form.value.category,
+      status: 'active'
     }
-  }
 
-  // 時間バリデーション
-  if (!formData.value.time) {
-    newErrors.time = '時間を入力してください'
-  }
-
-  // 顧客名バリデーション
-  if (!formData.value.customerName.trim()) {
-    newErrors.customerName = 'お名前を入力してください'
-  } else if (formData.value.customerName.trim().length < 2) {
-    newErrors.customerName = 'お名前は2文字以上で入力してください'
-  }
-
-  // 電話番号バリデーション（任意入力の場合）
-  if (formData.value.customerPhone && !isValidPhoneNumber(formData.value.customerPhone)) {
-    newErrors.customerPhone = '正しい電話番号を入力してください'
-  }
-
-  // 詳細の文字数制限
-  if (formData.value.details && formData.value.details.length > 500) {
-    newErrors.details = '詳細は500文字以内で入力してください'
-  }
-
-  errors.value = newErrors
-  return Object.keys(newErrors).length === 0
-}
-
-const isValidPhoneNumber = (phone: string): boolean => {
-  const phoneRegex = /^[0-9-+\s()]{10,15}$/
-  return phoneRegex.test(phone.replace(/\s/g, ''))
-}
-
-// メソッド
-const selectCategory = (categoryValue: string) => {
-  formData.value.category = categoryValue
-  validateForm()
-}
-
-const handleSubmit = () => {
-  if (!validateForm()) return
-
-  const reservationData: ReservationData = {
-    id: props.reservation?.id,
-    date: formData.value.date,
-    time: formData.value.time,
-    customerName: formData.value.customerName.trim(),
-    customerPhone: formData.value.customerPhone.trim(),
-    category: formData.value.category,
-    details: formData.value.details.trim(),
-    status: formData.value.status,
-    updatedAt: new Date()
-  }
-
-  if (!isEditing.value) {
-    reservationData.createdAt = new Date()
-  }
-
-  emit('save', reservationData)
-}
-
-const handleDelete = () => {
-  if (props.reservation?.id) {
-    if (confirm('この予約を削除しますか？\n削除した予約は元に戻せません。')) {
-      emit('delete', props.reservation.id)
-    }
+    emit('save', reservationData)
+  } catch (error) {
+    console.error('保存エラー:', error)
+  } finally {
+    loading.value = false
   }
 }
 
+// 削除処理
+const handleDelete = async () => {
+  if (!confirm('この予約を削除しますか？')) return
+
+  loading.value = true
+
+  try {
+    emit('delete', props.reservation.id)
+  } catch (error) {
+    console.error('削除エラー:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// モーダルを閉じる
 const closeModal = () => {
+  if (loading.value) return
   emit('close')
-  // フォームリセット
-  errors.value = {}
 }
 
-const initializeForm = () => {
-  if (props.reservation) {
-    // 編集モード：既存データを設定
-    formData.value = {
-      date: props.reservation.date,
-      time: props.reservation.time,
-      customerName: props.reservation.customerName,
-      customerPhone: props.reservation.customerPhone,
-      category: props.reservation.category,
-      details: props.reservation.details,
-      status: props.reservation.status
-    }
-  } else {
-    // 新規作成モード：初期値を設定
-    const today = props.selectedDate || new Date()
-    const defaultTime = new Date()
-    defaultTime.setHours(10, 0, 0, 0)
-    
-    formData.value = {
-      date: today.toISOString().split('T')[0],
-      time: '10:00',
-      customerName: '',
-      customerPhone: '',
-      category: '',
-      details: '',
-      status: 'pending'
-    }
-  }
-  errors.value = {}
-}
-
-// ウォッチャー
-watch(() => props.show, (newValue) => {
-  if (newValue) {
-    initializeForm()
-  }
-})
-
-// リアルタイムバリデーション
-watch(formData, () => {
-  if (Object.keys(errors.value).length > 0) {
-    validateForm()
-  }
-}, { deep: true })
-
-// 初期化
+// 初期データ設定
 onMounted(() => {
-  if (props.show) {
-    initializeForm()
+  if (props.reservation) {
+    form.value = {
+      content: props.reservation.content || '',
+      category: props.reservation.category || 'cut'
+    }
   }
 })
 </script>
@@ -801,19 +528,19 @@ onMounted(() => {
     width: 95vw;
     max-height: 95vh;
   }
-  
+
   .datetime-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .category-selection {
     grid-template-columns: 1fr;
   }
-  
+
   .button-group {
     flex-direction: column-reverse;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;

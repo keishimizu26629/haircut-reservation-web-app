@@ -9,7 +9,6 @@ import type { User } from 'firebase/auth'
 // 認証設定（auth.tsと統一）
 const AUTH_CONFIG = {
   publicRoutes: [
-    '/',
     '/login',
     '/register',
     '/forgot-password',
@@ -29,6 +28,7 @@ const AUTH_CONFIG = {
     '/reset-password'
   ],
   protectedRoutes: [
+    '/',
     '/dashboard',
     '/booking',
     '/reservations',
@@ -48,7 +48,7 @@ const AUTH_CONFIG = {
 // セッション期限チェック
 function isSessionExpired(): boolean {
   if (process.server) return false
-  
+
   try {
     const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0')
     const currentTime = Date.now()
@@ -76,6 +76,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     console.log(`🔒 Global Auth: Checking ${to.path}`)
 
+    // 認証状態の確認を少し遅延させて、初期化を待つ
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     // 1. VueFire から現在のユーザー取得
     let currentUser: User | null = null
     try {
@@ -95,7 +98,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     // 4. パブリックルートチェック
-    const isPublicRoute = AUTH_CONFIG.publicRoutes.some(route => 
+    const isPublicRoute = AUTH_CONFIG.publicRoutes.some(route =>
       to.path === route || to.path.startsWith(route + '/')
     )
 
@@ -123,14 +126,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     // 7. 管理者ページアクセスチェック
-    if (AUTH_CONFIG.adminRoutes.some(route => 
+    if (AUTH_CONFIG.adminRoutes.some(route =>
       to.path === route || to.path.startsWith(route + '/')
     )) {
       try {
         const token = await currentUser.getIdToken()
         const payload = JSON.parse(atob(token.split('.')[1]))
         const userRole = payload.role || payload.custom_claims?.role || 'user'
-        
+
         if (userRole !== 'admin') {
           console.log(`🔒 Non-admin access to ${to.path}, redirecting to dashboard`)
           return navigateTo(AUTH_CONFIG.defaultRedirect)
@@ -145,7 +148,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   } catch (error) {
     console.error('🔒 Global auth middleware error:', error)
-    
+
     // エラー時の安全な処理
     const isPublicRoute = AUTH_CONFIG.publicRoutes.includes(to.path)
     if (!isPublicRoute) {

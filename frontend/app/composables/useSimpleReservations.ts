@@ -12,16 +12,14 @@ import {
   type Unsubscribe
 } from 'firebase/firestore'
 
-// 予約データの型定義（シンプル版）
+// 予約データの型定義（MVP仕様準拠）
 export interface SimpleReservation {
   id?: string
-  date: string
-  time: string
-  customerName: string
-  customerPhone: string
-  category: 'cut' | 'color' | 'perm' | 'treatment' | 'set' | 'other'
-  details: string
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  date: string           // YYYY-MM-DD
+  timeSlot: string       // "09:00", "09:30", ...
+  content: string        // 自由入力テキスト
+  category: 'cut' | 'color' | 'perm' | 'straight' | 'other'
+  status: 'active' | 'completed' | 'cancelled'
   createdAt?: Date
   updatedAt?: Date
   createdBy?: string
@@ -60,17 +58,17 @@ export const useSimpleReservations = () => {
   // 予約データをカレンダー用にフォーマット
   const appointments = computed((): CalendarAppointment[] => {
     return reservations.value.map(reservation => {
-      const startTime = new Date(`${reservation.date}T${reservation.time}`)
-      const endTime = new Date(startTime.getTime() + (90 * 60 * 1000)) // デフォルト90分
+      const startTime = new Date(`${reservation.date}T${reservation.timeSlot}`)
+      const endTime = new Date(startTime.getTime() + (30 * 60 * 1000)) // 30分単位
       
       return {
         id: reservation.id || '',
-        title: categoryLabels[reservation.category] || reservation.category,
+        title: reservation.content || categoryLabels[reservation.category],
         startTime,
         endTime,
         status: reservation.status,
-        customerName: reservation.customerName,
-        duration: 90
+        customerName: reservation.content,
+        duration: 30
       }
     })
   })

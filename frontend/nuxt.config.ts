@@ -19,22 +19,23 @@ export default defineNuxtConfig({
     plugins: 'app/plugins'
   },
 
-  // Composables auto-import configuration  
+    // Composables auto-import configuration
   imports: {
+    autoImport: true,
     dirs: [
       'app/composables',
-      'app/composables/**'
+      'app/composables/**',
+      'app/stores'
+    ],
+    presets: [
+      'vue',
+      'vue-router',
+      'pinia'
     ]
   },
-  
-  // Additional auto-import configuration
-  components: [
-    {
-      path: '~/app/components',
-      pathPrefix: false,
-    }
-  ],
-  
+
+
+
   // Nitro configuration for composables
   nitro: {
     experimental: {
@@ -48,7 +49,11 @@ export default defineNuxtConfig({
     '@': '.',
     '~~': '.',
     '@@': '.',
-    '~/composables': './app/composables'
+    '@stores': './app/stores',
+    '~/composables': './app/composables',
+    '~/components': './app/components',
+    '~/pages': './app/pages',
+    '~/assets': './app/assets'
   },
 
   // Development server configuration
@@ -63,16 +68,7 @@ export default defineNuxtConfig({
     typeCheck: false
   },
 
-  // Auto-import configuration - 詳細設定
-  imports: {
-    autoImport: true,
-    // Nuxt composables
-    presets: [
-      'vue',
-      'vue-router',
-      'pinia'
-    ]
-  },
+
 
   // CSS Framework and Styling - Nuxt 4互換モード対応
   css: [
@@ -283,8 +279,7 @@ export default defineNuxtConfig({
       ],
       exclude: [
         // 管理画面コンポーネントは除外（遅延読み込み）
-        '~/app/components/Admin',
-        '~/app/composables/useAuth', // 軽量版を使用
+        '~/app/components/Admin'
       ]
     },
     // Server configuration for development

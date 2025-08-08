@@ -11,9 +11,10 @@ echo "================================================"
 # Check if .env.prod exists
 if [ ! -f "environments/.env.prod" ]; then
     echo "❌ Error: environments/.env.prod not found!"
-    echo "📝 Please create environments/.env.prod with your Firebase Production configuration"
-    echo "💡 Copy from environments/.env.example and configure Firebase Production settings"
-    exit 1
+    echo "📝 Creating from template..."
+    cp environments/env.template environments/.env.prod
+    echo "✅ Please edit environments/.env.prod with your Firebase Production configuration"
+    echo "💡 Use the FIREBASE_PROD_* values from the template and set secure passwords"
 fi
 
 # Export environment variables
@@ -26,8 +27,10 @@ REQUIRED_VARS=(
     "FIREBASE_PROD_PROJECT_ID"
     "FIREBASE_PROD_API_KEY"
     "FIREBASE_PROD_AUTH_DOMAIN"
-    "DATABASE_URL_PROD"
-    "JWT_SECRET_PROD"
+    "FIREBASE_PROD_STORAGE_BUCKET"
+    "FIREBASE_PROD_MESSAGING_SENDER_ID"
+    "FIREBASE_PROD_APP_ID"
+    "GRAFANA_ADMIN_PASSWORD_PROD"
 )
 
 for var in "${REQUIRED_VARS[@]}"; do
@@ -57,7 +60,7 @@ echo ""
 echo "✅ Production Environment Started!"
 echo "================================================"
 echo "🌐 Frontend:           http://localhost:3000"
-echo "🔧 Backend API:        http://localhost:3001"
+echo "🔧 Backend API:        Firebase Cloud Functions"
 echo "🔥 Firebase Project:   ${FIREBASE_PROD_PROJECT_ID}"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
