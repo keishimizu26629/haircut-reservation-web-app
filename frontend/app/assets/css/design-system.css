@@ -4,7 +4,7 @@
  */
 
 /* =====================================
-   デザイントークン・CSS Custom Properties
+  デザイントークン・CSS Custom Properties
    ===================================== */
 
 :root {
@@ -79,10 +79,30 @@
   --beauty-accent-light: #fff350;
   --beauty-accent-dark: #c79100;
 
+  /* 予約カテゴリ用パステルカラー */
+  --category-cut: #ffe4e1; /* 淡いピンク */
+  --category-color: #e0e4ff; /* 淡い青 */
+  --category-perm: #e4ffe0; /* 淡い緑 */
+  --category-straight: #fff0e4; /* 淡いオレンジ */
+  --category-mesh: #fff8dc; /* 淡い黄色 */
+  --category-other: #f0e4ff; /* 淡い紫 */
+
   /* グラデーション */
-  --beauty-gradient-primary: linear-gradient(135deg, var(--beauty-primary) 0%, var(--beauty-secondary) 100%);
-  --beauty-gradient-light: linear-gradient(135deg, var(--beauty-primary-light) 0%, var(--beauty-secondary-light) 100%);
-  --beauty-gradient-dark: linear-gradient(135deg, var(--beauty-primary-dark) 0%, var(--beauty-secondary-dark) 100%);
+  --beauty-gradient-primary: linear-gradient(
+    135deg,
+    var(--beauty-primary) 0%,
+    var(--beauty-secondary) 100%
+  );
+  --beauty-gradient-light: linear-gradient(
+    135deg,
+    var(--beauty-primary-light) 0%,
+    var(--beauty-secondary-light) 100%
+  );
+  --beauty-gradient-dark: linear-gradient(
+    135deg,
+    var(--beauty-primary-dark) 0%,
+    var(--beauty-secondary-dark) 100%
+  );
 
   /* ニュートラルカラー */
   --color-gray-50: #f9fafb;
@@ -103,14 +123,14 @@
   --color-info: #3b82f6;
 
   /* Typography Scale */
-  --font-size-xs: 0.75rem;    /* 12px */
-  --font-size-sm: 0.875rem;   /* 14px */
-  --font-size-base: 1rem;     /* 16px */
-  --font-size-lg: 1.125rem;   /* 18px */
-  --font-size-xl: 1.25rem;    /* 20px */
-  --font-size-2xl: 1.5rem;    /* 24px */
-  --font-size-3xl: 1.875rem;  /* 30px */
-  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
 
   /* Font Weights */
   --font-weight-light: 300;
@@ -125,35 +145,36 @@
   --line-height-relaxed: 1.75;
 
   /* フォント */
-  --font-family-primary: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-headings: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-mono: 'Fira Code', 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
-
-
+  --font-family-primary: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-family-headings: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-family-mono: 'Fira Code', 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code',
+    'Roboto Mono', monospace;
 
   /* Spacing Scale - 8px base */
   --space-0: 0;
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.25rem;   /* 20px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
-  --space-20: 5rem;     /* 80px */
-  --space-24: 6rem;     /* 96px */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
 
   /* Border Radius */
   --radius-none: 0;
-  --radius-sm: 0.125rem;   /* 2px */
-  --radius-base: 0.25rem;  /* 4px */
-  --radius-md: 0.375rem;   /* 6px */
-  --radius-lg: 0.5rem;     /* 8px */
-  --radius-xl: 0.75rem;    /* 12px */
-  --radius-2xl: 1rem;      /* 16px */
+  --radius-sm: 0.125rem; /* 2px */
+  --radius-base: 0.25rem; /* 4px */
+  --radius-md: 0.375rem; /* 6px */
+  --radius-lg: 0.5rem; /* 8px */
+  --radius-xl: 0.75rem; /* 12px */
+  --radius-2xl: 1rem; /* 16px */
   --radius-full: 9999px;
 
   /* Shadows */
@@ -221,7 +242,12 @@ body {
 }
 
 /* 見出しスタイル */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-family-headings);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
@@ -301,20 +327,36 @@ h1, h2, h3, h4, h5, h6 {
    ===================================== */
 
 /* 基本トランジション */
-.transition-none { transition: none; }
-.transition-all { transition: all var(--duration-150) var(--ease-in-out); }
-.transition-beauty { transition: all var(--duration-200) var(--ease-beauty); }
-.transition-bounce { transition: all var(--duration-300) var(--ease-bounce); }
+.transition-none {
+  transition: none;
+}
+.transition-all {
+  transition: all var(--duration-150) var(--ease-in-out);
+}
+.transition-beauty {
+  transition: all var(--duration-200) var(--ease-beauty);
+}
+.transition-bounce {
+  transition: all var(--duration-300) var(--ease-bounce);
+}
 
 /* フェードアニメーション */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes fadeInUp {
@@ -386,38 +428,64 @@ h1, h2, h3, h4, h5, h6 {
 
 /* スライドアニメーション */
 @keyframes slideInUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInDown {
-  from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideInLeft {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* ローディングアニメーション */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(-25%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -429,29 +497,63 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Beauty Salon専用アニメーション */
 @keyframes beautyGlow {
-  0% { box-shadow: 0 0 5px var(--beauty-primary); }
-  50% { box-shadow: 0 0 20px var(--beauty-primary), 0 0 30px var(--beauty-secondary); }
-  100% { box-shadow: 0 0 5px var(--beauty-primary); }
+  0% {
+    box-shadow: 0 0 5px var(--beauty-primary);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--beauty-primary), 0 0 30px var(--beauty-secondary);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--beauty-primary);
+  }
 }
 
 @keyframes beautyShimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* アニメーションクラス */
-.animate-fade-in { animation: fadeIn var(--duration-300) var(--ease-out); }
-.animate-fade-in-up { animation: fadeInUp var(--duration-500) var(--ease-out); }
-.animate-fade-in-down { animation: fadeInDown var(--duration-500) var(--ease-out); }
-.animate-fade-in-left { animation: fadeInLeft var(--duration-500) var(--ease-out); }
-.animate-fade-in-right { animation: fadeInRight var(--duration-500) var(--ease-out); }
-.animate-scale-in { animation: scaleIn var(--duration-200) var(--ease-out); }
-.animate-slide-in-up { animation: slideInUp var(--duration-300) var(--ease-out); }
-.animate-slide-in-down { animation: slideInDown var(--duration-300) var(--ease-out); }
-.animate-spin { animation: spin var(--duration-1000) linear infinite; }
-.animate-pulse { animation: pulse var(--duration-1000) var(--ease-in-out) infinite; }
-.animate-bounce { animation: bounce var(--duration-1000) infinite; }
-.animate-beauty-glow { animation: beautyGlow 2s ease-in-out infinite; }
+.animate-fade-in {
+  animation: fadeIn var(--duration-300) var(--ease-out);
+}
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-500) var(--ease-out);
+}
+.animate-fade-in-down {
+  animation: fadeInDown var(--duration-500) var(--ease-out);
+}
+.animate-fade-in-left {
+  animation: fadeInLeft var(--duration-500) var(--ease-out);
+}
+.animate-fade-in-right {
+  animation: fadeInRight var(--duration-500) var(--ease-out);
+}
+.animate-scale-in {
+  animation: scaleIn var(--duration-200) var(--ease-out);
+}
+.animate-slide-in-up {
+  animation: slideInUp var(--duration-300) var(--ease-out);
+}
+.animate-slide-in-down {
+  animation: slideInDown var(--duration-300) var(--ease-out);
+}
+.animate-spin {
+  animation: spin var(--duration-1000) linear infinite;
+}
+.animate-pulse {
+  animation: pulse var(--duration-1000) var(--ease-in-out) infinite;
+}
+.animate-bounce {
+  animation: bounce var(--duration-1000) infinite;
+}
+.animate-beauty-glow {
+  animation: beautyGlow 2s ease-in-out infinite;
+}
 
 /* ホバーアニメーション */
 .hover-lift {
@@ -476,11 +578,52 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* =====================================
-   ダークモードシステム
+  ダークモードシステム
    ===================================== */
 
 /* ダークモード変数 */
-[data-theme="dark"],
+[data-theme='dark'] :root {
+  /* ダークモード - Neutral Colors */
+  --neutral-0: #0f172a;
+  --neutral-50: #1e293b;
+  --neutral-100: #334155;
+  --neutral-200: #475569;
+  --neutral-300: #64748b;
+  --neutral-400: #94a3b8;
+  --neutral-500: #cbd5e1;
+  --neutral-600: #e2e8f0;
+  --neutral-700: #f1f5f9;
+  --neutral-800: #f8fafc;
+  --neutral-900: #ffffff;
+
+  /* ダークモードカラー（既存の互換性のため） */
+  --color-gray-50: #111827;
+  --color-gray-100: #1f2937;
+  --color-gray-200: #374151;
+  --color-gray-300: #4b5563;
+  --color-gray-400: #6b7280;
+  --color-gray-500: #9ca3af;
+  --color-gray-600: #d1d5db;
+  --color-gray-700: #e5e7eb;
+  --color-gray-800: #f3f4f6;
+  --color-gray-900: #f9fafb;
+
+  /* ダークモード対応beauty colors */
+  --beauty-primary: #8fa5ff;
+  --beauty-primary-light: #b4c6ff;
+  --beauty-primary-dark: #667eea;
+  --beauty-secondary: #9d6cc8;
+  --beauty-secondary-light: #b994d3;
+  --beauty-secondary-dark: #764ba2;
+
+  /* ダークモードグラデーション */
+  --beauty-gradient-primary: linear-gradient(
+    135deg,
+    var(--beauty-primary) 0%,
+    var(--beauty-secondary) 100%
+  );
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     /* ダークモード - Neutral Colors */
@@ -517,7 +660,11 @@ h1, h2, h3, h4, h5, h6 {
     --beauty-secondary-dark: #764ba2;
 
     /* ダークモードグラデーション */
-    --beauty-gradient-primary: linear-gradient(135deg, var(--beauty-primary) 0%, var(--beauty-secondary) 100%);
+    --beauty-gradient-primary: linear-gradient(
+      135deg,
+      var(--beauty-primary) 0%,
+      var(--beauty-secondary) 100%
+    );
   }
 
   body {
@@ -638,7 +785,12 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* 見出し */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Arial', sans-serif;
     font-weight: bold;
     color: #000;
@@ -647,10 +799,20 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.5em;
   }
 
-  h1 { font-size: 18pt; }
-  h2 { font-size: 16pt; }
-  h3 { font-size: 14pt; }
-  h4, h5, h6 { font-size: 12pt; }
+  h1 {
+    font-size: 18pt;
+  }
+  h2 {
+    font-size: 16pt;
+  }
+  h3 {
+    font-size: 14pt;
+  }
+  h4,
+  h5,
+  h6 {
+    font-size: 12pt;
+  }
 
   /* パラグラフ */
   p {
@@ -660,7 +822,8 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* リスト */
-  ul, ol {
+  ul,
+  ol {
     margin: 0 0 0.5em 0;
     padding-left: 2em;
   }
@@ -676,7 +839,8 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1em;
   }
 
-  th, td {
+  th,
+  td {
     border: 1px solid #000;
     padding: 0.25em 0.5em;
     text-align: left;
@@ -689,9 +853,15 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* ページブレーク */
-  .page-break-before { page-break-before: always; }
-  .page-break-after { page-break-after: always; }
-  .page-break-inside-avoid { page-break-inside: avoid; }
+  .page-break-before {
+    page-break-before: always;
+  }
+  .page-break-after {
+    page-break-after: always;
+  }
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
 
   .no-page-break,
   tr,
@@ -729,17 +899,17 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
   }
 
-  a[href^="http"]:after {
-    content: " (" attr(href) ")";
+  a[href^='http']:after {
+    content: ' (' attr(href) ')';
     font-size: 9pt;
     color: #666;
   }
 
-  a[href^="#"]:after,
-  a[href^="javascript:"]:after,
-  a[href^="mailto:"]:after,
-  a[href^="tel:"]:after {
-    content: "";
+  a[href^='#']:after,
+  a[href^='javascript:']:after,
+  a[href^='mailto:']:after,
+  a[href^='tel:']:after {
+    content: '';
   }
 
   /* 画像 */
@@ -894,21 +1064,45 @@ h1, h2, h3, h4, h5, h6 {
    ===================================== */
 
 /* Fluid typography */
-.text-fluid-xs { font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); }
-.text-fluid-sm { font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem); }
-.text-fluid-base { font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem); }
-.text-fluid-lg { font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem); }
-.text-fluid-xl { font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); }
-.text-fluid-2xl { font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem); }
-.text-fluid-3xl { font-size: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem); }
-.text-fluid-4xl { font-size: clamp(2.25rem, 1.9rem + 1.75vw, 3rem); }
+.text-fluid-xs {
+  font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+}
+.text-fluid-sm {
+  font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+}
+.text-fluid-base {
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+}
+.text-fluid-lg {
+  font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+}
+.text-fluid-xl {
+  font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+}
+.text-fluid-2xl {
+  font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+}
+.text-fluid-3xl {
+  font-size: clamp(1.875rem, 1.6rem + 1.375vw, 2.25rem);
+}
+.text-fluid-4xl {
+  font-size: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);
+}
 
 /* モバイル最適化タイポグラフィ */
 @media (max-width: 575.98px) {
-  .heading-1 { font-size: var(--font-size-3xl); }
-  .heading-2 { font-size: var(--font-size-2xl); }
-  .heading-3 { font-size: var(--font-size-xl); }
-  .text-lead { font-size: var(--font-size-lg); }
+  .heading-1 {
+    font-size: var(--font-size-3xl);
+  }
+  .heading-2 {
+    font-size: var(--font-size-2xl);
+  }
+  .heading-3 {
+    font-size: var(--font-size-xl);
+  }
+  .text-lead {
+    font-size: var(--font-size-lg);
+  }
 }
 
 /* =====================================
@@ -916,93 +1110,229 @@ h1, h2, h3, h4, h5, h6 {
    ===================================== */
 
 /* スペーシング */
-.p-0 { padding: 0; }
-.p-1 { padding: var(--space-1); }
-.p-2 { padding: var(--space-2); }
-.p-3 { padding: var(--space-3); }
-.p-4 { padding: var(--space-4); }
-.p-5 { padding: var(--space-5); }
-.p-6 { padding: var(--space-6); }
+.p-0 {
+  padding: 0;
+}
+.p-1 {
+  padding: var(--space-1);
+}
+.p-2 {
+  padding: var(--space-2);
+}
+.p-3 {
+  padding: var(--space-3);
+}
+.p-4 {
+  padding: var(--space-4);
+}
+.p-5 {
+  padding: var(--space-5);
+}
+.p-6 {
+  padding: var(--space-6);
+}
 
-.m-0 { margin: 0; }
-.m-1 { margin: var(--space-1); }
-.m-2 { margin: var(--space-2); }
-.m-3 { margin: var(--space-3); }
-.m-4 { margin: var(--space-4); }
-.m-5 { margin: var(--space-5); }
-.m-6 { margin: var(--space-6); }
+.m-0 {
+  margin: 0;
+}
+.m-1 {
+  margin: var(--space-1);
+}
+.m-2 {
+  margin: var(--space-2);
+}
+.m-3 {
+  margin: var(--space-3);
+}
+.m-4 {
+  margin: var(--space-4);
+}
+.m-5 {
+  margin: var(--space-5);
+}
+.m-6 {
+  margin: var(--space-6);
+}
 
 /* カラー */
-.text-primary { color: var(--beauty-primary); }
-.text-secondary { color: var(--beauty-secondary); }
-.text-success { color: var(--color-success); }
-.text-warning { color: var(--color-warning); }
-.text-error { color: var(--color-error); }
-.text-info { color: var(--color-info); }
+.text-primary {
+  color: var(--beauty-primary);
+}
+.text-secondary {
+  color: var(--beauty-secondary);
+}
+.text-success {
+  color: var(--color-success);
+}
+.text-warning {
+  color: var(--color-warning);
+}
+.text-error {
+  color: var(--color-error);
+}
+.text-info {
+  color: var(--color-info);
+}
 
-.bg-primary { background-color: var(--beauty-primary); }
-.bg-secondary { background-color: var(--beauty-secondary); }
-.bg-gradient { background: var(--beauty-gradient-primary); }
+.bg-primary {
+  background-color: var(--beauty-primary);
+}
+.bg-secondary {
+  background-color: var(--beauty-secondary);
+}
+.bg-gradient {
+  background: var(--beauty-gradient-primary);
+}
 
 /* 境界線 */
-.border { border: 1px solid var(--color-gray-200); }
-.border-primary { border-color: var(--beauty-primary); }
-.border-secondary { border-color: var(--beauty-secondary); }
+.border {
+  border: 1px solid var(--color-gray-200);
+}
+.border-primary {
+  border-color: var(--beauty-primary);
+}
+.border-secondary {
+  border-color: var(--beauty-secondary);
+}
 
-.rounded { border-radius: var(--radius-base); }
-.rounded-md { border-radius: var(--radius-md); }
-.rounded-lg { border-radius: var(--radius-lg); }
-.rounded-xl { border-radius: var(--radius-xl); }
-.rounded-full { border-radius: var(--radius-full); }
+.rounded {
+  border-radius: var(--radius-base);
+}
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.rounded-full {
+  border-radius: var(--radius-full);
+}
 
 /* シャドウ */
-.shadow-sm { box-shadow: var(--shadow-sm); }
-.shadow { box-shadow: var(--shadow-base); }
-.shadow-md { box-shadow: var(--shadow-md); }
-.shadow-lg { box-shadow: var(--shadow-lg); }
-.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+.shadow {
+  box-shadow: var(--shadow-base);
+}
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
 
 /* ディスプレイ */
-.d-none { display: none; }
-.d-block { display: block; }
-.d-inline { display: inline; }
-.d-inline-block { display: inline-block; }
-.d-flex { display: flex; }
-.d-grid { display: grid; }
+.d-none {
+  display: none;
+}
+.d-block {
+  display: block;
+}
+.d-inline {
+  display: inline;
+}
+.d-inline-block {
+  display: inline-block;
+}
+.d-flex {
+  display: flex;
+}
+.d-grid {
+  display: grid;
+}
 
 /* Flexbox */
-.flex-row { flex-direction: row; }
-.flex-col { flex-direction: column; }
-.flex-wrap { flex-wrap: wrap; }
-.flex-nowrap { flex-wrap: nowrap; }
+.flex-row {
+  flex-direction: row;
+}
+.flex-col {
+  flex-direction: column;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
 
-.justify-start { justify-content: flex-start; }
-.justify-center { justify-content: center; }
-.justify-end { justify-content: flex-end; }
-.justify-between { justify-content: space-between; }
-.justify-around { justify-content: space-around; }
+.justify-start {
+  justify-content: flex-start;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
 
-.items-start { align-items: flex-start; }
-.items-center { align-items: center; }
-.items-end { align-items: flex-end; }
-.items-stretch { align-items: stretch; }
+.items-start {
+  align-items: flex-start;
+}
+.items-center {
+  align-items: center;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-stretch {
+  align-items: stretch;
+}
 
 /* テキスト */
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
 
-.text-xs { font-size: var(--font-size-xs); }
-.text-sm { font-size: var(--font-size-sm); }
-.text-base { font-size: var(--font-size-base); }
-.text-lg { font-size: var(--font-size-lg); }
-.text-xl { font-size: var(--font-size-xl); }
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+.text-base {
+  font-size: var(--font-size-base);
+}
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+.text-xl {
+  font-size: var(--font-size-xl);
+}
 
-.font-light { font-weight: var(--font-weight-light); }
-.font-normal { font-weight: var(--font-weight-normal); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
+.font-light {
+  font-weight: var(--font-weight-light);
+}
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
 
 /* Beauty Salon専用クラス */
 .beauty-card {
@@ -1046,4 +1376,24 @@ h1, h2, h3, h4, h5, h6 {
   outline: none;
   border-color: var(--beauty-primary);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 予約カテゴリ用クラス */
+.category-cut {
+  background-color: var(--category-cut);
+}
+.category-color {
+  background-color: var(--category-color);
+}
+.category-perm {
+  background-color: var(--category-perm);
+}
+.category-straight {
+  background-color: var(--category-straight);
+}
+.category-mesh {
+  background-color: var(--category-mesh);
+}
+.category-other {
+  background-color: var(--category-other);
 }

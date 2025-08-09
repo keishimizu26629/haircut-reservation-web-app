@@ -3,23 +3,23 @@
     <div class="mx-auto w-full max-w-md">
       <!-- ヘッダー -->
       <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
           美容室予約システム
         </h1>
         <p class="text-gray-600">スタッフログイン</p>
       </div>
 
       <!-- ログインフォーム -->
-      <div class="bg-white shadow-lg rounded-lg px-6 py-8">
-        <form @submit.prevent="handleLogin" class="space-y-4">
+      <div class="bg-white shadow rounded-lg px-6 py-8">
+        <form @submit.prevent="handleLogin" class="space-y-6">
           <!-- エラーメッセージ -->
-          <div v-if="errorMessage" class="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+          <div v-if="errorMessage" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             {{ errorMessage }}
           </div>
 
           <!-- メールアドレス -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
               メールアドレス
             </label>
             <input
@@ -27,14 +27,14 @@
               v-model="form.email"
               type="email"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="メールアドレスを入力"
             />
           </div>
 
           <!-- パスワード -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
               パスワード
             </label>
             <input
@@ -42,7 +42,7 @@
               v-model="form.password"
               type="password"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="パスワードを入力"
             />
           </div>
@@ -73,19 +73,17 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { getFirebaseInstances } from '../stores/auth'
 
 definePageMeta({
   layout: 'auth',
-  middleware: 'guest'
+  ssr: false
 })
 
 useHead({
   title: 'ログイン - 美容室予約システム'
 })
-
-const { signInWithEmailAndPassword } = useAuth()
 
 const loading = ref(false)
 const errorMessage = ref('')
@@ -100,10 +98,41 @@ const handleLogin = async () => {
   errorMessage.value = ''
 
   try {
-    await signInWithEmailAndPassword(form.email, form.password)
-    await navigateTo('/')
+    console.log('🔐 Starting login process...')
+    const { auth } = getFirebaseInstances()
+
+    console.log('🔐 Attempting login with:', form.email)
+    const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password)
+
+    console.log('🔐 Login successful:', userCredential.user.uid)
+
+            // AuthStoreの状態を更新
+    const authStore = useAuthStore()
+    authStore.setUser(userCredential.user)
+
+    // セッション活動記録を更新（重要！）
+    localStorage.setItem('lastActivity', Date.now().toString())
+    console.log('🔐 Session activity updated:', Date.now())
+
+    // 認証状態の完全な同期を確認
+    await authStore.checkAuthState()
+
+    // VueFireの認証状態が更新されるまで少し待機
+    console.log('🔐 Waiting for VueFire auth sync...')
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // VueFireの認証状態を確認
+    const { getCurrentUser } = await import('vuefire')
+    const vueFireUser = await getCurrentUser()
+    console.log('🔐 VueFire auth state:', {
+      user: !!vueFireUser,
+      uid: vueFireUser?.uid
+    })
+
+    console.log('🔐 AuthStore updated, redirecting to calendar...')
+    await navigateTo('/calendar')
   } catch (error) {
-    console.error('ログインエラー:', error)
+    console.error('🔐 Login error:', error)
     errorMessage.value = getErrorMessage(error.code)
   } finally {
     loading.value = false
@@ -113,15 +142,15 @@ const handleLogin = async () => {
 const getErrorMessage = (errorCode) => {
   switch (errorCode) {
     case 'auth/user-not-found':
-      return 'このメールアドレスで登録されたアカウントが見つかりません'
+      return 'メールアドレスが見つかりません'
     case 'auth/wrong-password':
       return 'パスワードが正しくありません'
     case 'auth/invalid-email':
       return 'メールアドレスの形式が正しくありません'
-    case 'auth/too-many-requests':
-      return 'ログイン試行回数が多すぎます。しばらく時間をおいてから再試行してください'
+    case 'auth/user-disabled':
+      return 'このアカウントは無効化されています'
     default:
-      return 'ログインに失敗しました。もう一度お試しください'
+      return 'ログインに失敗しました。もう一度お試しください。'
   }
 }
 </script>

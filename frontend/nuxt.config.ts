@@ -19,22 +19,14 @@ export default defineNuxtConfig({
     plugins: 'app/plugins'
   },
 
-    // Composables auto-import configuration
+  // Composables auto-import configuration
   imports: {
     autoImport: true,
-    dirs: [
-      'app/composables',
-      'app/composables/**',
-      'app/stores'
-    ],
-    presets: [
-      'vue',
-      'vue-router',
-      'pinia'
-    ]
+    dirs: ['app/composables', 'app/composables/**', 'app/stores'],
+    presets: ['vue', 'vue-router', 'pinia'],
+    // グローバル型生成
+    global: true
   },
-
-
 
   // Nitro configuration for composables
   nitro: {
@@ -68,8 +60,6 @@ export default defineNuxtConfig({
     typeCheck: false
   },
 
-
-
   // CSS Framework and Styling - Nuxt 4互換モード対応
   css: [
     'bootstrap/dist/css/bootstrap.min.css',
@@ -86,7 +76,7 @@ export default defineNuxtConfig({
       path: '~/app/components',
       pathPrefix: false,
       // パフォーマンス最適化：管理画面コンポーネントの遅延読み込み
-      global: false, // 全体での自動インポートを無効化
+      global: false // 全体での自動インポートを無効化
     }
   ],
 
@@ -115,37 +105,43 @@ export default defineNuxtConfig({
     text: '' // 特定文字セットの指定なし
   },
 
-  // VueFire configuration - Emulator専用設定
+  // VueFire configuration - 環境別設定
   vuefire: {
-    // Firebase設定（Emulator専用）
+    // Firebase設定（環境変数から動的に設定）
     config: {
-      apiKey: 'demo-api-key',
-      authDomain: 'demo-project.firebaseapp.com',
-      projectId: 'demo-project',
-      storageBucket: 'demo-project.appspot.com',
-      messagingSenderId: '123456789',
-      appId: '1:123456789:web:demo123'
+      apiKey: process.env.FIREBASE_API_KEY || 'demo-api-key',
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
+      projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '123456789',
+      appId: process.env.FIREBASE_APP_ID || '1:123456789:web:demo123'
     },
 
     // SSR無効化
     ssr: false,
 
-    // Firebase Auth設定（Emulator使用）
+    // Firebase Auth設定（環境別）
     auth: {
       enabled: true,
       sessionCookie: false,
-      emulatorHost: 'localhost:9099',
-      emulatorOptions: {
-        disableWarnings: true
-      }
+      // Emulatorはlocal環境のみ
+      ...(process.env.FIREBASE_ENV === 'local' && {
+        emulatorHost: 'localhost:9099',
+        emulatorOptions: {
+          disableWarnings: true
+        }
+      })
     },
 
-    // Firestore設定（Emulator使用）
+    // Firestore設定（環境別）
     firestore: {
-      emulatorHost: 'localhost:8080',
-      emulatorOptions: {
-        experimentalForceLongPolling: true
-      }
+      // Emulatorはlocal環境のみ
+      ...(process.env.FIREBASE_ENV === 'local' && {
+        emulatorHost: 'localhost:8080',
+        emulatorOptions: {
+          experimentalForceLongPolling: true
+        }
+      })
     },
 
     // AppCheck完全無効化
@@ -169,8 +165,15 @@ export default defineNuxtConfig({
       nuxtEnv: process.env.NUXT_ENV || 'local',
       firebaseEnv: process.env.FIREBASE_ENV || 'local',
 
-      // ❌ Firebase config removed - VueFire handles this automatically
-      // VueFire モジュールが設定を管理するため、重複を避けるため削除
+      // Firebase configuration (for client-side access)
+      firebase: {
+        projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
+        apiKey: process.env.FIREBASE_API_KEY || 'demo-api-key',
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '123456789',
+        appId: process.env.FIREBASE_APP_ID || '1:123456789:web:demo123'
+      },
 
       // API configuration
       apiUrl: process.env.API_URL || 'http://localhost:3001',
@@ -223,19 +226,19 @@ export default defineNuxtConfig({
     define: {
       __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
     },
-          css: {
-        preprocessorOptions: {
-          scss: {
-            additionalData: '@import "assets/scss/variables.scss";'
-          }
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: '@import "assets/scss/variables.scss";'
         }
-      },
+      }
+    },
     // Build optimization - パフォーマンス重視設定
     build: {
       // Code splitting for better performance
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks: id => {
             // Firebase関連は別チャンク
             if (id.includes('firebase')) return 'firebase'
             // Vue core関連
@@ -266,17 +269,11 @@ export default defineNuxtConfig({
       // 軽量化設定
       cssCodeSplit: true,
       sourcemap: false, // 本番では無効化
-      reportCompressedSize: false, // ビルド時間短縮
+      reportCompressedSize: false // ビルド時間短縮
     },
     // Development optimization
     optimizeDeps: {
-      include: [
-        'firebase/app',
-        'firebase/auth',
-        'firebase/firestore',
-        'vue',
-        'vue-router'
-      ],
+      include: ['firebase/app', 'firebase/auth', 'firebase/firestore', 'vue', 'vue-router'],
       exclude: [
         // 管理画面コンポーネントは除外（遅延読み込み）
         '~/app/components/Admin'
@@ -297,7 +294,11 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-        { name: 'description', content: '24時間オンライン美容室予約システム。簡単3ステップで予約完了。即時確認・安心予約。' },
+        {
+          name: 'description',
+          content:
+            '24時間オンライン美容室予約システム。簡単3ステップで予約完了。即時確認・安心予約。'
+        },
         { name: 'keywords', content: '美容室,ヘアサロン,オンライン予約,24時間受付,即時確認' },
         { name: 'author', content: 'Haircut Reservation System' },
         { name: 'robots', content: 'index, follow' },
@@ -306,7 +307,10 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
         { name: 'apple-mobile-web-app-title', content: '美容室予約' },
         { property: 'og:title', content: '美容室予約システム - オンライン予約' },
-        { property: 'og:description', content: '24時間オンライン美容室予約システム。簡単3ステップで予約完了。' },
+        {
+          property: 'og:description',
+          content: '24時間オンライン美容室予約システム。簡単3ステップで予約完了。'
+        },
         { property: 'og:type', content: 'website' },
         { property: 'og:locale', content: 'ja_JP' },
         { name: 'twitter:card', content: 'summary' },
@@ -319,7 +323,11 @@ export default defineNuxtConfig({
         { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#3b82f6' },
         { rel: 'manifest', href: '/manifest.json' },
         // プリロード設定 - 重要なリソースを先読み
-        { rel: 'preload', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap', as: 'style' },
+        {
+          rel: 'preload',
+          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap',
+          as: 'style'
+        },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
         { rel: 'dns-prefetch', href: 'https://firebaseapp.com' },
@@ -346,7 +354,7 @@ export default defineNuxtConfig({
         headers: {
           'Cache-Control': 'public, max-age=300', // 5分キャッシュ
           'X-Frame-Options': 'DENY',
-          'X-Content-Type-Options': 'nosniff',
+          'X-Content-Type-Options': 'nosniff'
         }
       },
       // 管理画面: 遅延読み込み
@@ -412,7 +420,7 @@ export default defineNuxtConfig({
       navigateFallbackAllowlist: [/^\/$/],
       type: 'module'
     }
-  },
+  }
 
   // 日本語専用アプリケーション - i18n不要
 })

@@ -1,0 +1,69 @@
+{
+  "projectInfo": {
+    "projectId": "[YOUR_DEV_PROJECT_ID]",
+    "projectName": "Haircut Reservation Dev",
+    "region": "asia-northeast1",
+    "createdAt": "2025-01-30"
+  },
+  "firebaseConfig": {
+    "apiKey": "[YOUR_DEV_API_KEY]",
+    "authDomain": "[YOUR_DEV_PROJECT_ID].firebaseapp.com",
+    "projectId": "[YOUR_DEV_PROJECT_ID]",
+    "storageBucket": "[YOUR_DEV_PROJECT_ID].appspot.com",
+    "messagingSenderId": "[YOUR_DEV_SENDER_ID]",
+    "appId": "[YOUR_DEV_APP_ID]",
+    "measurementId": "[YOUR_DEV_MEASUREMENT_ID]"
+  },
+  "services": {
+    "authentication": {
+      "enabled": true,
+      "providers": [
+        "email/password",
+        "google"
+      ],
+      "settings": {
+        "oneAccountPerEmail": true,
+        "emailLink": true
+      }
+    },
+    "firestore": {
+      "enabled": true,
+      "region": "asia-northeast1",
+      "rules": "development_mode",
+      "rulesNote": "全アクセス許可（開発用）"
+    },
+    "storage": {
+      "enabled": true,
+      "region": "asia-northeast1", 
+      "rules": "development_mode",
+      "rulesNote": "全アクセス許可（開発用）"
+    },
+    "functions": {
+      "enabled": true,
+      "runtime": "nodejs20",
+      "billing": "blaze_plan_required"
+    },
+    "analytics": {
+      "enabled": true,
+      "type": "google_analytics_4"
+    }
+  },
+  "environment": {
+    "type": "development",
+    "purpose": "開発・テスト用",
+    "security": "low",
+    "note": "本番環境では使用しない"
+  },
+  "instructions": {
+    "setup": [
+      "1. [YOUR_*] 部分を実際の Firebase プロジェクト値に置換",
+      "2. このファイルを firebase-dev-config.json として保存",
+      "3. Firebase CLIでプロジェクト接続: firebase use [YOUR_DEV_PROJECT_ID]"
+    ],
+    "usage": [
+      "npm run dev:remote でリモート開発環境接続",
+      "firebase emulators:start でローカル開発",
+      "firebase deploy でデプロイ（開発環境）"
+    ]
+  }
+}

@@ -3,7 +3,7 @@
  * 環境設定の妥当性をチェック
  */
 
-import type { FirebaseConfig, EmulatorConfig, Environment } from '../types/environment'
+import type { EmulatorConfig, Environment, FirebaseConfig } from '../types/environment'
 
 export class EnvironmentValidator {
   /**
@@ -11,8 +11,12 @@ export class EnvironmentValidator {
    */
   static validateFirebaseConfig(config: FirebaseConfig): boolean {
     const requiredFields = [
-      'apiKey', 'authDomain', 'projectId',
-      'storageBucket', 'messagingSenderId', 'appId'
+      'apiKey',
+      'authDomain',
+      'projectId',
+      'storageBucket',
+      'messagingSenderId',
+      'appId'
     ]
 
     return requiredFields.every(field => {
@@ -81,7 +85,7 @@ export class EnvironmentValidator {
   }> {
     const services: Record<string, boolean> = {}
 
-    const checkService = async (name: string, host?: string): Promise<boolean> => {
+    const checkService = async (_name: string, host?: string): Promise<boolean> => {
       if (!host) return false
 
       try {
@@ -110,7 +114,10 @@ export class EnvironmentValidator {
   /**
    * 本番環境のセキュリティ設定をチェック
    */
-  static validateProductionSecurity(environment: Environment, config: any): {
+  static validateProductionSecurity(
+    environment: Environment,
+    config: any
+  ): {
     secure: boolean
     issues: string[]
   } {
@@ -197,7 +204,6 @@ export class EnvironmentValidator {
           warnings.push('Firebase emulators are not running')
         }
       }
-
     } catch (error) {
       errors.push(`Validation error: ${error}`)
     }

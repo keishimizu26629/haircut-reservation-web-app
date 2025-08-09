@@ -9,17 +9,17 @@ echo "🚀 Starting Development Environment (Remote Firebase Dev)"
 echo "================================================"
 
 # Check if .env.dev exists
-if [ ! -f "environments/.env.dev" ]; then
-    echo "❌ Error: environments/.env.dev not found!"
+if [ ! -f "../.env.dev" ]; then
+    echo "❌ Error: .env.dev not found!"
     echo "📝 Creating from template..."
-    cp environments/env.template environments/.env.dev
-    echo "✅ Please edit environments/.env.dev with your Firebase Dev configuration"
+    cp ../env.template ../.env.dev
+    echo "✅ Please edit .env.dev with your Firebase Dev configuration"
     echo "💡 Use the FIREBASE_DEV_* values from the template"
 fi
 
 # Export environment variables
 set -a  # Export all variables
-source environments/.env.dev
+source ../.env.dev
 set +a  # Stop exporting
 
 # Validate required environment variables
@@ -41,7 +41,7 @@ done
 
 # Start services
 echo "🔧 Starting Development Environment..."
-cd environments
+cd ..
 docker compose -f base.yml -f dev.yml up --build -d
 
 echo ""

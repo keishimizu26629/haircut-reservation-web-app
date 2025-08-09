@@ -25,7 +25,8 @@ export interface Stylist {
   id: string
   name: string
   displayName: string
-  personalInfo?: { // dev2 API互換性
+  personalInfo?: {
+    // dev2 API互換性
     name: string
     displayName: string
     avatar?: string
@@ -44,10 +45,11 @@ export interface Stylist {
 }
 
 export interface WorkingHours {
-  [key: string]: { // 曜日 (monday, tuesday, etc.)
+  [key: string]: {
+    // 曜日 (monday, tuesday, etc.)
     isWorking: boolean
     startTime: string // "09:00"
-    endTime: string   // "18:00"
+    endTime: string // "18:00"
     breakTime?: {
       start: string
       end: string
@@ -68,19 +70,19 @@ export interface BookingData {
   services: Service[]
   totalDuration: number
   totalPrice: number
-  
+
   // ステップ2: スタイリスト選択
   stylist: Stylist | null
   isAnyStylietOk: boolean
-  
+
   // ステップ3: 日時選択
   date: string // "2024-01-15"
   timeSlot: TimeSlot | null
-  
+
   // ステップ4: 顧客情報
   customerInfo: CustomerInfo
   specialRequests: string
-  
+
   // システム用
   estimatedEndTime?: string
   createdAt?: string
@@ -134,10 +136,11 @@ export interface ApiResponse<T = any> {
 }
 
 // dev2 API互換性のための型定義
-export interface MenuApiResponse extends ApiResponse<{menus: Service[]}> {}
-export interface StaffApiResponse extends ApiResponse<{staffs: Stylist[]}> {}
-export interface AvailabilityApiResponse extends ApiResponse<{availableTimeSlots: string[], totalSlots: number}> {}
-export interface ReservationApiResponse extends ApiResponse<{reservation: any}> {}
+export interface MenuApiResponse extends ApiResponse<{ menus: Service[] }> {}
+export interface StaffApiResponse extends ApiResponse<{ staffs: Stylist[] }> {}
+export interface AvailabilityApiResponse
+  extends ApiResponse<{ availableTimeSlots: string[]; totalSlots: number }> {}
+export interface ReservationApiResponse extends ApiResponse<{ reservation: any }> {}
 
 // 従来型定義（後方互換性）
 export interface BookingApiResponse extends ApiResponse<BookingData> {}

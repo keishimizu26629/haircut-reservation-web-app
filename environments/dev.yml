@@ -19,6 +19,8 @@ services:
       - API_URL=https://asia-northeast1-${FIREBASE_DEV_PROJECT_ID}.cloudfunctions.net/api
       # No emulator settings - connects to real Firebase
     command: npm run dev
+    networks:
+      - haircut-network
 
   # Backend functionality is provided by Firebase Cloud Functions in production
   # Database functionality is provided by Firebase Firestore in production
@@ -27,24 +29,24 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ../monitoring/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.console.libraries=/etc/prometheus/console_libraries"
-      - "--web.console.templates=/etc/prometheus/consoles"
-      - "--storage.tsdb.retention.time=7d"
-      - "--web.enable-lifecycle"
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
     networks:
       - haircut-network
 
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3030:3000"
+      - '3030:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD_DEV:-admin123}
     volumes:
@@ -57,3 +59,7 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+
+networks:
+  haircut-network:
+    driver: bridge

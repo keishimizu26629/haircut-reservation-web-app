@@ -3,9 +3,9 @@
  * Firebase Authentication + Nuxt Router Guard + CSRF Protection
  */
 
-import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
 import type { RouteLocationNormalized } from 'vue-router'
+import { getCurrentUser } from 'vuefire'
 
 // TypeScript型定義
 interface AuthMiddlewareConfig {
@@ -32,7 +32,7 @@ const AUTH_CONFIG: AuthMiddlewareConfig = {
   // 認証不要ページ（パブリックアクセス）
   publicRoutes: [
     '/login',
-    '/register', 
+    '/register',
     '/forgot-password',
     '/reset-password',
     '/terms',
@@ -44,32 +44,16 @@ const AUTH_CONFIG: AuthMiddlewareConfig = {
     '/api-test', // 開発用
     '/firebase-test' // 開発用
   ],
-  
+
   // 認証ページ（認証済みユーザーはアクセス不可）
-  authRoutes: [
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password'
-  ],
-  
+  authRoutes: ['/login', '/register', '/forgot-password', '/reset-password'],
+
   // 保護されたページ（認証必須）
-  protectedRoutes: [
-    '/',
-    '/dashboard', 
-    '/reservations',
-    '/profile',
-    '/settings'
-  ],
-  
+  protectedRoutes: ['/', '/dashboard', '/reservations', '/profile', '/settings'],
+
   // 管理者専用ページ
-  adminRoutes: [
-    '/admin',
-    '/admin/users',
-    '/admin/settings',
-    '/admin/analytics'
-  ],
-  
+  adminRoutes: ['/admin', '/admin/users', '/admin/settings', '/admin/analytics'],
+
   // デフォルトリダイレクト先（MVP: 予約画面中心）
   defaultRedirect: '/',
   loginRedirect: '/login'
@@ -81,12 +65,12 @@ class SecurityHelper {
    * CSRF トークン検証
    */
   static validateCSRFToken(headers: HeadersInit): boolean {
-    if (process.server) return true // サーバーサイドではスキップ
-    
+    if (import.meta.server) return true // サーバーサイドではスキップ
+
     try {
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
       const requestToken = (headers as any)['x-csrf-token']
-      
+
       return !token || token === requestToken
     } catch (error) {
       console.warn('CSRF token validation failed:', error)
@@ -99,24 +83,26 @@ class SecurityHelper {
    */
   static async validateSession(user: User | null): Promise<boolean> {
     if (!user) return false
-    
+
     try {
       // Firebase ID Token の有効性チェック
       const token = await user.getIdToken(false)
-      
+
       // トークンの基本検証
       if (!token) return false
-      
+
       // JWT ペイロード確認（簡易版）
-      const payload = JSON.parse(atob(token.split('.')[1]))
+      const tokenParts = token.split('.')
+      if (tokenParts.length !== 3) throw new Error('Invalid token format')
+      const payload = JSON.parse(atob(tokenParts[1]!))
       const currentTime = Math.floor(Date.now() / 1000)
-      
+
       // トークン有効期限チェック
       if (payload.exp < currentTime) {
         console.warn('🔒 Firebase token expired')
         return false
       }
-      
+
       return true
     } catch (error) {
       console.error('🔒 Session validation failed:', error)
@@ -129,11 +115,13 @@ class SecurityHelper {
    */
   static async getUserRole(user: User | null): Promise<string | null> {
     if (!user) return null
-    
+
     try {
       const token = await user.getIdToken()
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      
+      const tokenParts = token.split('.')
+      if (tokenParts.length !== 3) throw new Error('Invalid token format')
+      const payload = JSON.parse(atob(tokenParts[1]!))
+
       // Custom Claims からロール取得
       return payload.role || payload.custom_claims?.role || 'user'
     } catch (error) {
@@ -146,7 +134,7 @@ class SecurityHelper {
    * セッション活動記録更新
    */
   static updateLastActivity(): void {
-    if (process.client) {
+    if (import.meta.client) {
       localStorage.setItem('lastActivity', Date.now().toString())
     }
   }
@@ -155,14 +143,14 @@ class SecurityHelper {
    * セッション期限チェック（8時間）
    */
   static isSessionExpired(): boolean {
-    if (process.server) return false
-    
+    if (import.meta.server) return false
+
     try {
       const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0')
       const currentTime = Date.now()
       const sessionTimeout = 8 * 60 * 60 * 1000 // 8時間
 
-      return (currentTime - lastActivity) > sessionTimeout
+      return currentTime - lastActivity > sessionTimeout
     } catch (error) {
       return true // エラー時は期限切れ扱い
     }
@@ -177,10 +165,10 @@ async function buildSecurityContext(user: User | null): Promise<SecurityContext>
   const hasValidSession = await SecurityHelper.validateSession(user)
   const userRole = await SecurityHelper.getUserRole(user)
   const isExpired = SecurityHelper.isSessionExpired()
-  
+
   // セッション期限切れの場合は認証状態を無効化
   const validAuthentication = isAuthenticated && hasValidSession && !isExpired
-  
+
   return {
     user: validAuthentication ? user : null,
     isAuthenticated: validAuthentication,
@@ -199,52 +187,55 @@ function evaluateRouteAccess(
   route: RouteLocationNormalized,
   security: SecurityContext
 ): { allowed: boolean; redirect?: string; reason?: string } {
-  
   const path = route.path
-  
+
   // 1. パブリックルートチェック
-  if (AUTH_CONFIG.publicRoutes.some(publicRoute => 
-    path === publicRoute || path.startsWith(publicRoute + '/')
-  )) {
+  if (
+    AUTH_CONFIG.publicRoutes.some(
+      publicRoute => path === publicRoute || path.startsWith(publicRoute + '/')
+    )
+  ) {
     return { allowed: true }
   }
-  
+
   // 2. 認証ページアクセスチェック
   if (AUTH_CONFIG.authRoutes.includes(path)) {
     if (security.isAuthenticated) {
-      return { 
-        allowed: false, 
+      return {
+        allowed: false,
         redirect: AUTH_CONFIG.defaultRedirect,
         reason: 'Already authenticated'
       }
     }
     return { allowed: true }
   }
-  
+
   // 3. 保護されたページアクセスチェック
   if (!security.isAuthenticated) {
     // クエリパラメータで元のURL保存
     const returnUrl = encodeURIComponent(route.fullPath)
-    return { 
-      allowed: false, 
+    return {
+      allowed: false,
       redirect: `${AUTH_CONFIG.loginRedirect}?returnUrl=${returnUrl}`,
       reason: 'Authentication required'
     }
   }
-  
+
   // 4. 管理者ページアクセスチェック
-  if (AUTH_CONFIG.adminRoutes.some(adminRoute => 
-    path === adminRoute || path.startsWith(adminRoute + '/')
-  )) {
+  if (
+    AUTH_CONFIG.adminRoutes.some(
+      adminRoute => path === adminRoute || path.startsWith(adminRoute + '/')
+    )
+  ) {
     if (security.userRole !== 'admin') {
-      return { 
-        allowed: false, 
+      return {
+        allowed: false,
         redirect: AUTH_CONFIG.defaultRedirect,
         reason: 'Admin access required'
       }
     }
   }
-  
+
   // 5. デフォルト：アクセス許可
   return { allowed: true }
 }
@@ -252,10 +243,10 @@ function evaluateRouteAccess(
 /**
  * メイン認証ミドルウェア
  */
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async to => {
   try {
     // サーバーサイドレンダリング時はスキップ
-    if (process.server) {
+    if (import.meta.server) {
       console.log('🔒 Auth middleware: Skipped (SSR)')
       return
     }
@@ -265,7 +256,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // 1. 現在の認証ユーザー取得（VueFire）
     let currentUser: User | null = null
     try {
-      currentUser = await getCurrentUser()
+      currentUser = (await getCurrentUser()) ?? null
     } catch (error) {
       console.warn('🔒 Failed to get current user:', error)
       currentUser = null
@@ -273,7 +264,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // 2. セキュリティコンテキスト構築
     const securityContext = await buildSecurityContext(currentUser)
-    
+
     console.log('🔒 Security context:', {
       authenticated: securityContext.isAuthenticated,
       role: securityContext.userRole,
@@ -285,13 +276,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // 4. ルートアクセス評価
     const accessResult = evaluateRouteAccess(to, securityContext)
-    
+
     // 5. アクセス制御実行
     if (!accessResult.allowed) {
       console.log(`🔒 Access denied to ${to.path}:`, accessResult.reason)
-      
+
       // セキュリティログ記録（開発環境）
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.NODE_ENV === 'development') {
         console.table({
           route: to.path,
           user: securityContext.user?.email || 'Anonymous',
@@ -300,7 +291,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
           timestamp: new Date().toISOString()
         })
       }
-      
+
       // リダイレクト実行
       if (accessResult.redirect) {
         return navigateTo(accessResult.redirect)
@@ -308,10 +299,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     console.log(`✅ Access granted to ${to.path}`)
-
   } catch (error) {
     console.error('🔒 Auth middleware error:', error)
-    
+
     // エラー時の安全な処理：未認証として扱う
     if (!AUTH_CONFIG.publicRoutes.includes(to.path)) {
       console.warn('🔒 Authentication error, redirecting to login')
@@ -324,8 +314,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
  * 認証状態監視Composable（オプション）
  */
 export function useAuthGuard() {
-  const nuxtApp = useNuxtApp()
-  
   // 認証状態変更時の処理
   const onAuthStateChanged = (callback: (user: User | null) => void) => {
     // VueFire の認証状態変更を監視
@@ -333,8 +321,9 @@ export function useAuthGuard() {
     if (auth) {
       return auth.onAuthStateChanged(callback)
     }
+    return () => {} // デフォルトの空関数を返す
   }
-  
+
   // セッション強制更新
   const refreshSession = async (): Promise<boolean> => {
     try {
@@ -350,7 +339,7 @@ export function useAuthGuard() {
       return false
     }
   }
-  
+
   // 手動ログアウト
   const signOut = async (): Promise<void> => {
     try {
@@ -358,7 +347,7 @@ export function useAuthGuard() {
       if (auth) {
         await auth.signOut()
         // セッション情報クリア
-        if (process.client) {
+        if (import.meta.client) {
           localStorage.removeItem('lastActivity')
         }
         await navigateTo('/login')
@@ -367,7 +356,7 @@ export function useAuthGuard() {
       console.error('🔒 Sign out failed:', error)
     }
   }
-  
+
   return {
     onAuthStateChanged,
     refreshSession,
@@ -376,8 +365,8 @@ export function useAuthGuard() {
 }
 
 // デバッグ用エクスポート（開発環境のみ）
-if (process.env.NODE_ENV === 'development') {
-  (globalThis as any).__AUTH_DEBUG__ = {
+if (import.meta.env.NODE_ENV === 'development') {
+  ;(globalThis as any).__AUTH_DEBUG__ = {
     AUTH_CONFIG,
     SecurityHelper,
     buildSecurityContext,

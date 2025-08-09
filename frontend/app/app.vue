@@ -7,6 +7,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useHead } from 'nuxt/app'
 import { useAuthStore } from './stores/auth'
 

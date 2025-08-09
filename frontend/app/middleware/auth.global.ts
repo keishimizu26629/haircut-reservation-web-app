@@ -3,57 +3,28 @@
  * 高機能auth.tsの機能をグローバルミドルウェアとして適用
  */
 
-import { getCurrentUser } from 'vuefire'
 import type { User } from 'firebase/auth'
+import { getCurrentUser } from 'vuefire'
 
 // 認証設定（auth.tsと統一）
 const AUTH_CONFIG = {
-  publicRoutes: [
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
-    '/terms',
-    '/privacy',
-    '/services',
-    '/about',
-    '/contact',
-    '/api-test',
-    '/firebase-test'
-  ],
-  authRoutes: [
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password'
-  ],
-  protectedRoutes: [
-    '/',
-    '/dashboard',
-    '/booking',
-    '/reservations',
-    '/profile',
-    '/settings'
-  ],
-  adminRoutes: [
-    '/admin',
-    '/admin/users',
-    '/admin/settings',
-    '/admin/analytics'
-  ],
-  defaultRedirect: '/dashboard',
+  publicRoutes: ['/', '/login', '/register'],
+  authRoutes: ['/login', '/register'],
+  protectedRoutes: ['/calendar'],
+  adminRoutes: ['/admin', '/admin/users', '/admin/settings', '/admin/analytics'],
+  defaultRedirect: '/calendar',
   loginRedirect: '/login'
 }
 
 // セッション期限チェック
 function isSessionExpired(): boolean {
-  if (process.server) return false
+  if (import.meta.server) return false
 
   try {
     const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0')
     const currentTime = Date.now()
     const sessionTimeout = 8 * 60 * 60 * 1000 // 8時間
-    return (currentTime - lastActivity) > sessionTimeout
+    return currentTime - lastActivity > sessionTimeout
   } catch {
     return true
   }
@@ -61,15 +32,15 @@ function isSessionExpired(): boolean {
 
 // セッション活動記録更新
 function updateLastActivity(): void {
-  if (process.client) {
+  if (import.meta.client) {
     localStorage.setItem('lastActivity', Date.now().toString())
   }
 }
 
-export default defineNuxtRouteMiddleware(async (to) => {
+export default defineNuxtRouteMiddleware(async to => {
   try {
     // サーバーサイドでは認証チェックをスキップ
-    if (process.server) {
+    if (import.meta.server) {
       console.log('🔒 Global Auth: Skipped (SSR)')
       return
     }
@@ -82,15 +53,38 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // 1. VueFire から現在のユーザー取得
     let currentUser: User | null = null
     try {
-      currentUser = await getCurrentUser()
+      currentUser = (await getCurrentUser()) ?? null
     } catch (error) {
       console.warn('🔒 Failed to get current user:', error)
       currentUser = null
     }
 
+    // 1.5. AuthStoreからも認証状態を確認（フォールバック）
+    const { useAuthStore } = await import('../stores/auth')
+    const authStore = useAuthStore()
+    const authStoreUser = authStore.user
+
+    console.log('🔒 Auth state comparison:', {
+      vueFireUser: !!currentUser,
+      authStoreUser: !!authStoreUser,
+      vueFireUid: currentUser?.uid,
+      authStoreUid: authStoreUser?.uid
+    })
+
+    // VueFireとAuthStoreのいずれかで認証されていれば有効とする
+    const effectiveUser = currentUser || authStoreUser
+
     // 2. セッション期限チェック
     const isExpired = isSessionExpired()
-    const isAuthenticated = !!currentUser && !isExpired
+    const isAuthenticated = !!effectiveUser && !isExpired
+
+    console.log('🔒 Authentication check details:', {
+      effectiveUser: !!effectiveUser,
+      effectiveUserUid: effectiveUser?.uid,
+      isExpired,
+      isAuthenticated,
+      sessionCheck: !isExpired
+    })
 
     // 3. セッション活動記録更新
     if (isAuthenticated) {
@@ -98,8 +92,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     // 4. パブリックルートチェック
-    const isPublicRoute = AUTH_CONFIG.publicRoutes.some(route =>
-      to.path === route || to.path.startsWith(route + '/')
+    const isPublicRoute = AUTH_CONFIG.publicRoutes.some(
+      route => to.path === route || to.path.startsWith(route + '/')
     )
 
     if (isPublicRoute) {
@@ -126,12 +120,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     // 7. 管理者ページアクセスチェック
-    if (AUTH_CONFIG.adminRoutes.some(route =>
-      to.path === route || to.path.startsWith(route + '/')
-    )) {
+    if (
+      AUTH_CONFIG.adminRoutes.some(route => to.path === route || to.path.startsWith(route + '/'))
+    ) {
       try {
-        const token = await currentUser.getIdToken()
-        const payload = JSON.parse(atob(token.split('.')[1]))
+        const token = await currentUser!.getIdToken()
+        const tokenParts = token.split('.')
+        if (tokenParts.length !== 3) throw new Error('Invalid token format')
+        const payload = JSON.parse(atob(tokenParts[1]!))
         const userRole = payload.role || payload.custom_claims?.role || 'user'
 
         if (userRole !== 'admin') {
@@ -145,7 +141,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     console.log(`✅ Access granted to ${to.path}`)
-
   } catch (error) {
     console.error('🔒 Global auth middleware error:', error)
 

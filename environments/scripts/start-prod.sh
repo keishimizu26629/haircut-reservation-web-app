@@ -9,17 +9,17 @@ echo "🚀 Starting Production Environment (Remote Firebase Prod)"
 echo "================================================"
 
 # Check if .env.prod exists
-if [ ! -f "environments/.env.prod" ]; then
-    echo "❌ Error: environments/.env.prod not found!"
+if [ ! -f "../.env.prod" ]; then
+    echo "❌ Error: .env.prod not found!"
     echo "📝 Creating from template..."
-    cp environments/env.template environments/.env.prod
-    echo "✅ Please edit environments/.env.prod with your Firebase Production configuration"
+    cp ../env.template ../.env.prod
+    echo "✅ Please edit .env.prod with your Firebase Production configuration"
     echo "💡 Use the FIREBASE_PROD_* values from the template and set secure passwords"
 fi
 
 # Export environment variables
 set -a  # Export all variables
-source environments/.env.prod
+source ../.env.prod
 set +a  # Stop exporting
 
 # Validate required environment variables
@@ -53,7 +53,7 @@ fi
 
 # Start services
 echo "🔧 Starting Production Environment..."
-cd environments
+cd ..
 docker compose -f base.yml -f prod.yml up --build -d
 
 echo ""

@@ -3,7 +3,7 @@
  * Firebase重複初期化エラーの自動検出・復旧・予防システム
  */
 
-import { getApps, deleteApp } from 'firebase/app'
+import { deleteApp, getApps } from 'firebase/app'
 
 interface SystemHealthStatus {
   status: 'healthy' | 'warning' | 'critical' | 'recovering'
@@ -46,7 +46,7 @@ export class SystemRecoveryManager {
   async performHealthCheck(): Promise<SystemHealthStatus> {
     const startTime = performance.now()
     const issues: string[] = []
-    
+
     // Firebase Apps チェック
     const firebaseApps = getApps()
     if (firebaseApps.length === 0) {
@@ -59,7 +59,8 @@ export class SystemRecoveryManager {
     let memoryUsage = 0
     if (process.client && (performance as any).memory) {
       memoryUsage = (performance as any).memory.usedJSHeapSize
-      if (memoryUsage > 100 * 1024 * 1024) { // 100MB
+      if (memoryUsage > 100 * 1024 * 1024) {
+        // 100MB
         issues.push('High memory usage detected')
       }
     }
@@ -72,9 +73,10 @@ export class SystemRecoveryManager {
       }
 
       // Firebase重複初期化エラーチェック
-      const firebaseErrors = this.errorLog.filter(log => 
-        log.error.includes('Firebase') && 
-        (log.error.includes('already initialized') || log.error.includes('duplicate'))
+      const firebaseErrors = this.errorLog.filter(
+        log =>
+          log.error.includes('Firebase') &&
+          (log.error.includes('already initialized') || log.error.includes('duplicate'))
       ).length
 
       if (firebaseErrors > 0) {
@@ -83,7 +85,7 @@ export class SystemRecoveryManager {
     }
 
     const responseTime = performance.now() - startTime
-    
+
     // ステータス判定
     let status: SystemHealthStatus['status'] = 'healthy'
     if (this.recoveryInProgress) {
@@ -121,13 +123,13 @@ export class SystemRecoveryManager {
   async detectAndFixFirebaseDuplication(): Promise<boolean> {
     try {
       const apps = getApps()
-      
+
       if (apps.length <= 1) {
         return true // 問題なし
       }
 
       console.warn(`🚨 Multiple Firebase apps detected: ${apps.length}`)
-      
+
       // 重複アプリの削除（デフォルト以外）
       for (let i = 1; i < apps.length; i++) {
         try {
@@ -149,7 +151,6 @@ export class SystemRecoveryManager {
       }
 
       return success
-
     } catch (error) {
       console.error('❌ Firebase duplication fix failed:', error)
       this.logError('Firebase duplication fix failed', error)
@@ -188,12 +189,12 @@ export class SystemRecoveryManager {
 
         // Vue/Nuxtコンポーネントの強制ガベージコレクション
         if ((window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__) {
-          (window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
+          ;(window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
         }
 
         // 強制ガベージコレクション（開発環境のみ）
         if ((window as any).gc) {
-          (window as any).gc()
+          ;(window as any).gc()
         }
 
         console.log('✅ Memory cleanup completed')
@@ -201,7 +202,6 @@ export class SystemRecoveryManager {
       }
 
       return true
-
     } catch (error) {
       console.error('❌ Memory leak fix failed:', error)
       this.logError('Memory leak fix failed', error)
@@ -223,11 +223,11 @@ export class SystemRecoveryManager {
       // 重複ID要素の修正
       const allElements = document.querySelectorAll('[id]')
       const idCounts = new Map<string, number>()
-      
+
       allElements.forEach(el => {
         const id = el.id
         idCounts.set(id, (idCounts.get(id) || 0) + 1)
-        
+
         if (idCounts.get(id)! > 1) {
           el.id = `${id}-${idCounts.get(id)}`
         }
@@ -239,7 +239,6 @@ export class SystemRecoveryManager {
 
       console.log('✅ DOM issues resolved')
       return true
-
     } catch (error) {
       console.error('❌ DOM fix failed:', error)
       this.logError('DOM fix failed', error)
@@ -287,7 +286,7 @@ export class SystemRecoveryManager {
         console.log(`🔧 Executing: ${action.name}`)
         const success = await action.execute()
         results.push({ action: action.name, success })
-        
+
         if (success) {
           console.log(`✅ ${action.name} completed successfully`)
         } else {
@@ -301,12 +300,12 @@ export class SystemRecoveryManager {
     }
 
     this.recoveryInProgress = false
-    
+
     const successCount = results.filter(r => r.success).length
     const totalActions = results.length
-    
+
     console.log(`🎯 Recovery completed: ${successCount}/${totalActions} actions successful`)
-    
+
     return successCount === totalActions
   }
 
@@ -320,7 +319,7 @@ export class SystemRecoveryManager {
 
     this.monitoringInterval = setInterval(async () => {
       const health = await this.performHealthCheck()
-      
+
       if (health.status === 'critical') {
         console.warn('🚨 Critical system issues detected, attempting auto-recovery...')
         await this.performAutoRecovery()
@@ -376,23 +375,22 @@ export class SystemRecoveryManager {
    */
   async emergencyShutdown(): Promise<void> {
     console.warn('🚨 Performing emergency system shutdown...')
-    
+
     try {
       // 監視停止
       this.stopContinuousMonitoring()
-      
+
       // Firebase Apps削除
       const apps = getApps()
       await Promise.all(apps.map(app => deleteApp(app).catch(() => {})))
-      
+
       // キャッシュクリア
       if (process.client && 'caches' in window) {
         const cacheNames = await caches.keys()
         await Promise.all(cacheNames.map(name => caches.delete(name)))
       }
-      
+
       console.log('✅ Emergency shutdown completed')
-      
     } catch (error) {
       console.error('❌ Emergency shutdown failed:', error)
     }
@@ -408,17 +406,17 @@ if (process.client) {
   if (process.env.NODE_ENV === 'development') {
     systemRecovery.startContinuousMonitoring(30000) // 30秒間隔
   }
-  
+
   // 重要なエラーをキャッチ
-  window.addEventListener('error', (event) => {
+  window.addEventListener('error', event => {
     systemRecovery.logError(`Global error: ${event.message}`, {
       filename: event.filename,
       lineno: event.lineno,
       colno: event.colno
     })
   })
-  
-  window.addEventListener('unhandledrejection', (event) => {
+
+  window.addEventListener('unhandledrejection', event => {
     systemRecovery.logError(`Unhandled promise rejection: ${event.reason}`)
   })
 }

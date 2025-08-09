@@ -203,11 +203,7 @@ export interface AvailabilityResponse {
 
 // エラー型
 export class DomainError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly details?: any
-  ) {
+  constructor(message: string, public readonly code: string, public readonly details?: any) {
     super(message)
     this.name = 'DomainError'
   }
@@ -321,11 +317,8 @@ export interface IAvailabilityDomainService {
     services: ServiceEntity[],
     stylist?: StylistEntity
   ): Promise<TimeSlotEntity[]>
-  
-  isSlotAvailable(
-    slot: TimeSlotEntity,
-    existingBookings: BookingEntity[]
-  ): boolean
+
+  isSlotAvailable(slot: TimeSlotEntity, existingBookings: BookingEntity[]): boolean
 }
 
 export interface IPricingDomainService {
