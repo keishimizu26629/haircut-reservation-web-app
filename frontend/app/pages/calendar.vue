@@ -78,26 +78,45 @@
     <!-- メインコンテンツ -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <!-- 統計表示 -->
-      <div v-if="showStats" class="bg-white rounded-lg shadow p-6 mb-6">
+      <div
+        v-if="showStats"
+        class="bg-white rounded-lg shadow p-6 mb-6"
+      >
         <h2 class="text-lg font-semibold mb-4">
           {{ currentDateText }}の統計
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="bg-gray-50 rounded-lg p-4">
-            <div class="text-sm text-gray-600">総予約数</div>
-            <div class="text-2xl font-bold mt-1">{{ monthlyStats.total }}</div>
+            <div class="text-sm text-gray-600">
+              総予約数
+            </div>
+            <div class="text-2xl font-bold mt-1">
+              {{ monthlyStats.total }}
+            </div>
           </div>
           <div class="bg-green-50 rounded-lg p-4">
-            <div class="text-sm text-green-600">完了</div>
-            <div class="text-2xl font-bold text-green-700 mt-1">{{ monthlyStats.completed }}</div>
+            <div class="text-sm text-green-600">
+              完了
+            </div>
+            <div class="text-2xl font-bold text-green-700 mt-1">
+              {{ monthlyStats.completed }}
+            </div>
           </div>
           <div class="bg-blue-50 rounded-lg p-4">
-            <div class="text-sm text-blue-600">予約中</div>
-            <div class="text-2xl font-bold text-blue-700 mt-1">{{ monthlyStats.active }}</div>
+            <div class="text-sm text-blue-600">
+              予約中
+            </div>
+            <div class="text-2xl font-bold text-blue-700 mt-1">
+              {{ monthlyStats.active }}
+            </div>
           </div>
           <div class="bg-red-50 rounded-lg p-4">
-            <div class="text-sm text-red-600">キャンセル</div>
-            <div class="text-2xl font-bold text-red-700 mt-1">{{ monthlyStats.cancelled }}</div>
+            <div class="text-sm text-red-600">
+              キャンセル
+            </div>
+            <div class="text-2xl font-bold text-red-700 mt-1">
+              {{ monthlyStats.cancelled }}
+            </div>
           </div>
         </div>
         <div class="mt-4 pt-4 border-t">
@@ -115,93 +134,119 @@
       </div>
 
       <!-- カレンダーグリッド（紙の予約表風） -->
-      <div v-show="!showStats" class="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-300">
-        <!-- 曜日ヘッダー -->
-        <div class="grid grid-cols-8 bg-gradient-to-b from-gray-100 to-gray-50 border-b-2 border-gray-400">
-          <div class="px-4 py-3 text-sm font-bold text-gray-800 text-center border-r-2 border-gray-400 bg-gray-200">
-            時間
+      <div
+        v-show="!showStats"
+        class="bg-white rounded-lg shadow-xl overflow-hidden border-2 border-gray-300"
+      >
+        <div class="flex">
+          <!-- 時間軸 -->
+          <div class="w-16 bg-gray-100 border-r-2 border-gray-300">
+            <div class="h-12" /> <!-- ヘッダー分のスペース -->
+            <div
+              class="relative"
+              style="height: 720px;"
+            >
+              <!-- 12時間 × 60px -->
+              <div
+                v-for="hour in 12"
+                :key="hour + 8"
+                class="absolute left-0 right-0 text-xs text-center text-gray-600 border-t border-gray-200"
+                :style="{ top: `${(hour - 1) * 60}px` }"
+              >
+                <div class="bg-gray-100 py-1">
+                  {{ String(hour + 7).padStart(2, '0') }}:00
+                </div>
+              </div>
+            </div>
           </div>
+
+          <!-- 各曜日のカラム -->
           <div
             v-for="day in weekDays"
             :key="day.date"
-            class="px-4 py-3 text-sm font-bold text-gray-800 text-center border-l border-gray-300"
-            :class="{ 'bg-blue-100 text-blue-800 font-extrabold': day.isToday }"
+            class="flex-1 border-l border-gray-300"
           >
-            <div>{{ day.dayName }}</div>
-            <div class="text-xs">
-              {{ day.dateText }}
-            </div>
-          </div>
-        </div>
-
-        <!-- タイムスロットグリッド -->
-        <div class="grid grid-cols-8 divide-y">
-          <div
-            v-for="timeSlot in timeSlots"
-            :key="timeSlot"
-            class="contents"
-          >
-            <!-- 時間ラベル -->
-            <div class="px-2 py-3 text-sm font-semibold text-gray-700 text-center border-r-2 border-gray-300"
-                 :class="{
-                   'text-gray-400 italic': timeSlot < '09:00' || timeSlot >= '19:00',
-                   'bg-gray-100': timeSlot < '09:00' || timeSlot >= '19:00',
-                   'bg-gray-50': timeSlot >= '09:00' && timeSlot < '19:00'
-                 }">
-              {{ formatTime(timeSlot) }}
-              <span v-if="timeSlot < '09:00' || timeSlot >= '19:00'" class="text-xs block text-gray-400">
-                時間外
-              </span>
-            </div>
-
-            <!-- 各曜日のスロット -->
+            <!-- 曜日ヘッダー（再配置） -->
             <div
-              v-for="day in weekDays"
-              :key="`${day.date}-${timeSlot}`"
-              class="relative px-1 py-1 border border-gray-300 hover:bg-blue-50 cursor-pointer min-h-[50px] transition-colors"
-              :class="{
-                'bg-gray-50': timeSlot < '09:00' || timeSlot >= '19:00',
-                'bg-blue-50': day.isToday,
-                'border-b-2': timeSlot.endsWith(':30')
-              }"
-              @click="openReservationModal(day.date, timeSlot)"
+              class="h-12 px-2 py-2 text-sm font-bold text-gray-800 text-center border-b-2 border-gray-300"
+              :class="{ 'bg-blue-100 text-blue-800': day.isToday }"
             >
-              <!-- 予約表示（ダブルブッキング対応） -->
-              <div class="space-y-1">
+              <div>{{ day.dayName }}</div>
+              <div class="text-xs">
+                {{ day.dateText }}
+              </div>
+            </div>
+
+            <!-- 時間軸エリア -->
+            <div
+              class="relative bg-white cursor-pointer"
+              style="height: 720px;"
+              @click="openReservationModal(day.date, getTimeFromPosition($event))"
+            >
+              <!-- 時間区切り線 -->
+              <div
+                v-for="hour in 12"
+                :key="hour"
+                class="absolute left-0 right-0 border-t border-gray-200"
+                :style="{ top: `${(hour - 1) * 60}px` }"
+              />
+
+              <!-- 営業時間外の背景 -->
+              <div
+                class="absolute left-0 right-0 bg-gray-50 opacity-50"
+                style="top: 0; height: 60px;"
+              /> <!-- 8時前 -->
+              <div
+                class="absolute left-0 right-0 bg-gray-50 opacity-50"
+                style="bottom: 0; height: 60px;"
+              /> <!-- 19時以降 -->
+
+              <!-- 予約ブロック表示（重複対応） -->
+              <template v-for="group in groupOverlappingReservations(getReservationsForDay(day.date))">
                 <div
-                  v-for="reservation in getReservationsForSlot(day.date, timeSlot)"
+                  v-for="(reservation, index) in group"
                   :key="reservation.id"
-                  class="mb-1 p-1 rounded-sm cursor-pointer border shadow-sm"
+                  class="absolute rounded border-2 shadow-sm cursor-pointer overflow-hidden"
                   :class="[
                     getReservationColor(reservation.category),
                     reservation.status === 'completed' ? 'opacity-70' : '',
-                    reservation.status === 'cancelled' ? 'line-through opacity-50' : '',
-                    fontSize === 'small' ? 'text-xs' : fontSize === 'large' ? 'text-sm font-medium' : 'text-xs'
+                    reservation.status === 'cancelled' ? 'line-through opacity-50' : ''
                   ]"
+                  :style="{
+                    top: `${calculateTimePosition(reservation.startTime)}px`,
+                    height: `${reservation.duration}px`,
+                    left: group.length === 1 ? '4px' : `${4 + (index * (100 / group.length))}%`,
+                    width: group.length === 1 ? 'calc(100% - 8px)' : `${(100 / group.length) - 1}%`
+                  }"
                   @click.stop="editReservation(reservation)"
                 >
-                  <div class="space-y-1">
-                    <div class="flex items-center justify-between">
-                      <span class="truncate flex-1 font-medium">
-                        {{ reservation.customerName }}
-                      </span>
-                      <span v-if="reservation.status === 'completed'" class="ml-1">✓</span>
+                  <div class="p-1 h-full flex flex-col text-xs">
+                    <div class="font-medium truncate">
+                      {{ reservation.customerName }}
+                      <span
+                        v-if="reservation.status === 'completed'"
+                        class="ml-1"
+                      >✓</span>
                     </div>
-                    <div class="text-xs opacity-75">
-                      <div v-if="reservation.startTime && reservation.duration">
-                        {{ reservation.startTime }}〜{{ calculateEndTime(reservation.startTime, reservation.duration) }}
-                        ({{ reservation.duration }}分)
-                      </div>
-                      <div v-else-if="reservation.timeSlot">
-                        {{ reservation.timeSlot }}〜 (旧形式)
-                      </div>
-                      <div v-if="reservation.notes" class="mt-1">
-                        {{ reservation.notes }}
-                      </div>
+                    <div class="opacity-75 mt-1">
+                      {{ reservation.startTime }}〜{{ calculateEndTime(reservation.startTime, reservation.duration) }}
+                    </div>
+                    <div
+                      v-if="reservation.notes && reservation.duration > 60 && group.length === 1"
+                      class="opacity-75 mt-1 flex-1 overflow-hidden"
+                    >
+                      {{ reservation.notes }}
                     </div>
                   </div>
                 </div>
-              </div>
+              </template>
+
+              <!-- 今日の場合、現在時刻線を表示 -->
+              <div
+                v-if="day.isToday"
+                class="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
+                :style="{ top: `${getCurrentTimePosition()}px` }"
+              />
             </div>
           </div>
         </div>
@@ -234,7 +279,7 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="例: 田中太郎"
-            />
+            >
           </div>
 
           <!-- カテゴリ（色分け用） -->
@@ -366,7 +411,9 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="例: カット＆カラー、ロング"
             />
-            <p class="text-xs text-gray-500 mt-1">※ 施術内容や特記事項など</p>
+            <p class="text-xs text-gray-500 mt-1">
+              ※ 施術内容や特記事項など
+            </p>
           </div>
 
           <!-- ボタン -->
@@ -494,11 +541,6 @@ const monthlyStats = computed(() => {
 })
 
 // Methods
-const formatTime = (timeSlot) => {
-  return timeSlot // 既に"HH:MM"形式
-}
-
-// 削除: formatTimeRangeは不要
 
 const getReservationColor = (category) => {
   const colors = {
@@ -512,48 +554,86 @@ const getReservationColor = (category) => {
   return colors[category] || colors['other']
 }
 
-const getReservationsForSlot = (date, timeSlot) => {
-  const filteredReservations = reservations.value.filter(reservation => {
-    if (reservation.date !== date || reservation.status === 'cancelled') {
-      return false
-    }
+// 指定日の全予約を取得（時間軸表示用）
+const getReservationsForDay = (date) => {
+  return reservations.value.filter(reservation =>
+    reservation.date === date && reservation.status !== 'cancelled'
+  )
+}
 
-    // 新しいデータ構造：startTime + durationで時間範囲をチェック
-    if (reservation.startTime && reservation.duration) {
-      const [slotHours, slotMinutes] = timeSlot.split(':').map(Number)
-      const slotTime = slotHours * 60 + slotMinutes
+// 重複予約をグループ化（LaKiite方式）
+const groupOverlappingReservations = (reservations) => {
+  if (reservations.length === 0) return []
 
-      const [startHours, startMinutes] = reservation.startTime.split(':').map(Number)
-      const startTime = startHours * 60 + startMinutes
-      const endTime = startTime + reservation.duration
-
-      // 30分スロット内に予約が重なっているかチェック
-      const isInSlot = slotTime >= startTime && slotTime < endTime
-
-      // デバッグログ（一時的）
-      if (date === '2025-08-05' && timeSlot === '10:30') {
-        console.log('🔍 Checking reservation for 2025-08-05 10:30:', {
-          reservation,
-          slotTime,
-          startTime,
-          endTime,
-          isInSlot
-        })
-      }
-
-      return isInSlot
-    }
-
-    // 旧データ構造との互換性：timeSlotがある場合
-    return reservation.timeSlot === timeSlot || reservation.startTime === timeSlot
+  const sortedReservations = [...reservations].sort((a, b) => {
+    const aStart = calculateTimePosition(a.startTime)
+    const bStart = calculateTimePosition(b.startTime)
+    return aStart - bStart
   })
 
-  // デバッグログ（一時的）
-  if (date === '2025-08-05' && filteredReservations.length > 0) {
-    console.log(`📅 Found ${filteredReservations.length} reservations for ${date} ${timeSlot}`)
+  const groups = []
+  let currentGroup = [sortedReservations[0]]
+
+  for (let i = 1; i < sortedReservations.length; i++) {
+    const current = sortedReservations[i]
+    let overlapsWithGroup = false
+
+    // 現在のグループ内の予約と重なるかチェック
+    for (const groupReservation of currentGroup) {
+      if (isOverlapping(current, groupReservation)) {
+        overlapsWithGroup = true
+        break
+      }
+    }
+
+    if (overlapsWithGroup) {
+      currentGroup.push(current)
+    } else {
+      groups.push([...currentGroup])
+      currentGroup = [current]
+    }
   }
 
-  return filteredReservations
+  groups.push(currentGroup)
+  return groups
+}
+
+// 2つの予約が重なっているかチェック
+const isOverlapping = (a, b) => {
+  const aStart = calculateTimePosition(a.startTime)
+  const aEnd = aStart + a.duration
+  const bStart = calculateTimePosition(b.startTime)
+  const bEnd = bStart + b.duration
+
+  return aStart < bEnd && bStart < aEnd
+}
+
+// 時間を位置（px）に変換（8:00を基準0とする）
+const calculateTimePosition = (timeStr) => {
+  const [hours = 0, minutes = 0] = timeStr.split(':').map(Number)
+  const totalMinutes = hours * 60 + minutes
+  const baseMinutes = 8 * 60 // 8:00を基準
+  return Math.max(0, totalMinutes - baseMinutes) // 8:00より前は0
+}
+
+// マウス位置から時間を取得
+const getTimeFromPosition = (event) => {
+  const rect = event.currentTarget.getBoundingClientRect()
+  const y = event.clientY - rect.top
+  const minutes = Math.round(y) + (8 * 60) // 8:00からの分数
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return `${hours.toString().padStart(2, '0')}:${Math.round(mins / 30) * 30 === 60 ? '00' : (Math.round(mins / 30) * 30).toString().padStart(2, '0')}`
+}
+
+// 現在時刻の位置を取得（今日の場合）
+const getCurrentTimePosition = () => {
+  const now = new Date()
+  const hours = now.getHours()
+  const minutes = now.getMinutes()
+  const totalMinutes = hours * 60 + minutes
+  const baseMinutes = 8 * 60
+  return Math.max(0, totalMinutes - baseMinutes)
 }
 
 const goToToday = () => {
@@ -572,12 +652,12 @@ const nextWeek = () => {
   currentWeek.value = newDate
 }
 
-const openReservationModal = (date, timeSlot) => {
+const openReservationModal = (date, startTime) => {
   editingReservation.value = null
   reservationForm.customerName = ''
   reservationForm.notes = ''
   reservationForm.date = date
-  reservationForm.startTime = timeSlot // timeSlot → startTime
+  reservationForm.startTime = startTime || '09:00'
   reservationForm.duration = DEFAULT_DURATIONS.cut // デフォルトはカットの60分
   reservationForm.category = 'cut'
   reservationForm.status = 'active'

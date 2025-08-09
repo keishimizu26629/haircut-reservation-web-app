@@ -93,12 +93,6 @@ export const useReservations = () => {
           }) as Reservation[]
 
           console.log(`📅 Loaded ${reservations.value.length} reservations`)
-          if (reservations.value.length > 0) {
-            console.log('📋 Sample reservation:', reservations.value[0])
-            console.log('📋 All reservations:', reservations.value)
-          } else {
-            console.log('⚠️ No reservations found in database')
-          }
         },
         err => {
           console.error('❌ Firestore listener error:', err)

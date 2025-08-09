@@ -54,8 +54,6 @@ export default defineNuxtConfig({
 
   // CSS Framework and Styling - Nuxt 4互換モード対応
   css: [
-    'bootstrap/dist/css/bootstrap.min.css',
-    'bootstrap-icons/font/bootstrap-icons.css',
     '~/app/assets/css/design-system.css',
     '~/app/assets/css/responsive.css',
     '~/app/assets/css/cross-browser.css',
@@ -73,13 +71,7 @@ export default defineNuxtConfig({
   ],
 
   // Modules
-  modules: [
-    '@pinia/nuxt',
-    '@vueuse/nuxt',
-    '@nuxtjs/google-fonts',
-    '@nuxtjs/tailwindcss',
-    'nuxt-vuefire'
-  ],
+  modules: ['@pinia/nuxt', '@vueuse/nuxt', '@nuxtjs/tailwindcss', 'nuxt-vuefire'],
 
   // VueFire configuration - 環境別設定
   vuefire: {
@@ -127,7 +119,7 @@ export default defineNuxtConfig({
   // Runtime configuration - VueFire統合最適化版
   runtimeConfig: {
     // Private keys (only available on server-side)
-    firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT,
+    firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT || '',
 
     // Environment configuration
     nodeEnv: process.env.NODE_ENV || 'development',
@@ -219,8 +211,7 @@ export default defineNuxtConfig({
             if (id.includes('firebase')) return 'firebase'
             // Vue core関連
             if (id.includes('vue') || id.includes('@vue')) return 'vue-vendor'
-            // Bootstrap等のUI
-            if (id.includes('bootstrap')) return 'ui-vendor'
+
             // 管理画面関連は遅延読み込み
             if (id.includes('components/Admin') || id.includes('dashboard')) return 'admin'
             // その他のライブラリ
@@ -300,14 +291,7 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' },
         { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#3b82f6' },
         { rel: 'manifest', href: '/manifest.json' },
-        // プリロード設定 - 重要なリソースを先読み
-        {
-          rel: 'preload',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap',
-          as: 'style'
-        },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
+
         { rel: 'dns-prefetch', href: 'https://firebaseapp.com' },
         { rel: 'dns-prefetch', href: 'https://googleapis.com' }
       ]
@@ -316,7 +300,7 @@ export default defineNuxtConfig({
 
   // Nitro configuration - VueFire + SSR最適化
   nitro: {
-    preset: 'node-server',
+    preset: 'static',
 
     // SSR + Firebase最適化
     experimental: {
