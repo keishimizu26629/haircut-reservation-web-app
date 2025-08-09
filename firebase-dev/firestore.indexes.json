@@ -9,7 +9,7 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "timeSlot",
+          "fieldPath": "startTime",
           "order": "ASCENDING"
         }
       ]

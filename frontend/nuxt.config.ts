@@ -13,7 +13,6 @@ export default defineNuxtConfig({
   dir: {
     pages: 'app/pages',
     layouts: 'app/layouts',
-    components: 'app/components',
     assets: 'app/assets',
     middleware: 'app/middleware',
     plugins: 'app/plugins'
@@ -26,13 +25,6 @@ export default defineNuxtConfig({
     presets: ['vue', 'vue-router', 'pinia'],
     // グローバル型生成
     global: true
-  },
-
-  // Nitro configuration for composables
-  nitro: {
-    experimental: {
-      wasm: true
-    }
   },
 
   // Alias configuration for path resolution
@@ -88,22 +80,6 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     'nuxt-vuefire'
   ],
-
-  // Google Fonts configuration - パフォーマンス最適化版
-  googleFonts: {
-    families: {
-      Inter: [400, 600], // 必要最小限のフォントウェイト
-      'Noto Sans JP': [400, 500] // 日本語フォントも最小限
-    },
-    display: 'swap', // フォント読み込み中のテキスト表示
-    prefetch: true, // プリフェッチ有効化
-    preconnect: true, // プリコネクト有効化
-    preload: true, // プリロード有効化
-    download: false, // ローカルダウンロード無効（CDN使用）
-    base64: false, // Base64無効（パフォーマンス重視）
-    subsets: 'latin', // 必要なサブセットのみ
-    text: '' // 特定文字セットの指定なし
-  },
 
   // VueFire configuration - 環境別設定
   vuefire: {
@@ -249,6 +225,8 @@ export default defineNuxtConfig({
             if (id.includes('components/Admin') || id.includes('dashboard')) return 'admin'
             // その他のライブラリ
             if (id.includes('node_modules')) return 'vendor'
+            // デフォルト
+            return undefined
           }
         }
       },
@@ -402,23 +380,6 @@ export default defineNuxtConfig({
     // Firebase Functions地域設定
     firebase: {
       region: 'asia-northeast1'
-    }
-  },
-
-  // PWA configuration
-  pwa: {
-    registerType: 'autoUpdate',
-    workbox: {
-      navigateFallback: '/'
-    },
-    client: {
-      installPrompt: true
-    },
-    devOptions: {
-      enabled: true,
-      suppressWarnings: true,
-      navigateFallbackAllowlist: [/^\/$/],
-      type: 'module'
     }
   }
 

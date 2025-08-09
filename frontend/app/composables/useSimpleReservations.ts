@@ -12,12 +12,14 @@ import {
 } from 'firebase/firestore'
 import { getFirebaseInstances } from '../stores/auth'
 
-interface SimpleReservation {
+interface Reservation {
   id?: string
   customerName: string // 顧客名
   notes?: string // 備考（オプション）
-  date: string
-  timeSlot: string // "09:00", "09:30"形式
+  date: string // "2025-08-06"形式
+  startTime: string // "10:30"形式
+  duration: number // 所要時間（分）
+  // endTime は計算値のみ（Firestoreには保存しない）
   category: 'cut' | 'color' | 'perm' | 'straight' | 'mesh' | 'other' // 色分け用カテゴリ
   status: 'active' | 'completed' | 'cancelled' // ステータス
   createdAt?: any
@@ -25,8 +27,28 @@ interface SimpleReservation {
   createdBy?: string // スタッフID
 }
 
-export const useSimpleReservations = () => {
-  const reservations = ref<SimpleReservation[]>([])
+// カテゴリ別デフォルト所要時間（分）
+const DEFAULT_DURATIONS = {
+  cut: 60, // カット：60分
+  color: 90, // カラー：90分
+  perm: 120, // パーマ：120分
+  straight: 180, // 縮毛矯正：180分
+  mesh: 90, // メッシュ：90分
+  other: 60 // その他：60分
+} as const
+
+// 時間計算ユーティリティ関数
+const calculateEndTime = (startTime: string, duration: number): string => {
+  const [hours = 0, minutes = 0] = startTime.split(':').map(Number)
+  const startMinutes = hours * 60 + minutes
+  const endMinutes = startMinutes + duration
+  const endHours = Math.floor(endMinutes / 60)
+  const endMins = endMinutes % 60
+  return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`
+}
+
+export const useReservations = () => {
+  const reservations = ref<Reservation[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -39,7 +61,8 @@ export const useSimpleReservations = () => {
       console.log('🔥 Firestore instance for listener:', !!firestore)
 
       const reservationsRef = collection(firestore, 'reservations')
-      const q = query(reservationsRef, orderBy('date', 'asc'), orderBy('timeSlot', 'asc'))
+      // 一時的に単純クエリに変更（インデックス構築中のため）
+      const q = query(reservationsRef, orderBy('date', 'asc'))
       console.log('🔍 Query created for reservations')
 
       unsubscribe = onSnapshot(
@@ -52,14 +75,29 @@ export const useSimpleReservations = () => {
             fromCache: snapshot.metadata.fromCache
           })
 
-          reservations.value = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          })) as SimpleReservation[]
+          reservations.value = snapshot.docs.map(doc => {
+            const data = doc.data()
+            // 既存データの互換性対応：timeSlotがある場合はstartTimeに変換
+            if (data.timeSlot && !data.startTime) {
+              data.startTime = data.timeSlot
+              data.duration =
+                data.duration ||
+                DEFAULT_DURATIONS[data.category as keyof typeof DEFAULT_DURATIONS] ||
+                60
+            }
+            // endTimeは動的計算のみ（保存しない）
+            return {
+              id: doc.id,
+              ...data
+            }
+          }) as Reservation[]
 
           console.log(`📅 Loaded ${reservations.value.length} reservations`)
           if (reservations.value.length > 0) {
             console.log('📋 Sample reservation:', reservations.value[0])
+            console.log('📋 All reservations:', reservations.value)
+          } else {
+            console.log('⚠️ No reservations found in database')
           }
         },
         err => {
@@ -88,7 +126,7 @@ export const useSimpleReservations = () => {
 
   // 予約追加
   const addReservation = async (
-    reservation: Omit<SimpleReservation, 'id' | 'createdAt' | 'updatedAt'>
+    reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'>
   ) => {
     loading.value = true
     error.value = null
@@ -97,7 +135,8 @@ export const useSimpleReservations = () => {
       customerName: reservation.customerName,
       notes: reservation.notes,
       date: reservation.date,
-      timeSlot: reservation.timeSlot,
+      startTime: reservation.startTime,
+      duration: reservation.duration,
       category: reservation.category,
       status: reservation.status
     })
@@ -111,6 +150,7 @@ export const useSimpleReservations = () => {
 
       const docData = {
         ...reservation,
+        // endTimeは保存しない（動的計算のみ）
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
@@ -137,15 +177,19 @@ export const useSimpleReservations = () => {
   }
 
   // 予約更新
-  const updateReservation = async (id: string, updates: Partial<SimpleReservation>) => {
+  const updateReservation = async (id: string, updates: Partial<Reservation>) => {
     loading.value = true
     error.value = null
 
     try {
       const { firestore } = getFirebaseInstances()
       const docRef = doc(firestore, 'reservations', id)
+
+      // endTimeは保存しない（動的計算のみ）
+      const updateData = { ...updates }
+
       await updateDoc(docRef, {
-        ...updates,
+        ...updateData,
         updatedAt: serverTimestamp()
       })
 
@@ -218,6 +262,12 @@ export const useSimpleReservations = () => {
     error,
     addReservation,
     updateReservation,
-    deleteReservation
+    deleteReservation,
+    // ユーティリティ関数もエクスポート
+    calculateEndTime,
+    DEFAULT_DURATIONS
   }
 }
+
+// 後方互換性のため、旧名前でもエクスポート
+export const useSimpleReservations = useReservations

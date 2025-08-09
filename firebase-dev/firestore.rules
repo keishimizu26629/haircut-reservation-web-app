@@ -61,12 +61,13 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
-    // Reservations - MVP版（簡略化・デバッグ用）
+    // Reservations - 認証済みユーザーのみアクセス可能
     match /reservations/{reservationId} {
-      allow read: if isAuthenticated(); // 認証済みユーザーは全ての予約を読み取り可能
-      allow create: if isAuthenticated(); // MVPでは認証チェックのみ
-      allow update: if isAuthenticated(); // MVPでは認証チェックのみ
-      allow delete: if isAuthenticated(); // MVPでは認証済みユーザーは削除可能
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                       request.resource.data.keys().hasAll(['customerName', 'date', 'startTime', 'duration', 'category', 'status']);
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated();
     }
 
     // Business hours and availability

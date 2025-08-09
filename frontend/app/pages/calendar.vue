@@ -180,14 +180,25 @@
                   ]"
                   @click.stop="editReservation(reservation)"
                 >
-                  <div class="flex items-center justify-between">
-                    <span class="truncate flex-1">
-                      {{ reservation.customerName }}
-                      <span v-if="reservation.notes" class="text-xs opacity-75">
-                        ({{ reservation.notes }})
+                  <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="truncate flex-1 font-medium">
+                        {{ reservation.customerName }}
                       </span>
-                    </span>
-                    <span v-if="reservation.status === 'completed'" class="ml-1">✓</span>
+                      <span v-if="reservation.status === 'completed'" class="ml-1">✓</span>
+                    </div>
+                    <div class="text-xs opacity-75">
+                      <div v-if="reservation.startTime && reservation.duration">
+                        {{ reservation.startTime }}〜{{ calculateEndTime(reservation.startTime, reservation.duration) }}
+                        ({{ reservation.duration }}分)
+                      </div>
+                      <div v-else-if="reservation.timeSlot">
+                        {{ reservation.timeSlot }}〜 (旧形式)
+                      </div>
+                      <div v-if="reservation.notes" class="mt-1">
+                        {{ reservation.notes }}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -247,7 +258,7 @@
                   'px-3 py-2 text-sm rounded-md transition-colors',
                   reservationForm.category === cat.value ? cat.color : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
                 ]"
-                @click="reservationForm.category = cat.value"
+                @click="selectCategory(cat.value)"
               >
                 {{ cat.label }}
               </button>
@@ -269,10 +280,10 @@
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                時間
+                開始時間
               </label>
               <select
-                v-model="reservationForm.timeSlot"
+                v-model="reservationForm.startTime"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -285,6 +296,37 @@
                   <span v-if="slot < '09:00' || slot >= '19:00'">(時間外)</span>
                 </option>
               </select>
+            </div>
+          </div>
+
+          <!-- 所要時間選択 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              所要時間
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="duration in [
+                  { value: 30, label: '30分' },
+                  { value: 60, label: '1時間' },
+                  { value: 90, label: '1時間30分' },
+                  { value: 120, label: '2時間' },
+                  { value: 150, label: '2時間30分' },
+                  { value: 180, label: '3時間' }
+                ]"
+                :key="duration.value"
+                type="button"
+                :class="[
+                  'px-3 py-2 text-sm rounded-md transition-colors',
+                  reservationForm.duration === duration.value ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                ]"
+                @click="reservationForm.duration = duration.value"
+              >
+                {{ duration.label }}
+              </button>
+            </div>
+            <div class="mt-2 text-xs text-gray-500">
+              終了予定時間: {{ calculateEndTime(reservationForm.startTime, reservationForm.duration) }}
             </div>
           </div>
 
@@ -374,7 +416,7 @@ useHead({
 })
 
 // Composables
-const { reservations, loading, addReservation, updateReservation, deleteReservation: removeReservation } = useSimpleReservations()
+const { reservations, loading, addReservation, updateReservation, deleteReservation: removeReservation, calculateEndTime, DEFAULT_DURATIONS } = useSimpleReservations()
 
 // State
 const currentWeek = ref(new Date())
@@ -387,7 +429,8 @@ const reservationForm = reactive({
   customerName: '', // 顧客名
   notes: '', // 備考
   date: '',
-  timeSlot: '09:00',
+  startTime: '09:00', // timeSlot → startTime に変更
+  duration: 60, // 所要時間（分）
   category: 'cut',
   status: 'active'
 })
@@ -470,11 +513,47 @@ const getReservationColor = (category) => {
 }
 
 const getReservationsForSlot = (date, timeSlot) => {
-  return reservations.value.filter(reservation =>
-    reservation.date === date &&
-    reservation.timeSlot === timeSlot &&
-    reservation.status !== 'cancelled' // キャンセル以外を表示
-  )
+  const filteredReservations = reservations.value.filter(reservation => {
+    if (reservation.date !== date || reservation.status === 'cancelled') {
+      return false
+    }
+
+    // 新しいデータ構造：startTime + durationで時間範囲をチェック
+    if (reservation.startTime && reservation.duration) {
+      const [slotHours, slotMinutes] = timeSlot.split(':').map(Number)
+      const slotTime = slotHours * 60 + slotMinutes
+
+      const [startHours, startMinutes] = reservation.startTime.split(':').map(Number)
+      const startTime = startHours * 60 + startMinutes
+      const endTime = startTime + reservation.duration
+
+      // 30分スロット内に予約が重なっているかチェック
+      const isInSlot = slotTime >= startTime && slotTime < endTime
+
+      // デバッグログ（一時的）
+      if (date === '2025-08-05' && timeSlot === '10:30') {
+        console.log('🔍 Checking reservation for 2025-08-05 10:30:', {
+          reservation,
+          slotTime,
+          startTime,
+          endTime,
+          isInSlot
+        })
+      }
+
+      return isInSlot
+    }
+
+    // 旧データ構造との互換性：timeSlotがある場合
+    return reservation.timeSlot === timeSlot || reservation.startTime === timeSlot
+  })
+
+  // デバッグログ（一時的）
+  if (date === '2025-08-05' && filteredReservations.length > 0) {
+    console.log(`📅 Found ${filteredReservations.length} reservations for ${date} ${timeSlot}`)
+  }
+
+  return filteredReservations
 }
 
 const goToToday = () => {
@@ -498,7 +577,8 @@ const openReservationModal = (date, timeSlot) => {
   reservationForm.customerName = ''
   reservationForm.notes = ''
   reservationForm.date = date
-  reservationForm.timeSlot = timeSlot
+  reservationForm.startTime = timeSlot // timeSlot → startTime
+  reservationForm.duration = DEFAULT_DURATIONS.cut // デフォルトはカットの60分
   reservationForm.category = 'cut'
   reservationForm.status = 'active'
   showModal.value = true
@@ -509,7 +589,9 @@ const editReservation = (reservation) => {
   reservationForm.customerName = reservation.customerName
   reservationForm.notes = reservation.notes || ''
   reservationForm.date = reservation.date
-  reservationForm.timeSlot = reservation.timeSlot
+  // 新旧データ構造の互換性対応
+  reservationForm.startTime = reservation.startTime || reservation.timeSlot || '09:00'
+  reservationForm.duration = reservation.duration || DEFAULT_DURATIONS[reservation.category] || 60
   reservationForm.category = reservation.category
   reservationForm.status = reservation.status
   showModal.value = true
@@ -520,6 +602,12 @@ const closeModal = () => {
   editingReservation.value = null
 }
 
+// カテゴリ選択時にデフォルトの所要時間を設定
+const selectCategory = (category) => {
+  reservationForm.category = category
+  reservationForm.duration = DEFAULT_DURATIONS[category] || 60
+}
+
 const saveReservation = async () => {
   console.log('💾 Saving reservation...')
 
@@ -528,7 +616,8 @@ const saveReservation = async () => {
       customerName: reservationForm.customerName,
       notes: reservationForm.notes,
       date: reservationForm.date,
-      timeSlot: reservationForm.timeSlot,
+      startTime: reservationForm.startTime, // timeSlot → startTime
+      duration: reservationForm.duration, // 所要時間を追加
       category: reservationForm.category,
       status: reservationForm.status
     }

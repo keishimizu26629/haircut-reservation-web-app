@@ -17,10 +17,7 @@
   "services": {
     "authentication": {
       "enabled": true,
-      "providers": [
-        "email/password",
-        "google"
-      ],
+      "providers": ["email/password", "google"],
       "settings": {
         "oneAccountPerEmail": true,
         "emailLink": true
@@ -34,7 +31,7 @@
     },
     "storage": {
       "enabled": true,
-      "region": "asia-northeast1", 
+      "region": "asia-northeast1",
       "rules": "development_mode",
       "rulesNote": "全アクセス許可（開発用）"
     },

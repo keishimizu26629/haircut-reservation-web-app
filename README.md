@@ -63,7 +63,9 @@ haircut-reservation-dev/
 │       ├── customerName: string     # 顧客名（例: "田中太郎"）
 │       ├── notes: string            # 備考（例: "カット＆カラー、ロング"）
 │       ├── date: string             # 予約日（YYYY-MM-DD形式）
-│       ├── timeSlot: string         # 時間枠（"09:00", "09:30"形式）
+│       ├── startTime: string        # 開始時間（"10:30"形式）
+│       ├── duration: number         # 所要時間（分）（例: 60, 90, 120）
+│       # endTime: 計算値のみ（保存しない）
 │       ├── category: string         # カテゴリ（'cut'|'color'|'perm'|'straight'|'mesh'|'other'）
 │       ├── status: string           # ステータス（'active'|'completed'|'cancelled'）
 │       ├── createdAt: Timestamp     # 作成日時
@@ -71,14 +73,21 @@ haircut-reservation-dev/
 │       └── createdBy: string        # 作成者UID
 ```
 
-### カテゴリ別色分け
+### カテゴリ別色分け・所要時間
 
-- 🌸 **カット** (cut): 淡いピンク
-- 🔵 **カラー** (color): 淡い青
-- 🟢 **パーマ** (perm): 淡い緑
-- 🟠 **縮毛矯正** (straight): 淡いオレンジ
-- 🟡 **メッシュ** (mesh): 淡い黄色
-- 🟣 **その他** (other): 淡い紫
+- 🌸 **カット** (cut): 淡いピンク - デフォルト 60 分
+- 🔵 **カラー** (color): 淡い青 - デフォルト 90 分
+- 🟢 **パーマ** (perm): 淡い緑 - デフォルト 120 分
+- 🟠 **縮毛矯正** (straight): 淡いオレンジ - デフォルト 180 分
+- 🟡 **メッシュ** (mesh): 淡い黄色 - デフォルト 90 分
+- 🟣 **その他** (other): 淡い紫 - デフォルト 60 分
+
+### 新機能：所要時間管理
+
+- ⏱️ **開始時間 + 所要時間**: 従来の 30 分固定枠から柔軟な時間管理に変更
+- 📊 **終了時間自動計算**: 開始時間と所要時間から終了時間を自動計算
+- 🎯 **カテゴリ別デフォルト**: カテゴリ選択時に適切な所要時間を自動設定
+- 🔄 **既存データ互換**: 旧形式（timeSlot）のデータも自動変換して表示
 
 詳細は [`docs/FIRESTORE_SCHEMA.md`](./docs/FIRESTORE_SCHEMA.md) を参照してください。
 

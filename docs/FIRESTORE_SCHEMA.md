@@ -20,7 +20,9 @@ haircut-reservation-dev/
 │       ├── customerName: string     # 顧客名（例: "田中太郎"）
 │       ├── notes: string            # 備考（例: "カット＆カラー、ロング"）
 │       ├── date: string             # 予約日（YYYY-MM-DD形式）
-│       ├── timeSlot: string         # 時間枠（"09:00", "09:30"形式）
+│       ├── startTime: string        # 開始時間（"10:30"形式）
+│       ├── duration: number         # 所要時間（分）（例: 60, 90, 120）
+│       # endTime: 計算値のみ（保存しない）
 │       ├── category: string         # カテゴリ（'cut' | 'color' | 'perm' | 'straight' | 'mesh' | 'other'）
 │       ├── status: string           # ステータス（'active' | 'completed' | 'cancelled'）
 │       ├── createdAt: Timestamp     # 作成日時
@@ -34,21 +36,33 @@ haircut-reservation-dev/
 
 ## データ型定義
 
-### SimpleReservation
+### Reservation（新データ構造）
 
 ```typescript
-interface SimpleReservation {
+interface Reservation {
   id?: string // Firestore自動生成ID
   customerName: string // 顧客名
   notes?: string // 備考（オプション）
   date: string // 予約日（YYYY-MM-DD）
-  timeSlot: string // 時間枠（HH:MM）
+  startTime: string // 開始時間（HH:MM）
+  duration: number // 所要時間（分）
+  // endTime: 計算値のみ（Firestoreには保存しない）
   category: ReservationCategory // カテゴリ
   status: ReservationStatus // ステータス
   createdAt?: Timestamp // 作成日時
   updatedAt?: Timestamp // 更新日時
   createdBy?: string // 作成者UID
 }
+
+// カテゴリ別デフォルト所要時間（分）
+const DEFAULT_DURATIONS = {
+  cut: 60, // カット：60分
+  color: 90, // カラー：90分
+  perm: 120, // パーマ：120分
+  straight: 180, // 縮毛矯正：180分
+  mesh: 90, // メッシュ：90分
+  other: 60 // その他：60分
+} as const
 
 type ReservationCategory = 'cut' | 'color' | 'perm' | 'straight' | 'mesh' | 'other'
 type ReservationStatus = 'active' | 'completed' | 'cancelled'
@@ -69,10 +83,10 @@ interface User {
 
 ### 複合インデックス
 
-1. **reservations**: `date (ASC)` + `timeSlot (ASC)`
+1. **reservations**: `date (ASC)` + `startTime (ASC)`
 
    - 用途: 日付・時間順での予約取得
-   - クエリ: `orderBy('date', 'asc'), orderBy('timeSlot', 'asc')`
+   - クエリ: `orderBy('date', 'asc'), orderBy('startTime', 'asc')`
 
 2. **reservations**: `date (ASC)` + `status (ASC)`
 
