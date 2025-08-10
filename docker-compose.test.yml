@@ -10,3 +10,10 @@ services:
       - FIRESTORE_EMULATOR_HOST=localhost:8080
     networks: []
     depends_on: []
+
+  # Firebase エミュレータサービスを無効化
+  firebase-emulator:
+    image: alpine:latest
+    command: ['echo', 'Firebase emulator disabled in test mode']
+    ports: []
+    volumes: []
