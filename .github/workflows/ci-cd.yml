@@ -68,14 +68,27 @@ jobs:
 
       - name: Start Firebase Emulator
         run: |
+          # 既存のFirebaseエミュレータプロセスを停止
+          pkill -f "firebase emulators" || true
+
           cd firebase-test
           firebase emulators:start --only auth,firestore,storage --project demo-test &
           timeout 30 bash -c 'until curl -s http://localhost:9099; do sleep 1; done'
         env:
           FIREBASE_PROJECT: demo-test
 
+      - name: Stop any existing Docker containers
+        run: |
+          docker compose down || true
+          docker system prune -f || true
+
       - name: Start application with Docker Compose
         run: |
+          # Firebase emulator用のポートを解放
+          sudo lsof -ti:4000 | xargs -r sudo kill -9 || true
+          sudo lsof -ti:8080 | xargs -r sudo kill -9 || true
+          sudo lsof -ti:9099 | xargs -r sudo kill -9 || true
+
           docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
           timeout 120 bash -c 'until curl -s http://localhost:3000; do sleep 2; done'
         env:
