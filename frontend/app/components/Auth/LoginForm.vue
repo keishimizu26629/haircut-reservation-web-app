@@ -32,8 +32,13 @@
           autocomplete="email"
           @input="clearError('email')"
           @blur="validateField('email')"
-        />
-        <div v-if="errors.email" class="error-message">{{ errors.email }}</div>
+        >
+        <div
+          v-if="errors.email"
+          class="error-message"
+        >
+          {{ errors.email }}
+        </div>
       </div>
 
       <!-- パスワード -->
@@ -49,7 +54,7 @@
             autocomplete="current-password"
             @input="clearError('password')"
             @blur="validateField('password')"
-          />
+          >
           <button
             type="button"
             class="password-toggle"
@@ -58,7 +63,12 @@
             <i :class="showPassword ? 'bi-eye-slash' : 'bi-eye'" />
           </button>
         </div>
-        <div v-if="errors.password" class="error-message">{{ errors.password }}</div>
+        <div
+          v-if="errors.password"
+          class="error-message"
+        >
+          {{ errors.password }}
+        </div>
       </div>
 
       <!-- Remember Me & Forgot Password -->
@@ -159,7 +169,7 @@ interface Emits {
   (event: 'googleLogin'): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const _props = withDefaults(defineProps<Props>(), {
   loading: false,
   globalError: ''
 })

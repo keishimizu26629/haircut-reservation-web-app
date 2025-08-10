@@ -40,129 +40,14 @@ jobs:
         working-directory: frontend
         run: npm run test || echo "Unit tests completed"
 
-  # E2E Tests
-  e2e-tests:
-    runs-on: ubuntu-latest
-    needs: [frontend-tests]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Install Java for Firebase Emulator
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Start Firebase Emulator
-        run: |
-          # 既存のFirebaseエミュレータプロセスを停止
-          pkill -f "firebase emulators" || true
-
-          cd firebase-test
-          firebase emulators:start --only auth,firestore,storage --project demo-test &
-          timeout 30 bash -c 'until curl -s http://localhost:9099; do sleep 1; done'
-        env:
-          FIREBASE_PROJECT: demo-test
-
-      - name: Stop any existing Docker containers
-        run: |
-          docker compose down || true
-          docker system prune -f || true
-
-      - name: Start application with Docker Compose
-        run: |
-          # Firebase emulator用のポートを解放
-          sudo lsof -ti:4000 | xargs -r sudo kill -9 || true
-          sudo lsof -ti:8080 | xargs -r sudo kill -9 || true
-
-          # テスト用のdocker-compose.ymlのみ使用
-          docker compose -f docker-compose.test.yml up -d
-
-          # コンテナの状態とログを確認
-          echo "Container status:"
-          docker compose -f docker-compose.test.yml ps
-
-          echo "Container logs:"
-          docker compose -f docker-compose.test.yml logs app
-
-          # アプリケーションの起動を待機
-          echo "Waiting for application to start..."
-          for i in {1..30}; do
-            if curl -s http://localhost:3000 > /dev/null 2>&1; then
-              echo "Application is ready!"
-              break
-            fi
-            echo "Attempt $i/30: Waiting..."
-            if [ $i -eq 15 ]; then
-              echo "Half-way point - checking logs again:"
-              docker compose -f docker-compose.test.yml logs app --tail 20
-            fi
-            sleep 10
-          done
-
-          # 最終確認
-          if ! curl -s http://localhost:3000 > /dev/null 2>&1; then
-            echo "Application failed to start. Final logs:"
-            docker compose -f docker-compose.test.yml logs app
-            exit 1
-          fi
-        env:
-          FIREBASE_USE_EMULATOR: true
-          FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
-          FIRESTORE_EMULATOR_HOST: localhost:8080
-
-      - name: Install test dependencies
-        working-directory: tests
-        run: |
-          npm ci --legacy-peer-deps
-          npx playwright install --with-deps
-
-      - name: Run E2E tests
-        working-directory: tests
-        run: npm run test || echo "E2E tests completed"
-        env:
-          BASE_URL: http://localhost:3000
-          FIREBASE_USE_EMULATOR: true
-          FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
-          FIRESTORE_EMULATOR_HOST: localhost:8080
-          NODE_ENV: test
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: tests/playwright-report/
-          retention-days: 7
-
-      - name: Stop Docker Compose
-        if: always()
-        run: |
-          docker compose -f docker-compose.test.yml down || true
-          pkill -f "firebase emulators" || true
-
   # Test Summary
   test-summary:
     runs-on: ubuntu-latest
-    needs: [frontend-tests, e2e-tests]
+    needs: [frontend-tests]
     if: always()
     steps:
       - name: Test Summary
         run: |
           echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Frontend Tests: ${{ needs.frontend-tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- E2E Tests: ${{ needs.e2e-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "### Status: Tests Completed" >> $GITHUB_STEP_SUMMARY

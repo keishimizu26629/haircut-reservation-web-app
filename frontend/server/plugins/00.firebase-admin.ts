@@ -1,4 +1,4 @@
-import { initializeApp, getApps, credential, cert } from 'firebase-admin/app'
+import { cert, getApps, initializeApp } from 'firebase-admin/app'
 
 // Firebase Admin SDK 安全初期化プラグイン
 export default defineNitroPlugin(async () => {
@@ -12,10 +12,14 @@ export default defineNitroPlugin(async () => {
 
     // 環境検出
     const isDevelopment = process.env.NODE_ENV === 'development'
-    const isEmulatorMode = process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST
-    const projectId = process.env.FIREBASE_PROJECT_ID || (isDevelopment ? 'demo-project' : 'demo-project')
+    const isEmulatorMode =
+      process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST
+    const projectId =
+      process.env.FIREBASE_PROJECT_ID || (isDevelopment ? 'demo-project' : 'demo-project')
 
-    console.log(`🔧 Firebase Admin SDK - Environment: ${isDevelopment ? 'development' : 'production'}`)
+    console.log(
+      `🔧 Firebase Admin SDK - Environment: ${isDevelopment ? 'development' : 'production'}`
+    )
     console.log(`🔧 Firebase Admin SDK - Project ID: ${projectId}`)
     console.log(`🔧 Firebase Admin SDK - Emulator Mode: ${!!isEmulatorMode}`)
 
@@ -68,11 +72,14 @@ export default defineNitroPlugin(async () => {
       const app = initializedApps[0]
       console.log(`✅ Firebase Admin App initialized: ${app.name} (${app.options.projectId})`)
     }
-
   } catch (error) {
     console.error('❌ Firebase Admin SDK initialization failed:', error)
-    
+
     // Critical error - do not continue with broken initialization
-    throw new Error(`Firebase Admin SDK initialization failed: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      `Firebase Admin SDK initialization failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    )
   }
 })

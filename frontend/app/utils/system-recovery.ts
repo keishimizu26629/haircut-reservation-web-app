@@ -132,11 +132,13 @@ export class SystemRecoveryManager {
 
       // 重複アプリの削除（デフォルト以外）
       for (let i = 1; i < apps.length; i++) {
+        const app = apps[i]
+        if (!app) continue
         try {
-          await deleteApp(apps[i])
-          console.log(`✅ Removed duplicate Firebase app: ${apps[i].name}`)
+          await deleteApp(app)
+          console.log(`✅ Removed duplicate Firebase app: ${app.name}`)
         } catch (error) {
-          console.error(`❌ Failed to remove Firebase app ${apps[i].name}:`, error)
+          console.error(`❌ Failed to remove Firebase app ${app.name}:`, error)
         }
       }
 
