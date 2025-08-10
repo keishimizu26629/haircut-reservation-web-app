@@ -5,28 +5,42 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   if (import.meta.client) {
     const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
+    const isTest = import.meta.env.NODE_ENV === 'test' || import.meta.env.MODE === 'test'
+    const useEmulator = import.meta.env.FIREBASE_USE_EMULATOR === 'true' || isTest
 
     console.log('🔥 Firebase Client Plugin: Manual initialization')
     console.log('🔥 Plugin timestamp:', new Date().toISOString())
     console.log('🔥 Client environment:', import.meta.env.MODE || 'unknown')
     console.log('🔥 Is Production:', isProduction)
+    console.log('🔥 Is Test:', isTest)
+    console.log('🔥 Use Emulator:', useEmulator)
 
     // Firebase設定をnuxt.config.tsから取得（環境変数優先、フォールバックあり）
     const config = useRuntimeConfig()
 
-    // 環境変数から設定を取得、なければ開発用のデフォルト値を使用
-    const firebaseConfig = {
-      apiKey: config.public.firebase.apiKey || 'AIzaSyBTvdrOvdcdhNrONF_b9uXeInoqvVmKYfY',
-      authDomain: config.public.firebase.authDomain || 'haircut-reservation-dev.firebaseapp.com',
-      projectId: config.public.firebase.projectId || 'haircut-reservation-dev',
-      storageBucket:
-        config.public.firebase.storageBucket || 'haircut-reservation-dev.firebasestorage.app',
-      messagingSenderId: config.public.firebase.messagingSenderId || '509197594275',
-      appId: config.public.firebase.appId || '1:509197594275:web:c2aab827763cddcf441916'
-    }
+    // テスト環境では demo-test プロジェクトを使用
+    const firebaseConfig = useEmulator
+      ? {
+          apiKey: 'demo-api-key',
+          authDomain: 'demo-test.firebaseapp.com',
+          projectId: 'demo-test',
+          storageBucket: 'demo-test.appspot.com',
+          messagingSenderId: '123456789',
+          appId: '1:123456789:web:demo123'
+        }
+      : {
+          apiKey: config.public.firebase.apiKey || 'AIzaSyBTvdrOvdcdhNrONF_b9uXeInoqvVmKYfY',
+          authDomain:
+            config.public.firebase.authDomain || 'haircut-reservation-dev.firebaseapp.com',
+          projectId: config.public.firebase.projectId || 'haircut-reservation-dev',
+          storageBucket:
+            config.public.firebase.storageBucket || 'haircut-reservation-dev.firebasestorage.app',
+          messagingSenderId: config.public.firebase.messagingSenderId || '509197594275',
+          appId: config.public.firebase.appId || '1:509197594275:web:c2aab827763cddcf441916'
+        }
 
     console.log('🔥 Firebase config source:', {
       fromEnvVars: !!config.public.firebase.apiKey,
@@ -44,10 +58,32 @@ export default defineNuxtPlugin(() => {
       const auth = getAuth(app)
       const firestore = getFirestore(app)
 
+      // エミュレータ接続設定（テスト環境）
+      if (useEmulator) {
+        const { connectAuthEmulator } = await import('firebase/auth')
+        const { connectFirestoreEmulator } = await import('firebase/firestore')
+
+        try {
+          // Auth エミュレータ接続
+          const authHost = import.meta.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099'
+          connectAuthEmulator(auth, `http://${authHost}`)
+          console.log('🔥 Connected to Auth Emulator:', authHost)
+
+          // Firestore エミュレータ接続
+          const firestoreHost = import.meta.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080'
+          const [host, port] = firestoreHost.split(':')
+          connectFirestoreEmulator(firestore, host, parseInt(port))
+          console.log('🔥 Connected to Firestore Emulator:', firestoreHost)
+        } catch (emulatorError) {
+          console.warn('⚠️ Emulator connection error (already connected?):', emulatorError)
+        }
+      }
+
       console.log('✅ Firebase initialized successfully')
       console.log('✅ Auth instance:', !!auth)
       console.log('✅ Firestore instance:', !!firestore)
       console.log('✅ App instance:', !!app)
+      console.log('✅ Using emulator:', useEmulator)
 
       return {
         provide: {
