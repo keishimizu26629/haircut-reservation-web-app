@@ -86,11 +86,14 @@ jobs:
         run: |
           # Firebase emulator用のポートを解放
           sudo lsof -ti:4000 | xargs -r sudo kill -9 || true
-          sudo lsof -ti:8080 | xargs -r sudo kill -9 || true
-          sudo lsof -ti:9099 | xargs -r sudo kill -9 || true
 
-          docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
-          timeout 120 bash -c 'until curl -s http://localhost:3000; do sleep 2; done'
+          # appサービスのみ起動（firebase-emulatorは除外）
+          docker compose -f docker-compose.yml -f docker-compose.test.yml up -d app
+
+          # アプリケーションの起動を待機（タイムアウト延長）
+          echo "Waiting for application to start..."
+          timeout 300 bash -c 'until curl -s http://localhost:3000; do echo "Waiting..."; sleep 5; done'
+          echo "Application is ready!"
         env:
           FIREBASE_USE_EMULATOR: true
           FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
@@ -123,7 +126,7 @@ jobs:
       - name: Stop Docker Compose
         if: always()
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.test.yml down
+          docker compose -f docker-compose.yml -f docker-compose.test.yml down app || true
           pkill -f "firebase emulators" || true
 
   # Test Summary
