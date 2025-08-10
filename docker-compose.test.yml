@@ -3,17 +3,16 @@ version: '3.8'
 services:
   # テスト環境用のアプリケーション（Firebaseエミュレータはホストで実行）
   app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
     environment:
       - NODE_ENV=test
       - FIREBASE_USE_EMULATOR=true
       - FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
       - FIRESTORE_EMULATOR_HOST=localhost:8080
-    networks: []
-    depends_on: []
-
-  # Firebase エミュレータサービスを無効化
-  firebase-emulator:
-    image: alpine:latest
-    command: ['echo', 'Firebase emulator disabled in test mode']
-    ports: []
-    volumes: []
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
