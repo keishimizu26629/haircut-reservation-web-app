@@ -6,6 +6,7 @@ services:
     environment:
       - NODE_ENV=test
       - FIREBASE_USE_EMULATOR=true
-      - FIREBASE_AUTH_EMULATOR_HOST=host.docker.internal:9099
-      - FIRESTORE_EMULATOR_HOST=host.docker.internal:8080
-    network_mode: 'host'
+      - FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+      - FIRESTORE_EMULATOR_HOST=localhost:8080
+    networks: []
+    depends_on: []
