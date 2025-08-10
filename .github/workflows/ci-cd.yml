@@ -91,10 +91,34 @@ jobs:
           # テスト用のdocker-compose.ymlのみ使用
           docker compose -f docker-compose.test.yml up -d
 
-          # アプリケーションの起動を待機（タイムアウト延長）
+          # コンテナの状態とログを確認
+          echo "Container status:"
+          docker compose -f docker-compose.test.yml ps
+
+          echo "Container logs:"
+          docker compose -f docker-compose.test.yml logs app
+
+          # アプリケーションの起動を待機
           echo "Waiting for application to start..."
-          timeout 300 bash -c 'until curl -s http://localhost:3000; do echo "Waiting..."; sleep 5; done'
-          echo "Application is ready!"
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Application is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Waiting..."
+            if [ $i -eq 15 ]; then
+              echo "Half-way point - checking logs again:"
+              docker compose -f docker-compose.test.yml logs app --tail 20
+            fi
+            sleep 10
+          done
+
+          # 最終確認
+          if ! curl -s http://localhost:3000 > /dev/null 2>&1; then
+            echo "Application failed to start. Final logs:"
+            docker compose -f docker-compose.test.yml logs app
+            exit 1
+          fi
         env:
           FIREBASE_USE_EMULATOR: true
           FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
