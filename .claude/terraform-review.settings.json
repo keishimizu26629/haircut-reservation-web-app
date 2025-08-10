@@ -1,0 +1,19 @@
+{
+  "model": "gemini-2.5-flash",
+  "max_turns": 2,
+  "temperature": 0.1,
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash(terraform fmt -check)",
+    "Bash(terraform validate)"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[REVIEW MODE] Analyzing Terraform code...'"
+    }
+  },
+  "custom_instructions": "You are in REVIEW MODE. Focus only on infrastructure code review. Check security, cost optimization, naming conventions, and best practices. Run terraform validate. DO NOT modify code, only provide feedback."
+}

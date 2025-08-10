@@ -1,0 +1,62 @@
+# Local Development Environment
+# Firebase Emulator を使用した完全ローカル環境
+
+services:
+  frontend:
+    extends:
+      file: base.yml
+      service: frontend
+    environment:
+      - NODE_ENV=development
+      - FIREBASE_ENV=local
+      # Firebase Emulator Configuration
+      - FIREBASE_PROJECT_ID=demo-project
+      - FIREBASE_API_KEY=demo-api-key
+      - FIREBASE_AUTH_DOMAIN=demo-project.firebaseapp.com
+      - FIREBASE_STORAGE_BUCKET=demo-project.appspot.com
+      - FIREBASE_MESSAGING_SENDER_ID=123456789
+      - FIREBASE_APP_ID=1:123456789:web:demo123
+      # Emulator Hosts
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - FIREBASE_FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+      - FIREBASE_DATABASE_EMULATOR_HOST=firebase-emulator:9000
+      - FIREBASE_STORAGE_EMULATOR_HOST=firebase-emulator:9199
+      - API_URL=http://firebase-emulator:5001/demo-project/asia-northeast1/api
+    depends_on:
+      - firebase-emulator
+    command: npm run dev
+
+  # Backend functionality is handled by Firebase Cloud Functions within the emulator
+  # Database functionality is handled by Firebase Firestore within the emulator
+
+  # Firebase Emulator Suite
+  firebase-emulator:
+    image: node:20-alpine
+    ports:
+      - "4000:4000" # Firebase Emulator UI
+      - "8080:8080" # Firestore
+      - "9099:9099" # Auth
+      - "9000:9000" # Realtime Database
+      - "5001:5001" # Functions
+      - "9199:9199" # Storage
+      - "8085:8085" # Pub/Sub
+    volumes:
+      - ../firebase:/app
+      - firebase-data:/app/data
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+    networks:
+      - haircut-network
+    command: >
+      sh -c "
+        apk add --no-cache openjdk17-jre-headless &&
+        npm install -g firebase-tools &&
+        cd /app &&
+        npm install &&
+        firebase emulators:start --only auth,firestore,functions,database,storage,pubsub,ui --project demo-project
+      "
+
+volumes:
+  firebase-data:

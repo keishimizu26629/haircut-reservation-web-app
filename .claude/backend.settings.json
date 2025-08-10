@@ -1,0 +1,21 @@
+{
+  "model": "claude-sonnet-4@20250514",
+  "max_turns": 5,
+  "temperature": 0.2,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash",
+    "WebSearch"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo 'Reviewing Backend code...'"
+    }
+  },
+  "custom_instructions": "Focus on API design, database optimization, security, and error handling. Check for SQL injection, authentication issues, and proper validation."
+}

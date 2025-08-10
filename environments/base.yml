@@ -1,0 +1,32 @@
+# Base Docker Compose configuration
+# 共通設定 - すべての環境で共有される基本設定
+
+services:
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-development}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+      - /app/.nuxt
+    environment:
+      - NITRO_HOST=0.0.0.0
+      - NITRO_PORT=3000
+    networks:
+      - haircut-network
+    user: "1001:1001"
+
+# Backend removed - Firebase Cloud Functions are handled by Firebase Emulator
+# The backend functionality is provided by Firebase Cloud Functions
+# which run within the Firebase Emulator in local development
+
+# PostgreSQL and Redis removed - Using Firebase Firestore instead
+# All data is stored in Firebase Firestore which is managed by Firebase
+
+networks:
+  haircut-network:
+    driver: bridge

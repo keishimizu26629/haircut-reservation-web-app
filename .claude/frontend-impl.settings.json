@@ -1,0 +1,23 @@
+{
+  "model": "claude-3-7-sonnet@20250219",
+  "max_turns": 10,
+  "temperature": 0.3,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Write",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash",
+    "WebSearch",
+    "TodoWrite"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[IMPLEMENTATION MODE] Creating Frontend code...'"
+    }
+  },
+  "custom_instructions": "You are in IMPLEMENTATION MODE. Actively write React/TypeScript code. Create components, hooks, tests. Use modern patterns like function components, custom hooks, and TypeScript. Always create corresponding test files. Follow the implementation guidelines in frontend/CLAUDE-IMPL.md."
+}

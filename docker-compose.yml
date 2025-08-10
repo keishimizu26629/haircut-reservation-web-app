@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # メインアプリケーション
+  app:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - FIREBASE_USE_EMULATOR=true
+      - FIREBASE_EMULATOR_HOST=firebase-emulator
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - firebase-emulator
+    networks:
+      - haircut-network
+
+  # Firebase Emulator
+  firebase-emulator:
+    image: node:18-alpine
+    ports:
+      - "4000:4000"  # Firebase UI
+      - "8080:8080"  # Firestore
+      - "9099:9099"  # Auth
+      - "5001:5001"  # Functions
+      - "8085:8085"  # Pub/Sub
+      - "9199:9199"  # Storage
+    working_dir: /firebase
+    volumes:
+      - ./firebase:/firebase
+    command: |
+      sh -c "
+        if [ ! -d node_modules ]; then
+          npm install -g firebase-tools
+        fi
+        firebase emulators:start --only auth,firestore,storage --host 0.0.0.0
+      "
+    environment:
+      - FIREBASE_USE_EMULATOR=true
+      - GOOGLE_APPLICATION_CREDENTIALS=/firebase/service-account-key.json
+    networks:
+      - haircut-network
+
+networks:
+  haircut-network:
+    driver: bridge
+
+volumes:
+  firebase-data:
+  node-modules:

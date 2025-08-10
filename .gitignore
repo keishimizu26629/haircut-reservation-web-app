@@ -1,0 +1,278 @@
+# ===============================================
+# 美容室予約システム - Git 除外設定
+# ===============================================
+
+# ===============================================
+# Node.js 関連
+# ===============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# ===============================================
+# 環境設定ファイル
+# ===============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.prod
+.env.dev
+
+# Keep example files
+!.env.example
+!.env.dev.template
+
+# ===============================================
+# Nuxt.js 関連
+# ===============================================
+# Nuxt dev/build outputs
+.output
+.nuxt
+dist/
+
+# Nuxt generate
+.generate
+
+# Nuxt analyze
+.nuxt-analyze
+
+# Vite cache
+.vite
+
+# ===============================================
+# Vue.js / Frontend 関連
+# ===============================================
+# Build outputs
+build/
+dist/
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# ===============================================
+# Firebase 関連
+# ===============================================
+# Firebase debug logs
+firebase-debug.log*
+firestore-debug.log*
+database-debug.log*
+pubsub-debug.log*
+ui-debug.log*
+
+# Firebase cache
+.firebase/
+
+# Firebase hosting cache
+.firebase-hosting-*
+
+# Firebase emulator data
+firebase-export-*/
+*-export
+
+# Firebase service account keys (セキュリティ重要)
+*-service-account-key.json
+service-account-*.json
+
+# Firebase configuration files with credentials
+*-config.json
+firebase-*-config.json
+*-dev-config.json
+*-prod-config.json
+
+# ===============================================
+# Docker 関連
+# ===============================================
+# Docker compose override files (個人設定)
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Docker volumes data (if any)
+docker-data/
+volumes/
+
+# ===============================================
+# バックアップ・一時ファイル
+# ===============================================
+# Backup files
+*.backup
+*.bak
+*.tmp
+*~
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Thumbs.db
+
+# Temporary folders
+tmp/
+temp/
+
+# Application specific backups
+app-backup/
+.backup/
+*-backup/
+
+# ===============================================
+# ログファイル
+# ===============================================
+logs/
+*.log
+log/
+
+# Keep important log directories structure
+!logs/.gitkeep
+
+# ===============================================
+# IDE / エディタ設定
+# ===============================================
+# VSCode
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/tasks.json
+# Keep workspace settings
+!.vscode/settings.example.json
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===============================================
+# テスト関連
+# ===============================================
+# Test artifacts
+test-results/
+playwright-report/
+coverage/
+
+# Keep test configuration
+!tests/config/
+!tests/fixtures/
+
+# ===============================================
+# セキュリティ関連ファイル
+# ===============================================
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.cert
+
+# API keys and secrets
+secrets/
+.secrets
+*secret*
+*key*
+
+# Keep example/template files
+!*example*
+!*template*
+!*sample*
+
+# ===============================================
+# 開発・デバッグ関連
+# ===============================================
+# Debug files
+*.map
+
+# Profiling files
+*.prof
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ===============================================
+# AI・開発支援ツール
+# ===============================================
+# AI configuration and rules (開発環境固有)
+.agentrules/
+.ai/
+
+# Cursor AI
+.cursor/
+
+# ===============================================
+# プロジェクト固有
+# ===============================================
+# 本プロジェクト固有の除外設定
+
+# 開発用設定ファイル
+*-dev-config.json
+*-local-config.json
+
+# 本番用設定ファイル（セキュリティ重要）
+*-prod-config.json
+*-production-config.json
+
+# Keep example configurations
+!*-config.example.json
+
+# Monitoring data
+monitoring/data/
+grafana/data/
+
+# Performance logs
+performance_*.log
+e2e_support_*.log
+integration_test_*.log

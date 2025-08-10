@@ -1,0 +1,62 @@
+{
+  "name": "haircut-reservation-system",
+  "version": "1.0.0",
+  "description": "美容室予約システム - サーバーレス構成（Nuxt 3 + Firebase直接接続）",
+  "scripts": {
+    "dev": "docker compose --profile local up -d",
+    "dev:remote": "docker compose --env-file .env.dev --profile dev up -d",
+    "prod": "docker compose --env-file .env.prod --profile prod up -d",
+    "dev:logs": "docker compose logs -f",
+    "dev:down": "docker compose down",
+    "dev:build": "docker compose build",
+    "dev:fresh": "docker compose down && docker compose build --no-cache && docker compose --profile local up -d",
+    "dev:remote:fresh": "docker compose --env-file .env.dev down && docker compose --env-file .env.dev build --no-cache && docker compose --env-file .env.dev --profile dev up -d",
+    "prod:fresh": "docker compose --env-file .env.prod down && docker compose --env-file .env.prod build --no-cache && docker compose --env-file .env.prod --profile prod up -d",
+    "deploy:local": "./scripts/deploy.sh -e local",
+    "deploy:dev": "./scripts/deploy.sh -e dev",
+    "deploy:staging": "./scripts/deploy.sh -e staging",
+    "deploy:prod": "./scripts/deploy.sh -e production",
+    "deploy:dev:fresh": "./scripts/deploy.sh -e dev -f",
+    "deploy:staging:fresh": "./scripts/deploy.sh -e staging -f",
+    "test:firebase": "node scripts/test-firebase-connection.js",
+    "test:firebase:local": "node scripts/test-firebase-connection.js local",
+    "test:firebase:dev": "node scripts/test-firebase-connection.js development",
+    "test:firebase:staging": "node scripts/test-firebase-connection.js staging",
+    "test:firebase:prod": "node scripts/test-firebase-connection.js production",
+    "setup:firebase": "./scripts/setup-firebase-projects.sh",
+    "setup:env": "npm run setup:env:local && npm run setup:env:dev && npm run setup:env:prod",
+    "setup:env:local": "echo 'NODE_ENV=development\nFIREBASE_ENV=local\nFIREBASE_PROJECT_ID=demo-project\nFIREBASE_API_KEY=demo-api-key\nFIREBASE_AUTH_DOMAIN=demo-project.firebaseapp.com\nFIREBASE_STORAGE_BUCKET=demo-project.appspot.com\nFIREBASE_MESSAGING_SENDER_ID=123456789\nFIREBASE_APP_ID=1:123456789:web:demo123' > .env.local",
+    "setup:env:dev": "echo '# 開発環境用Firebase設定（要編集）\nNODE_ENV=development\nFIREBASE_ENV=dev\nFIREBASE_PROJECT_ID=your-dev-project-id\nFIREBASE_API_KEY=your-dev-api-key\nFIREBASE_AUTH_DOMAIN=your-dev-project.firebaseapp.com\nFIREBASE_STORAGE_BUCKET=your-dev-project.appspot.com\nFIREBASE_MESSAGING_SENDER_ID=your-dev-sender-id\nFIREBASE_APP_ID=your-dev-app-id' > .env.dev",
+    "setup:env:prod": "echo '# 本番環境用Firebase設定（要編集）\nNODE_ENV=production\nFIREBASE_ENV=prod\nBUILD_TARGET=production\nFIREBASE_PROJECT_ID=your-prod-project-id\nFIREBASE_API_KEY=your-prod-api-key\nFIREBASE_AUTH_DOMAIN=your-prod-project.firebaseapp.com\nFIREBASE_STORAGE_BUCKET=your-prod-project.appspot.com\nFIREBASE_MESSAGING_SENDER_ID=your-prod-sender-id\nFIREBASE_APP_ID=your-prod-app-id' > .env.prod",
+    "setup:quick": "npm run setup:env && echo '✅ 環境変数ファイル作成完了！npm run dev で起動できます'",
+    "status": "docker compose ps",
+    "logs": "docker compose logs",
+    "logs:frontend": "docker compose logs frontend-local frontend",
+    "logs:firebase": "docker compose logs firebase-emulator",
+    "health:local": "curl -f http://localhost:3000 && curl -f http://localhost:4000",
+    "health:remote": "curl -f http://localhost:3000",
+    "clean": "docker compose down -v && docker system prune -f"
+  },
+  "keywords": [
+    "haircut",
+    "reservation",
+    "firebase",
+    "nuxt",
+    "docker",
+    "serverless",
+    "multi-environment"
+  ],
+  "author": "Haircut Reservation Team",
+  "license": "MIT",
+  "devDependencies": {
+    "firebase": "^10.7.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/haircut-reservation.git"
+  }
+}

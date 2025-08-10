@@ -1,0 +1,69 @@
+# Production Environment
+# Remote Firebase Production Project に接続
+
+services:
+  frontend:
+    extends:
+      file: base.yml
+      service: frontend
+    build:
+      target: production
+    environment:
+      - NODE_ENV=production
+      - FIREBASE_ENV=production
+      # Remote Firebase Production Project Configuration
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROD_PROJECT_ID}
+      - FIREBASE_API_KEY=${FIREBASE_PROD_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_PROD_AUTH_DOMAIN}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_PROD_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_PROD_MESSAGING_SENDER_ID}
+      - FIREBASE_APP_ID=${FIREBASE_PROD_APP_ID}
+      - API_URL=https://asia-northeast1-${FIREBASE_PROD_PROJECT_ID}.cloudfunctions.net/api
+    command: npm run start
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend functionality is provided by Firebase Cloud Functions in production
+  # Database functionality is provided by Firebase Firestore in production
+
+  # Production monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-prod-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    networks:
+      - haircut-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD_PROD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER_PROD:-admin}
+    volumes:
+      - grafana-prod-data:/var/lib/grafana
+      - ../monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ../monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - haircut-network
+    restart: unless-stopped
+
+volumes:
+  prometheus-prod-data:
+  grafana-prod-data:

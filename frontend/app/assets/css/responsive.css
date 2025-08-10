@@ -1,0 +1,671 @@
+/**
+ * 統一レスポンシブデザインシステム
+ * 全システム対応・モバイルファースト設計
+ */
+
+/* =====================================
+   ブレークポイント定義
+   ===================================== */
+:root {
+  /* ブレークポイント */
+  --breakpoint-xs: 0px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+
+  /* コンテナサイズ */
+  --container-sm: 540px;
+  --container-md: 720px;
+  --container-lg: 960px;
+  --container-xl: 1140px;
+  --container-xxl: 1320px;
+
+  /* スペーシング（モバイルファースト） */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* フォントサイズ（モバイルファースト） */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+
+  /* タッチターゲットサイズ */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+  --touch-target-large: 52px;
+}
+
+/* =====================================
+   ベースレスポンシブスタイル
+   ===================================== */
+
+/* モバイルファースト：ベースサイズ */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  /* 横スクロール防止 */
+  overflow-x: hidden;
+  /* タッチ最適化 */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* コンテナ */
+.container-responsive {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* =====================================
+   タッチ操作対応
+   ===================================== */
+
+/* タッチターゲット最小サイズ */
+button,
+.btn,
+a[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.touch-target {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* タッチフィードバック */
+.touch-interactive {
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.touch-interactive:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+/* スワイプ対応 */
+.swipeable {
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ピンチズーム無効化（必要な場合のみ） */
+.no-zoom {
+  touch-action: manipulation;
+}
+
+/* =====================================
+   グリッドシステム（統一）
+   ===================================== */
+
+.row-responsive {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 calc(-1 * var(--spacing-sm));
+}
+
+.col-responsive {
+  flex: 1;
+  padding: 0 var(--spacing-sm);
+  min-width: 0; /* flex item overflow fix */
+}
+
+/* =====================================
+   フォーム要素（統一レスポンシブ）
+   ===================================== */
+
+.form-control-responsive {
+  width: 100%;
+  min-height: var(--touch-target-comfortable);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  /* iOS styling reset */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-control-responsive:focus {
+  outline: none;
+  border-color: var(--beauty-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ラベル */
+.form-label-responsive {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: #374151;
+}
+
+/* =====================================
+   ナビゲーション（統一レスポンシブ）
+   ===================================== */
+
+.nav-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.nav-item-responsive {
+  min-height: var(--touch-target-comfortable);
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-item-responsive:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+/* =====================================
+   カードコンポーネント（統一）
+   ===================================== */
+
+.card-responsive {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.card-responsive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-responsive {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.card-body-responsive {
+  padding: var(--spacing-lg);
+}
+
+.card-footer-responsive {
+  padding: var(--spacing-lg);
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* =====================================
+   モーダル（統一レスポンシブ）
+   ===================================== */
+
+.modal-responsive {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  padding: var(--spacing-md);
+}
+
+.modal-content-responsive {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 500px;
+}
+
+.modal-header-responsive {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-body-responsive {
+  padding: var(--spacing-lg);
+}
+
+.modal-footer-responsive {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  padding: var(--spacing-lg);
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =====================================
+   ユーティリティクラス
+   ===================================== */
+
+/* Display */
+.d-mobile-none { display: none; }
+.d-mobile-block { display: block; }
+.d-mobile-flex { display: flex; }
+
+/* Spacing */
+.p-responsive { padding: var(--spacing-md); }
+.m-responsive { margin: var(--spacing-md); }
+.gap-responsive { gap: var(--spacing-md); }
+
+/* Text */
+.text-responsive { font-size: var(--font-size-base); }
+.text-responsive-sm { font-size: var(--font-size-sm); }
+.text-responsive-lg { font-size: var(--font-size-lg); }
+
+/* =====================================
+   スマートフォン（portrait）: 320px - 575px
+   ===================================== */
+@media (max-width: 575.98px) {
+  :root {
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --font-size-base: 0.9rem;
+    --font-size-lg: 1rem;  
+    --font-size-xl: 1.125rem;
+    --font-size-2xl: 1.25rem;
+  }
+
+  .container-responsive {
+    padding: 0 var(--spacing-sm);
+  }
+
+  /* フォーム */
+  .form-control-responsive {
+    font-size: 16px; /* iOS zoom prevention */
+  }
+
+  /* ナビゲーション */
+  .nav-responsive {
+    flex-direction: column;
+  }
+
+  /* カード */
+  .card-responsive {
+    border-radius: 8px;
+    margin: var(--spacing-sm) 0;
+  }
+
+  .card-header-responsive,
+  .card-body-responsive,
+  .card-footer-responsive {
+    padding: var(--spacing-md);
+  }
+
+  /* モーダル */
+  .modal-responsive {
+    padding: var(--spacing-sm);
+    align-items: flex-end;
+  }
+
+  .modal-content-responsive {
+    width: 100%;
+    max-height: 80vh;
+    margin-top: auto;
+    border-radius: 12px 12px 0 0;
+  }
+
+  /* Display utilities */
+  .d-mobile-none { display: none !important; }
+  .d-mobile-block { display: block !important; }
+  .d-mobile-flex { display: flex !important; }
+
+  /* テキスト調整 */
+  h1 { font-size: var(--font-size-2xl); }
+  h2 { font-size: var(--font-size-xl); }
+  h3 { font-size: var(--font-size-lg); }
+
+  /* ボタンスタック */
+  .btn-group-responsive {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .btn-group-responsive .btn {
+    width: 100%;
+  }
+}
+
+/* =====================================
+   タブレット（portrait）: 576px - 767px
+   ===================================== */
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .container-responsive {
+    max-width: var(--container-sm);
+  }
+
+  /* 2カラムグリッド */
+  .col-responsive-tablet-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Display utilities */
+  .d-tablet-none { display: none !important; }
+  .d-tablet-block { display: block !important; }
+  .d-tablet-flex { display: flex !important; }
+
+  /* ナビゲーション（横並び可能） */
+  .nav-responsive {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+/* =====================================
+   タブレット（landscape）: 768px - 991px
+   ===================================== */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .container-responsive {
+    max-width: var(--container-md);
+  }
+
+  /* 3カラムグリッド */
+  .col-responsive-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+
+  .col-responsive-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .col-responsive-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+  }
+
+  /* Display utilities */
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+
+  /* モーダル */
+  .modal-responsive {
+    align-items: center;
+  }
+
+  .modal-content-responsive {
+    margin: auto;
+    border-radius: 12px;
+  }
+}
+
+/* =====================================
+   デスクトップ: 992px - 1199px
+   ===================================== */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .container-responsive {
+    max-width: var(--container-lg);
+  }
+
+  /* 4カラムグリッド */
+  .col-responsive-lg-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+
+  .col-responsive-lg-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+
+  .col-responsive-lg-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .col-responsive-lg-9 {
+    flex: 0 0 75%;
+    max-width: 75%;
+  }
+
+  /* Display utilities */
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+
+  /* フォーム横並び */
+  .form-row-responsive {
+    display: flex;
+    gap: var(--spacing-md);
+  }
+
+  .form-row-responsive .form-control-responsive {
+    flex: 1;
+  }
+}
+
+/* =====================================
+   大画面デスクトップ: 1200px+
+   ===================================== */
+@media (min-width: 1200px) {
+  .container-responsive {
+    max-width: var(--container-xl);
+  }
+
+  /* 5カラム・6カラムグリッド */
+  .col-responsive-xl-2 {
+    flex: 0 0 16.666667%;
+    max-width: 16.666667%;
+  }
+
+  .col-responsive-xl-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+
+  .col-responsive-xl-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+  }
+
+  /* Display utilities */
+  .d-xl-none { display: none !important; }
+  .d-xl-block { display: block !important; }
+  .d-xl-flex { display: flex !important; }
+}
+
+/* =====================================
+   超大画面: 1400px+
+   ===================================== */
+@media (min-width: 1400px) {
+  .container-responsive {
+    max-width: var(--container-xxl);
+  }
+
+  :root {
+    --spacing-xl: 2.5rem;
+    --spacing-xxl: 4rem;
+    --font-size-3xl: 2rem;
+    --font-size-4xl: 2.5rem;
+  }
+}
+
+/* =====================================
+   アクセシビリティ対応
+   ===================================== */
+
+/* 色覚対応 */
+@media (prefers-contrast: high) {
+  .form-control-responsive {
+    border-width: 3px;
+  }
+  
+  .btn {
+    border-width: 2px;
+  }
+}
+
+/* モーション削減対応 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .touch-interactive:active {
+    transform: none;
+  }
+
+  .card-responsive:hover {
+    transform: none;
+  }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .card-responsive {
+    background: #1f2937;
+    color: white;
+  }
+
+  .card-header-responsive,
+  .card-footer-responsive {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .form-control-responsive {
+    background: #1f2937;
+    border-color: #374151;
+    color: white;
+  }
+
+  .modal-content-responsive {
+    background: #1f2937;
+    color: white;
+  }
+
+  .modal-header-responsive,
+  .modal-footer-responsive {
+    border-color: #374151;
+  }
+}
+
+/* =====================================
+   デバイス特化対応
+   ===================================== */
+
+/* iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .form-control-responsive {
+    /* Safari font size zoom prevention */
+    transform: translateZ(0);
+  }
+  
+  /* Safe area padding for notch devices */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Android Chrome */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  .container-responsive {
+    /* Android viewport optimization */
+    width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* =====================================
+   印刷対応
+   ===================================== */
+@media print {
+  .modal-responsive,
+  .touch-interactive,
+  .nav-responsive,
+  button:not(.print-button) {
+    display: none !important;
+  }
+
+  .card-responsive {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    break-inside: avoid;
+  }
+
+  .container-responsive {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* 印刷用フォントサイズ */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  h1 { font-size: 18pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 14pt; }
+}
+
+/* =====================================
+   パフォーマンス最適化
+   ===================================== */
+
+/* GPU accelerated transforms */
+.gpu-optimized {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Contain layout for better performance */
+.contain-layout {
+  contain: layout;
+}
+
+/* Lazy loading optimizations */
+.lazy-load {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
