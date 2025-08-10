@@ -6,6 +6,8 @@ services:
     extends:
       file: base.yml
       service: frontend
+    env_file:
+      - .env.dev
     environment:
       - NODE_ENV=development
       - FIREBASE_ENV=development

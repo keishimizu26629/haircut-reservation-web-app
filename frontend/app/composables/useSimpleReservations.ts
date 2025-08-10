@@ -1,16 +1,17 @@
 // Vue 3 composables are auto-imported
+import { getAuth } from 'firebase/auth'
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
+  getFirestore,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc
 } from 'firebase/firestore'
-import { getFirebaseInstances } from '../stores/auth'
 
 interface Reservation {
   id?: string
@@ -22,8 +23,8 @@ interface Reservation {
   // endTime は計算値のみ（Firestoreには保存しない）
   category: 'cut' | 'color' | 'perm' | 'straight' | 'mesh' | 'other' // 色分け用カテゴリ
   status: 'active' | 'completed' | 'cancelled' // ステータス
-  createdAt?: any
-  updatedAt?: any
+  createdAt?: unknown
+  updatedAt?: unknown
   createdBy?: string // スタッフID
 }
 
@@ -57,7 +58,7 @@ export const useReservations = () => {
   const startRealtimeListener = () => {
     try {
       console.log('🔄 Starting realtime listener...')
-      const { firestore } = getFirebaseInstances()
+      const firestore = getFirestore()
       console.log('🔥 Firestore instance for listener:', !!firestore)
 
       const reservationsRef = collection(firestore, 'reservations')
@@ -100,7 +101,7 @@ export const useReservations = () => {
           console.error('❌ Listener error details:', {
             name: err instanceof Error ? err.name : 'UnknownError',
             message: errorMessage,
-            code: (err as any)?.code || 'unknown'
+            code: (err as { code?: string })?.code || 'unknown'
           })
           error.value = `データの取得に失敗しました: ${errorMessage}`
         }
@@ -112,7 +113,7 @@ export const useReservations = () => {
       console.error('❌ Listener startup error details:', {
         name: err instanceof Error ? err.name : 'UnknownError',
         message: errorMessage,
-        code: (err as any)?.code || 'unknown'
+        code: (err as { code?: string })?.code || 'unknown'
       })
       error.value = `リアルタイム同期の開始に失敗しました: ${errorMessage}`
     }
@@ -136,7 +137,7 @@ export const useReservations = () => {
     })
 
     try {
-      const { firestore } = getFirebaseInstances()
+      const firestore = getFirestore()
       console.log('🔥 Firestore instance:', !!firestore)
 
       const reservationsRef = collection(firestore, 'reservations')
@@ -160,7 +161,7 @@ export const useReservations = () => {
       console.error('❌ Error details:', {
         name: err instanceof Error ? err.name : 'UnknownError',
         message: errorMessage,
-        code: (err as any)?.code || 'unknown',
+        code: (err as { code?: string })?.code || 'unknown',
         stack: err instanceof Error ? err.stack : 'No stack trace'
       })
       error.value = `予約の追加に失敗しました: ${errorMessage}`
@@ -176,7 +177,7 @@ export const useReservations = () => {
     error.value = null
 
     try {
-      const { firestore } = getFirebaseInstances()
+      const firestore = getFirestore()
       const docRef = doc(firestore, 'reservations', id)
 
       // endTimeは保存しない（動的計算のみ）
@@ -204,7 +205,7 @@ export const useReservations = () => {
     error.value = null
 
     try {
-      const { firestore } = getFirebaseInstances()
+      const firestore = getFirestore()
       const docRef = doc(firestore, 'reservations', id)
       await deleteDoc(docRef)
 
@@ -225,8 +226,8 @@ export const useReservations = () => {
 
     // 認証状態を確認
     try {
-      const { getCurrentUser } = await import('vuefire')
-      const currentUser = await getCurrentUser()
+      const auth = getAuth()
+      const currentUser = auth.currentUser
       console.log('👤 Current user:', currentUser ? currentUser.uid : 'Not authenticated')
 
       if (currentUser) {

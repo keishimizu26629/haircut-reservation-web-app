@@ -6,20 +6,31 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">
           美容室予約システム
         </h1>
-        <p class="text-gray-600">スタッフログイン</p>
+        <p class="text-gray-600">
+          スタッフログイン
+        </p>
       </div>
 
       <!-- ログインフォーム -->
       <div class="bg-white shadow rounded-lg px-6 py-8">
-        <form @submit.prevent="handleLogin" class="space-y-6">
+        <form
+          class="space-y-6"
+          @submit.prevent="handleLogin"
+        >
           <!-- エラーメッセージ -->
-          <div v-if="errorMessage" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div
+            v-if="errorMessage"
+            class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"
+          >
             {{ errorMessage }}
           </div>
 
           <!-- メールアドレス -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               メールアドレス
             </label>
             <input
@@ -29,12 +40,15 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="メールアドレスを入力"
-            />
+            >
           </div>
 
           <!-- パスワード -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               パスワード
             </label>
             <input
@@ -44,7 +58,7 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="パスワードを入力"
-            />
+            >
           </div>
 
           <!-- ログインボタン -->
@@ -59,14 +73,19 @@
         </form>
 
         <!-- 新規登録リンク -->
+        <!--
         <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             アカウントをお持ちでない方は
-            <NuxtLink to="/register" class="text-blue-600 hover:text-blue-500 font-medium">
+            <NuxtLink
+              to="/register"
+              class="text-blue-600 hover:text-blue-500 font-medium"
+            >
               新規登録
             </NuxtLink>
           </p>
         </div>
+        -->
       </div>
     </div>
   </div>
@@ -74,7 +93,7 @@
 
 <script setup>
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { getFirebaseInstances } from '../stores/auth'
+import { getAuth } from 'firebase/auth'
 
 definePageMeta({
   layout: 'auth',
@@ -99,7 +118,11 @@ const handleLogin = async () => {
 
   try {
     console.log('🔐 Starting login process...')
-    const { auth } = getFirebaseInstances()
+    console.log('🔐 Login timestamp:', new Date().toISOString())
+    console.log('🔐 Form data:', { email: form.email, passwordLength: form.password.length })
+
+    const auth = getAuth()
+    console.log('🔐 Auth instance obtained:', !!auth)
 
     console.log('🔐 Attempting login with:', form.email)
     const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password)
@@ -117,20 +140,22 @@ const handleLogin = async () => {
     // 認証状態の完全な同期を確認
     await authStore.checkAuthState()
 
-    // VueFireの認証状態が更新されるまで少し待機
-    console.log('🔐 Waiting for VueFire auth sync...')
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Firebase Authの認証状態が更新されるまで少し待機
+    // 本番環境では同期により時間がかかることがある
+    const syncWaitTime = import.meta.env.PROD ? 2000 : 1000
+    console.log(`🔐 Waiting for Firebase auth sync... (${syncWaitTime}ms)`)
+    await new Promise(resolve => setTimeout(resolve, syncWaitTime))
 
-    // VueFireの認証状態を確認
-    const { getCurrentUser } = await import('vuefire')
-    const vueFireUser = await getCurrentUser()
-    console.log('🔐 VueFire auth state:', {
-      user: !!vueFireUser,
-      uid: vueFireUser?.uid
+    // Firebase Authの認証状態を確認
+    const currentUser = auth.currentUser
+    console.log('🔐 Firebase auth state:', {
+      user: !!currentUser,
+      uid: currentUser?.uid
     })
 
     console.log('🔐 AuthStore updated, redirecting to calendar...')
-    await navigateTo('/calendar')
+    // メインページにリダイレクト（認証ミドルウェアが適切に処理）
+    await navigateTo('/')
   } catch (error) {
     console.error('🔐 Login error:', error)
     errorMessage.value = getErrorMessage(error.code)

@@ -451,7 +451,7 @@
 
 <script setup>
 import { signOut } from 'firebase/auth'
-import { getFirebaseInstances } from '../stores/auth'
+import { getAuth } from 'firebase/auth'
 import { useSimpleReservations } from '../composables/useSimpleReservations'
 
 definePageMeta({
@@ -743,7 +743,7 @@ const deleteReservation = async () => {
 
 const logout = async () => {
   try {
-    const { auth } = getFirebaseInstances()
+    const auth = getAuth()
     await signOut(auth)
     await navigateTo('/login')
   } catch (error) {

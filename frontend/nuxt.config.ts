@@ -71,50 +71,10 @@ export default defineNuxtConfig({
   ],
 
   // Modules
-  modules: ['@pinia/nuxt', '@vueuse/nuxt', '@nuxtjs/tailwindcss', 'nuxt-vuefire'],
+  modules: ['@pinia/nuxt', '@vueuse/nuxt', '@nuxtjs/tailwindcss'],
 
-  // VueFire configuration - 環境別設定
-  vuefire: {
-    // Firebase設定（環境変数から動的に設定）
-    config: {
-      apiKey: process.env.FIREBASE_API_KEY || 'demo-api-key',
-      authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
-      projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
-      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
-      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '123456789',
-      appId: process.env.FIREBASE_APP_ID || '1:123456789:web:demo123'
-    },
-
-    // SSR無効化
-    ssr: false,
-
-    // Firebase Auth設定（環境別）
-    auth: {
-      enabled: true,
-      sessionCookie: false,
-      // Emulatorはlocal環境のみ
-      ...(process.env.FIREBASE_ENV === 'local' && {
-        emulatorHost: 'localhost:9099',
-        emulatorOptions: {
-          disableWarnings: true
-        }
-      })
-    },
-
-    // Firestore設定（環境別）
-    firestore: {
-      // Emulatorはlocal環境のみ
-      ...(process.env.FIREBASE_ENV === 'local' && {
-        emulatorHost: 'localhost:8080',
-        emulatorOptions: {
-          experimentalForceLongPolling: true
-        }
-      })
-    },
-
-    // AppCheck完全無効化
-    appCheck: false
-  },
+  // SSR完全無効化
+  ssr: false,
 
   // Runtime configuration - VueFire統合最適化版
   runtimeConfig: {
@@ -135,12 +95,12 @@ export default defineNuxtConfig({
 
       // Firebase configuration (for client-side access)
       firebase: {
-        projectId: process.env.FIREBASE_PROJECT_ID || 'demo-project',
-        apiKey: process.env.FIREBASE_API_KEY || 'demo-api-key',
-        authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'demo-project.firebaseapp.com',
-        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'demo-project.appspot.com',
-        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '123456789',
-        appId: process.env.FIREBASE_APP_ID || '1:123456789:web:demo123'
+        projectId: process.env.FIREBASE_DEV_PROJECT_ID || '',
+        apiKey: process.env.FIREBASE_DEV_API_KEY || '',
+        authDomain: process.env.FIREBASE_DEV_AUTH_DOMAIN || '',
+        storageBucket: process.env.FIREBASE_DEV_STORAGE_BUCKET || '',
+        messagingSenderId: process.env.FIREBASE_DEV_MESSAGING_SENDER_ID || '',
+        appId: process.env.FIREBASE_DEV_APP_ID || ''
       },
 
       // API configuration
@@ -152,12 +112,24 @@ export default defineNuxtConfig({
         defaultTenantId: process.env.DEFAULT_TENANT_ID || 'default-salon'
       },
 
-      // Firebase Emulators configuration
+      // Firebase Emulators configuration (開発環境のみ)
       firebaseEmulators: {
-        authHost: process.env.FIREBASE_AUTH_EMULATOR_HOST || 'firebase-emulator:9099',
-        firestoreHost: process.env.FIREBASE_FIRESTORE_EMULATOR_HOST || 'firebase-emulator:8080',
-        storageHost: process.env.FIREBASE_STORAGE_EMULATOR_HOST || 'firebase-emulator:9199',
-        functionsHost: process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST || 'firebase-emulator:5001'
+        authHost:
+          process.env.NODE_ENV === 'production'
+            ? ''
+            : process.env.FIREBASE_AUTH_EMULATOR_HOST || 'firebase-emulator:9099',
+        firestoreHost:
+          process.env.NODE_ENV === 'production'
+            ? ''
+            : process.env.FIREBASE_FIRESTORE_EMULATOR_HOST || 'firebase-emulator:8080',
+        storageHost:
+          process.env.NODE_ENV === 'production'
+            ? ''
+            : process.env.FIREBASE_STORAGE_EMULATOR_HOST || 'firebase-emulator:9199',
+        functionsHost:
+          process.env.NODE_ENV === 'production'
+            ? ''
+            : process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST || 'firebase-emulator:5001'
       },
 
       // Feature flags
@@ -170,9 +142,9 @@ export default defineNuxtConfig({
         performanceMonitoring: process.env.ENABLE_PERFORMANCE_MONITORING === 'true'
       },
 
-      // Security settings
+      // Security settings - Firebase Auth対応でCSP無効化
       security: {
-        csp: process.env.ENABLE_CSP === 'true',
+        csp: false,
         httpsRedirect: process.env.ENABLE_HTTPS_REDIRECT === 'true',
         hsts: process.env.ENABLE_HSTS === 'true'
       },
@@ -201,24 +173,12 @@ export default defineNuxtConfig({
         }
       }
     },
-    // Build optimization - パフォーマンス重視設定
+    // Build optimization - 静的ホスティング対応
     build: {
-      // Code splitting for better performance
+      // Code splittingを最小限に抑制
       rollupOptions: {
         output: {
-          manualChunks: id => {
-            // Firebase関連は別チャンク
-            if (id.includes('firebase')) return 'firebase'
-            // Vue core関連
-            if (id.includes('vue') || id.includes('@vue')) return 'vue-vendor'
-
-            // 管理画面関連は遅延読み込み
-            if (id.includes('components/Admin') || id.includes('dashboard')) return 'admin'
-            // その他のライブラリ
-            if (id.includes('node_modules')) return 'vendor'
-            // デフォルト
-            return undefined
-          }
+          manualChunks: () => 'main'
         }
       },
       // Chunk size warning threshold
@@ -272,7 +232,7 @@ export default defineNuxtConfig({
         { name: 'author', content: 'Haircut Reservation System' },
         { name: 'robots', content: 'index, follow' },
         { name: 'theme-color', content: '#3b82f6' },
-        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
         { name: 'apple-mobile-web-app-title', content: '美容室予約' },
         { property: 'og:title', content: '美容室予約システム - オンライン予約' },
@@ -311,10 +271,10 @@ export default defineNuxtConfig({
     routeRules: {
       // ルートページ（予約画面）: 超高速化設定
       '/': {
-        ssr: true, // SSRで初期表示を高速化
-        prerender: false, // 動的コンテンツのためプリレンダー無効
+        ssr: false,
+        prerender: true,
         headers: {
-          'Cache-Control': 'public, max-age=300', // 5分キャッシュ
+          'Cache-Control': 'no-cache',
           'X-Frame-Options': 'DENY',
           'X-Content-Type-Options': 'nosniff'
         }

@@ -4,8 +4,8 @@
  */
 
 import type { User } from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 import type { RouteLocationNormalized } from 'vue-router'
-import { getCurrentUser } from 'vuefire'
 
 // TypeScript型定義
 interface AuthMiddlewareConfig {
@@ -42,7 +42,8 @@ const AUTH_CONFIG: AuthMiddlewareConfig = {
     '/contact',
     '/landing',
     '/api-test', // 開発用
-    '/firebase-test' // 開発用
+    '/firebase-test', // 開発用
+    '/diagnose-login.html' // 診断ツール
   ],
 
   // 認証ページ（認証済みユーザーはアクセス不可）
@@ -69,7 +70,7 @@ class SecurityHelper {
 
     try {
       const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-      const requestToken = (headers as any)['x-csrf-token']
+      const requestToken = (headers as Record<string, string>)['x-csrf-token']
 
       return !token || token === requestToken
     } catch (error) {
@@ -201,6 +202,11 @@ function evaluateRouteAccess(
   // 2. 認証ページアクセスチェック
   if (AUTH_CONFIG.authRoutes.includes(path)) {
     if (security.isAuthenticated) {
+      // 認証済みユーザーのリダイレクトに少し遅延を追加
+      setTimeout(() => {
+        console.log('🔒 Redirecting authenticated user from auth page')
+      }, 100)
+
       return {
         allowed: false,
         redirect: AUTH_CONFIG.defaultRedirect,
@@ -252,11 +258,28 @@ export default defineNuxtRouteMiddleware(async to => {
     }
 
     console.log(`🔒 Auth middleware: Checking access to ${to.path}`)
+    console.log(`🔒 Timestamp: ${new Date().toISOString()}`)
+    console.log(`🔒 User Agent: ${navigator?.userAgent || 'Unknown'}`)
 
-    // 1. 現在の認証ユーザー取得（VueFire）
+    // 1. Firebase Auth初期化待機
     let currentUser: User | null = null
     try {
-      currentUser = (await getCurrentUser()) ?? null
+      const auth = getAuth()
+
+      // Firebase Authの初期化を待機（最大3秒）
+      await new Promise(resolve => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+          currentUser = user
+          unsubscribe()
+          resolve(user)
+        })
+
+        // タイムアウト処理
+        setTimeout(() => {
+          unsubscribe()
+          resolve(null)
+        }, 3000)
+      })
     } catch (error) {
       console.warn('🔒 Failed to get current user:', error)
       currentUser = null
@@ -268,7 +291,9 @@ export default defineNuxtRouteMiddleware(async to => {
     console.log('🔒 Security context:', {
       authenticated: securityContext.isAuthenticated,
       role: securityContext.userRole,
-      validSession: securityContext.hasValidSession
+      validSession: securityContext.hasValidSession,
+      userEmail: (currentUser as User | null)?.email || 'None',
+      userUID: (currentUser as User | null)?.uid || 'None'
     })
 
     // 3. セッション活動記録更新
@@ -280,6 +305,7 @@ export default defineNuxtRouteMiddleware(async to => {
     // 5. アクセス制御実行
     if (!accessResult.allowed) {
       console.log(`🔒 Access denied to ${to.path}:`, accessResult.reason)
+      console.log(`🔒 Redirect target: ${accessResult.redirect || 'None'}`)
 
       // セキュリティログ記録（開発環境）
       if (import.meta.env.NODE_ENV === 'development') {
@@ -317,17 +343,15 @@ export function useAuthGuard() {
   // 認証状態変更時の処理
   const onAuthStateChanged = (callback: (user: User | null) => void) => {
     // VueFire の認証状態変更を監視
-    const auth = useFirebaseAuth()
-    if (auth) {
-      return auth.onAuthStateChanged(callback)
-    }
-    return () => {} // デフォルトの空関数を返す
+    const auth = getAuth()
+    return auth.onAuthStateChanged(callback)
   }
 
   // セッション強制更新
   const refreshSession = async (): Promise<boolean> => {
     try {
-      const user = await getCurrentUser()
+      const auth = getAuth()
+      const user = auth.currentUser
       if (user) {
         await user.getIdToken(true) // 強制トークン更新
         SecurityHelper.updateLastActivity()
@@ -343,15 +367,13 @@ export function useAuthGuard() {
   // 手動ログアウト
   const signOut = async (): Promise<void> => {
     try {
-      const auth = useFirebaseAuth()
-      if (auth) {
-        await auth.signOut()
-        // セッション情報クリア
-        if (import.meta.client) {
-          localStorage.removeItem('lastActivity')
-        }
-        await navigateTo('/login')
+      const auth = getAuth()
+      await auth.signOut()
+      // セッション情報クリア
+      if (import.meta.client) {
+        localStorage.removeItem('lastActivity')
       }
+      await navigateTo('/login')
     } catch (error) {
       console.error('🔒 Sign out failed:', error)
     }
@@ -366,7 +388,17 @@ export function useAuthGuard() {
 
 // デバッグ用エクスポート（開発環境のみ）
 if (import.meta.env.NODE_ENV === 'development') {
-  ;(globalThis as any).__AUTH_DEBUG__ = {
+  // eslint-disable-next-line no-extra-semi
+  ;(
+    globalThis as typeof globalThis & {
+      __AUTH_DEBUG__?: {
+        AUTH_CONFIG: typeof AUTH_CONFIG
+        SecurityHelper: typeof SecurityHelper
+        buildSecurityContext: typeof buildSecurityContext
+        evaluateRouteAccess: typeof evaluateRouteAccess
+      }
+    }
+  ).__AUTH_DEBUG__ = {
     AUTH_CONFIG,
     SecurityHelper,
     buildSecurityContext,

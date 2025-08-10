@@ -4,7 +4,7 @@
  */
 
 import type { User } from 'firebase/auth'
-import { getCurrentUser } from 'vuefire'
+import { getAuth } from 'firebase/auth'
 
 // 認証設定（auth.tsと統一）
 const AUTH_CONFIG = {
@@ -48,12 +48,15 @@ export default defineNuxtRouteMiddleware(async to => {
     console.log(`🔒 Global Auth: Checking ${to.path}`)
 
     // 認証状態の確認を少し遅延させて、初期化を待つ
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // 本番環境では初期化により時間がかかる可能性があるため、より長い待機時間を設定
+    const waitTime = process.env.NODE_ENV === 'production' ? 500 : 100
+    await new Promise(resolve => setTimeout(resolve, waitTime))
 
     // 1. VueFire から現在のユーザー取得
     let currentUser: User | null = null
     try {
-      currentUser = (await getCurrentUser()) ?? null
+      const auth = getAuth()
+      currentUser = auth.currentUser
     } catch (error) {
       console.warn('🔒 Failed to get current user:', error)
       currentUser = null

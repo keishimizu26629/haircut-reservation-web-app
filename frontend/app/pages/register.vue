@@ -104,14 +104,14 @@
         </form>
 
         <!-- ログインリンク -->
-        <div class="mt-6 text-center">
+        <!-- <div class="mt-6 text-center">
           <p class="text-sm text-gray-600">
             すでにアカウントをお持ちの方は
             <NuxtLink to="/login" class="text-blue-600 hover:text-blue-500 font-medium">
               ログイン
             </NuxtLink>
           </p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -120,7 +120,8 @@
 <script setup>
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { getFirebaseInstances } from '../stores/auth'
+import { getAuth } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
 
 definePageMeta({
   layout: 'auth',
@@ -161,7 +162,8 @@ const handleRegister = async () => {
 
   try {
     console.log('🔐 Starting registration process...')
-    const { auth, firestore } = getFirebaseInstances()
+    const auth = getAuth()
+  const firestore = getFirestore()
 
     // ユーザー作成
     console.log('🔐 Creating user with email and password...')
