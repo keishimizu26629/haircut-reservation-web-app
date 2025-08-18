@@ -89,6 +89,17 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { auth } = getFirebaseInstances()
 
+        // 認証永続化を確実にする（Docker環境対応）
+        if (!process.env.FIREBASE_ENV || process.env.FIREBASE_ENV !== 'local') {
+          try {
+            const { setPersistence, browserLocalPersistence } = await import('firebase/auth')
+            await setPersistence(auth, browserLocalPersistence)
+            console.log('🔒 AuthStore: Auth persistence confirmed')
+          } catch (persistenceError) {
+            console.warn('🔒 AuthStore: Auth persistence warning:', persistenceError)
+          }
+        }
+
         return new Promise(resolve => {
           const unsubscribe = auth.onAuthStateChanged(async user => {
             console.log('🔒 AuthStore: Auth state changed:', !!user)
@@ -96,6 +107,10 @@ export const useAuthStore = defineStore('auth', {
             try {
               if (user) {
                 this.setUser(user)
+                // セッション活動記録を更新
+                if (import.meta.client) {
+                  localStorage.setItem('lastActivity', Date.now().toString())
+                }
                 console.log('🔒 AuthStore: User authenticated')
                 resolve(true)
               } else {

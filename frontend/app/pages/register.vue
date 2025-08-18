@@ -6,20 +6,31 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">
           美容室予約システム
         </h1>
-        <p class="text-gray-600">新規アカウント作成</p>
+        <p class="text-gray-600">
+          新規アカウント作成
+        </p>
       </div>
 
       <!-- 登録フォーム -->
       <div class="bg-white shadow rounded-lg px-6 py-8">
-        <form @submit.prevent="handleRegister" class="space-y-6">
+        <form
+          class="space-y-6"
+          @submit.prevent="handleRegister"
+        >
           <!-- エラーメッセージ -->
-          <div v-if="errorMessage" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div
+            v-if="errorMessage"
+            class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"
+          >
             {{ errorMessage }}
           </div>
 
           <!-- 名前 -->
           <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="name"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               お名前
             </label>
             <input
@@ -29,12 +40,15 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="お名前を入力"
-            />
+            >
           </div>
 
           <!-- メールアドレス -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="email"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               メールアドレス
             </label>
             <input
@@ -44,12 +58,15 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="メールアドレスを入力"
-            />
+            >
           </div>
 
           <!-- パスワード -->
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="password"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               パスワード
             </label>
             <input
@@ -60,12 +77,15 @@
               minlength="6"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="パスワードを入力（6文字以上）"
-            />
+            >
           </div>
 
           <!-- パスワード確認 -->
           <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="confirmPassword"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               パスワード確認
             </label>
             <input
@@ -75,7 +95,7 @@
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="パスワードを再入力"
-            />
+            >
           </div>
 
           <!-- 利用規約同意 -->
@@ -86,8 +106,11 @@
               type="checkbox"
               required
               class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label for="acceptTerms" class="ml-2 block text-sm text-gray-700">
+            >
+            <label
+              for="acceptTerms"
+              class="ml-2 block text-sm text-gray-700"
+            >
               利用規約に同意します
             </label>
           </div>

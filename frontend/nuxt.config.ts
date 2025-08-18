@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
     dirs: ['app/composables', 'app/composables/**', 'app/stores'],
-    presets: ['vue', 'vue-router', 'pinia'],
+    // presets を削除して Nuxt のデフォルトインポートのみ使用
     // グローバル型生成
     global: true
   },

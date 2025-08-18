@@ -112,7 +112,7 @@
       <!-- ログインボタン -->
       <button
         type="submit"
-        :disabled="!isFormValid || loading"
+        :disabled="!isFormValid || loading ? true : false"
         class="login-button"
       >
         <i
@@ -132,7 +132,7 @@
     <button
       type="button"
       class="google-login-button"
-      :disabled="loading"
+      :disabled="loading ? true : false"
       @click="$emit('googleLogin')"
     >
       <i class="bi bi-google" />
@@ -169,7 +169,7 @@ interface Emits {
   (event: 'googleLogin'): void
 }
 
-const _props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loading: false,
   globalError: ''
 })

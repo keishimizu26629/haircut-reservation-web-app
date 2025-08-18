@@ -51,10 +51,14 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+# Stop any running containers first
+echo "🛑 Stopping any existing containers..."
+cd ..
+docker compose -f environments/base.yml -f environments/prod.yml down 2>/dev/null || true
+
 # Start services
 echo "🔧 Starting Production Environment..."
-cd ..
-docker compose -f base.yml -f prod.yml up --build -d
+docker compose -f environments/base.yml -f environments/prod.yml up --build -d
 
 echo ""
 echo "✅ Production Environment Started!"
@@ -65,5 +69,5 @@ echo "🔥 Firebase Project:   ${FIREBASE_PROD_PROJECT_ID}"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
 echo "================================================"
-echo "🛑 To stop: cd environments && docker compose -f base.yml -f prod.yml down"
-echo "📋 To view logs: cd environments && docker compose -f base.yml -f prod.yml logs -f"
+echo "🛑 To stop: docker compose -f environments/base.yml -f environments/prod.yml down"
+echo "📋 To view logs: docker compose -f environments/base.yml -f environments/prod.yml logs -f"

@@ -9,22 +9,26 @@ echo "🚀 Starting Local Development Environment (Firebase Emulator)"
 echo "================================================"
 
 # Check if .env.local exists
-if [ ! -f "environments/.env.local" ]; then
-    echo "⚠️  Warning: environments/.env.local not found!"
+if [ ! -f "../.env.local" ]; then
+    echo "⚠️  Warning: .env.local not found!"
     echo "📝 Creating from template..."
-    cp environments/env.template environments/.env.local
-    echo "✅ Please edit environments/.env.local with your configuration"
+    cp ../env.template ../.env.local
+    echo "✅ Please edit .env.local with your configuration"
 fi
 
 # Export environment variables
 set -a  # Export all variables
-source environments/.env.local
+source ../.env.local
 set +a  # Stop exporting
+
+# Stop any running containers first
+echo "🛑 Stopping any existing containers..."
+cd ..
+docker compose -f environments/base.yml -f environments/local.yml down 2>/dev/null || true
 
 # Start services
 echo "🔧 Starting Local Development Environment..."
-cd environments
-docker compose -f base.yml -f local.yml up --build -d
+docker compose -f environments/base.yml -f environments/local.yml up --build -d
 
 echo ""
 echo "✅ Local Development Environment Started!"
@@ -35,5 +39,5 @@ echo "🔥 Firebase Emulator:  http://localhost:4000"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
 echo "================================================"
-echo "🛑 To stop: docker compose -f base.yml -f local.yml down"
-echo "📋 To view logs: docker compose -f base.yml -f local.yml logs -f"
+echo "🛑 To stop: docker compose -f environments/base.yml -f environments/local.yml down"
+echo "📋 To view logs: docker compose -f environments/base.yml -f environments/local.yml logs -f"
