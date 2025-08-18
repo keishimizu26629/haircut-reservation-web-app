@@ -5,6 +5,24 @@
 
 import { deleteApp, getApps } from 'firebase/app'
 
+// 型定義の拡張
+interface PerformanceMemory {
+  usedJSHeapSize: number
+  totalJSHeapSize: number
+  jsHeapSizeLimit: number
+}
+
+interface WindowWithDevtools extends Window {
+  __VUE_DEVTOOLS_GLOBAL_HOOK__?: {
+    emit: (event: string) => void
+  }
+  gc?: () => void
+}
+
+interface PerformanceWithMemory extends Performance {
+  memory?: PerformanceMemory
+}
+
 interface SystemHealthStatus {
   status: 'healthy' | 'warning' | 'critical' | 'recovering'
   timestamp: string
@@ -27,7 +45,7 @@ interface RecoveryAction {
 export class SystemRecoveryManager {
   private static instance: SystemRecoveryManager
   private healthHistory: SystemHealthStatus[] = []
-  private errorLog: Array<{ timestamp: string; error: string; context?: any }> = []
+  private errorLog: Array<{ timestamp: string; error: string; context?: unknown }> = []
   private recoveryInProgress = false
   private monitoringInterval: NodeJS.Timeout | null = null
 
@@ -57,8 +75,8 @@ export class SystemRecoveryManager {
 
     // メモリ使用量チェック
     let memoryUsage = 0
-    if (process.client && (performance as any).memory) {
-      memoryUsage = (performance as any).memory.usedJSHeapSize
+    if (import.meta.client && (performance as PerformanceWithMemory).memory) {
+      memoryUsage = (performance as PerformanceWithMemory).memory!.usedJSHeapSize
       if (memoryUsage > 100 * 1024 * 1024) {
         // 100MB
         issues.push('High memory usage detected')
@@ -66,7 +84,7 @@ export class SystemRecoveryManager {
     }
 
     // DOM状態チェック
-    if (process.client) {
+    if (import.meta.client) {
       const errorElements = document.querySelectorAll('.error, [data-error]')
       if (errorElements.length > 0) {
         issues.push(`${errorElements.length} error elements found in DOM`)
@@ -164,12 +182,12 @@ export class SystemRecoveryManager {
    * メモリリーク検出・クリーンアップ
    */
   async detectAndFixMemoryLeaks(): Promise<boolean> {
-    if (!process.client || !(performance as any).memory) {
+    if (!import.meta.client || !(performance as PerformanceWithMemory).memory) {
       return true
     }
 
     try {
-      const memoryInfo = (performance as any).memory
+      const memoryInfo = (performance as PerformanceWithMemory).memory!
       const memoryUsage = memoryInfo.usedJSHeapSize
       const memoryLimit = memoryInfo.jsHeapSizeLimit
       const memoryRatio = memoryUsage / memoryLimit
@@ -190,13 +208,15 @@ export class SystemRecoveryManager {
         })
 
         // Vue/Nuxtコンポーネントの強制ガベージコレクション
-        if ((window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__) {
-          ;(window as any).__VUE_DEVTOOLS_GLOBAL_HOOK__.emit('flush')
+        const devtools = (window as WindowWithDevtools).__VUE_DEVTOOLS_GLOBAL_HOOK__
+        if (devtools) {
+          devtools.emit('flush')
         }
 
         // 強制ガベージコレクション（開発環境のみ）
-        if ((window as any).gc) {
-          ;(window as any).gc()
+        const gc = (window as WindowWithDevtools).gc
+        if (gc) {
+          gc()
         }
 
         console.log('✅ Memory cleanup completed')
@@ -215,7 +235,7 @@ export class SystemRecoveryManager {
    * DOM状態の修正
    */
   async fixDOMIssues(): Promise<boolean> {
-    if (!process.client) return true
+    if (!import.meta.client) return true
 
     try {
       // エラー要素の除去
@@ -347,7 +367,7 @@ export class SystemRecoveryManager {
   /**
    * エラーログの記録
    */
-  logError(error: string, context?: any): void {
+  logError(error: string, context?: unknown): void {
     this.errorLog.push({
       timestamp: new Date().toISOString(),
       error,
@@ -363,7 +383,12 @@ export class SystemRecoveryManager {
   /**
    * システム状態の取得
    */
-  getSystemState() {
+  getSystemState(): {
+    health: SystemHealthStatus | undefined
+    errors: Array<{ timestamp: string; error: string; context?: unknown }>
+    recoveryInProgress: boolean
+    monitoring: boolean
+  } {
     return {
       health: this.healthHistory.slice(-1)[0],
       errors: this.errorLog.slice(-10), // 最新10件
@@ -387,7 +412,7 @@ export class SystemRecoveryManager {
       await Promise.all(apps.map(app => deleteApp(app).catch(() => {})))
 
       // キャッシュクリア
-      if (process.client && 'caches' in window) {
+      if (import.meta.client && 'caches' in window) {
         const cacheNames = await caches.keys()
         await Promise.all(cacheNames.map(name => caches.delete(name)))
       }
@@ -403,9 +428,9 @@ export class SystemRecoveryManager {
 export const systemRecovery = SystemRecoveryManager.getInstance()
 
 // 自動初期化（クライアント側のみ）
-if (process.client) {
+if (import.meta.client) {
   // 開発環境では継続監視を有効化
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.NODE_ENV === 'development') {
     systemRecovery.startContinuousMonitoring(30000) // 30秒間隔
   }
 

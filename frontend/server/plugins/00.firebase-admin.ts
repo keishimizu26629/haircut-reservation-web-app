@@ -70,7 +70,7 @@ export default defineNitroPlugin(async () => {
     const initializedApps = getApps()
     if (initializedApps && initializedApps.length > 0) {
       const app = initializedApps[0]
-      console.log(`✅ Firebase Admin App initialized: ${app.name} (${app.options.projectId})`)
+      console.log(`✅ Firebase Admin App initialized: ${app?.name} (${app?.options?.projectId})`)
     }
   } catch (error) {
     console.error('❌ Firebase Admin SDK initialization failed:', error)

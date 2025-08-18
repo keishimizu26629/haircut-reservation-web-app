@@ -124,6 +124,15 @@ const handleLogin = async () => {
     const auth = getAuth()
     console.log('🔐 Auth instance obtained:', !!auth)
 
+    // 認証永続化を確実にする（Docker環境対応）
+    try {
+      const { setPersistence, browserLocalPersistence } = await import('firebase/auth')
+      await setPersistence(auth, browserLocalPersistence)
+      console.log('🔐 Auth persistence confirmed for login')
+    } catch (persistenceError) {
+      console.warn('🔐 Auth persistence warning:', persistenceError)
+    }
+
     console.log('🔐 Attempting login with:', form.email)
     const userCredential = await signInWithEmailAndPassword(auth, form.email, form.password)
 

@@ -7,7 +7,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=development
       - FIREBASE_USE_EMULATOR=true
@@ -17,6 +17,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - browser-data:/app/.nuxt/browser-data
     depends_on:
       - firebase-emulator
     networks:
@@ -26,12 +27,12 @@ services:
   firebase-emulator:
     image: node:18-alpine
     ports:
-      - "4000:4000"  # Firebase UI
-      - "8080:8080"  # Firestore
-      - "9099:9099"  # Auth
-      - "5001:5001"  # Functions
-      - "8085:8085"  # Pub/Sub
-      - "9199:9199"  # Storage
+      - '4000:4000' # Firebase UI
+      - '8080:8080' # Firestore
+      - '9099:9099' # Auth
+      - '5001:5001' # Functions
+      - '8085:8085' # Pub/Sub
+      - '9199:9199' # Storage
     working_dir: /firebase
     volumes:
       - ./firebase:/firebase
@@ -55,3 +56,4 @@ networks:
 volumes:
   firebase-data:
   node-modules:
+  browser-data:

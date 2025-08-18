@@ -38,8 +38,8 @@ export interface Stylist {
   skills?: string[] // dev2 API互換性
   experience: number // 年数
   rating: number
-  availability?: any // dev2 API互換性
-  performance?: any // dev2 API互換性
+  availability?: Record<string, unknown> // dev2 API互換性
+  performance?: Record<string, unknown> // dev2 API互換性
   isActive: boolean
   workingHours: WorkingHours
 }
@@ -123,14 +123,14 @@ export interface AvailabilityResponse {
 }
 
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: {
     code?: string
     message: string
     field?: string // dev2 API仕様
-    details?: any
+    details?: unknown
   }
   timestamp?: string
 }
@@ -140,7 +140,7 @@ export interface MenuApiResponse extends ApiResponse<{ menus: Service[] }> {}
 export interface StaffApiResponse extends ApiResponse<{ staffs: Stylist[] }> {}
 export interface AvailabilityApiResponse
   extends ApiResponse<{ availableTimeSlots: string[]; totalSlots: number }> {}
-export interface ReservationApiResponse extends ApiResponse<{ reservation: any }> {}
+export interface ReservationApiResponse extends ApiResponse<{ reservation: BookingData }> {}
 
 // 従来型定義（後方互換性）
 export interface BookingApiResponse extends ApiResponse<BookingData> {}

@@ -1,6 +1,7 @@
 /**
  * Firebase Client Plugin - 手動初期化
  */
+import { getAnalytics, isSupported } from 'firebase/analytics'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
@@ -58,6 +59,33 @@ export default defineNuxtPlugin(async () => {
       const auth = getAuth(app)
       const firestore = getFirestore(app)
 
+      // 認証永続化設定を明示的に設定（Docker環境対応）
+      if (!useEmulator) {
+        const { setPersistence, browserLocalPersistence } = await import('firebase/auth')
+        try {
+          await setPersistence(auth, browserLocalPersistence)
+          console.log('🔥 Firebase Auth persistence set to LOCAL')
+        } catch (persistenceError) {
+          console.warn('⚠️ Failed to set auth persistence:', persistenceError)
+        }
+      }
+
+      // Analytics の初期化（本番環境のみ）
+      let analytics = null
+      if (!useEmulator && isProduction) {
+        try {
+          const analyticsSupported = await isSupported()
+          if (analyticsSupported) {
+            analytics = getAnalytics(app)
+            console.log('✅ Firebase Analytics initialized')
+          } else {
+            console.log('⚠️ Firebase Analytics not supported in this environment')
+          }
+        } catch (analyticsError) {
+          console.warn('⚠️ Firebase Analytics initialization failed:', analyticsError)
+        }
+      }
+
       // エミュレータ接続設定（テスト環境）
       if (useEmulator) {
         const { connectAuthEmulator } = await import('firebase/auth')
@@ -83,13 +111,15 @@ export default defineNuxtPlugin(async () => {
       console.log('✅ Auth instance:', !!auth)
       console.log('✅ Firestore instance:', !!firestore)
       console.log('✅ App instance:', !!app)
+      console.log('✅ Analytics instance:', !!analytics)
       console.log('✅ Using emulator:', useEmulator)
 
       return {
         provide: {
           firebaseApp: app,
           firebaseAuth: auth,
-          firebaseFirestore: firestore
+          firebaseFirestore: firestore,
+          firebaseAnalytics: analytics
         }
       }
     } catch (error) {

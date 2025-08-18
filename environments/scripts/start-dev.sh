@@ -39,10 +39,14 @@ for var in "${REQUIRED_VARS[@]}"; do
     fi
 done
 
+# Stop any running containers first
+echo "🛑 Stopping any existing containers..."
+cd ..
+docker compose -f environments/base.yml -f environments/dev.yml down 2>/dev/null || true
+
 # Start services
 echo "🔧 Starting Development Environment..."
-cd ..
-docker compose -f base.yml -f dev.yml up --build -d
+docker compose -f environments/base.yml -f environments/dev.yml up --build -d
 
 echo ""
 echo "✅ Development Environment Started!"
@@ -53,5 +57,5 @@ echo "🔥 Firebase Project:   ${FIREBASE_DEV_PROJECT_ID}"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
 echo "================================================"
-echo "🛑 To stop: cd environments && docker compose -f base.yml -f dev.yml down"
-echo "📋 To view logs: cd environments && docker compose -f base.yml -f dev.yml logs -f"
+echo "🛑 To stop: docker compose -f environments/base.yml -f environments/dev.yml down"
+echo "📋 To view logs: docker compose -f environments/base.yml -f environments/dev.yml logs -f"
