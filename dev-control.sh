@@ -21,6 +21,7 @@ export FIREBASE_DEV_MESSAGING_SENDER_ID=509197594275
 export FIREBASE_DEV_APP_ID=1:509197594275:web:c2aab827763cddcf441916
 export FIREBASE_ENV=development
 export NODE_ENV=development
+export FIREBASE_USE_EMULATOR=false
 
 # Docker Composeファイル
 COMPOSE_FILES="-f environments/base.yml -f environments/dev.yml"

@@ -70,6 +70,11 @@ service cloud.firestore {
       allow delete: if isAuthenticated();
     }
 
+    // User Tags - ユーザー個別のタグ管理
+    match /userTags/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
     // Business hours and availability
     match /availability/{availabilityId} {
       allow read: if true; // Public read access

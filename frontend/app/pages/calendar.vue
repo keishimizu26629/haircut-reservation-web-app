@@ -3,8 +3,8 @@
     <!-- ヘッダー（モバイルファースト） -->
     <header class="bg-white shadow-sm border-b sticky top-0 z-40">
       <div class="px-4 py-3">
-        <!-- タグ管理ボタン -->
-        <div class="mb-3 flex justify-end">
+        <!-- タグ管理ボタンとメニュー -->
+        <div class="mb-3 flex justify-end items-center gap-2">
           <button
             type="button"
             class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
@@ -25,6 +25,84 @@
             </svg>
             タグ管理
           </button>
+
+          <!-- 統計ボタン -->
+          <button
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            @click="showStats = !showStats"
+          >
+            <svg
+              class="w-4 h-4 inline-block mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                v-if="!showStats"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <span class="hidden sm:inline">{{ showStats ? 'カレンダー' : '統計' }}</span>
+            <span class="sm:hidden">{{ showStats ? '📅' : '📊' }}</span>
+          </button>
+
+          <!-- ドロップダウンメニュー -->
+          <div class="relative">
+            <button
+              class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              @click="showMenuDropdown = !showMenuDropdown"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                />
+              </svg>
+            </button>
+            <!-- ドロップダウンメニュー -->
+            <div
+              v-if="showMenuDropdown"
+              class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50"
+              @click="showMenuDropdown = false"
+            >
+              <button
+                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
+                @click="logout"
+              >
+                <svg
+                  class="w-4 h-4 mr-2 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                ログアウト
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- ナビゲーション -->
@@ -78,84 +156,6 @@
               />
             </svg>
           </button>
-        </div>
-
-        <!-- 追加コントロール -->
-        <div class="flex justify-end items-center gap-2 mt-3">
-          <button
-            class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-            @click="showStats = !showStats"
-          >
-            <svg
-              class="w-4 h-4 inline-block mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                v-if="!showStats"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-              <path
-                v-else
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span class="hidden sm:inline">{{ showStats ? 'カレンダー' : '統計' }}</span>
-            <span class="sm:hidden">{{ showStats ? '📅' : '📊' }}</span>
-          </button>
-          <div class="relative">
-            <button
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              @click="showMenuDropdown = !showMenuDropdown"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                />
-              </svg>
-            </button>
-            <!-- ドロップダウンメニュー -->
-            <div
-              v-if="showMenuDropdown"
-              class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50"
-              @click="showMenuDropdown = false"
-            >
-              <button
-                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
-                @click="logout"
-              >
-                <svg
-                  class="w-4 h-4 mr-2 text-red-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-                ログアウト
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </header>
