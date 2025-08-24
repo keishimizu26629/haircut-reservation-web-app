@@ -3,67 +3,22 @@
     <!-- ヘッダー（モバイルファースト） -->
     <header class="bg-white shadow-sm border-b sticky top-0 z-40">
       <div class="px-4 py-3">
-        <!-- タグ管理ボタンとメニュー -->
-        <div class="mb-3 flex justify-end items-center gap-2">
-          <button
-            type="button"
-            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-            @click="openTagModal"
-          >
-            <svg
-              class="w-4 h-4 inline-block mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-              />
-            </svg>
-            タグ管理
-          </button>
+        <!-- ナビゲーション -->
+        <div
+          v-show="!showStats"
+          class="flex items-center"
+        >
+          <!-- 左側スペーサー -->
+          <div class="flex-1" />
 
-          <!-- 集計ボタン -->
-          <button
-            class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-            @click="showStats = !showStats"
-          >
-            <svg
-              class="w-4 h-4 inline-block mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                v-if="!showStats"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-              <path
-                v-else
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span class="hidden sm:inline">{{ showStats ? 'カレンダー' : '集計' }}</span>
-            <span class="sm:hidden">{{ showStats ? '📅' : '📊' }}</span>
-          </button>
-
-          <!-- ドロップダウンメニュー -->
-          <div class="relative">
+          <!-- 中央エリア：日送りボタンと月表示 -->
+          <div class="flex items-center gap-3">
             <button
-              class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              @click="showMenuDropdown = !showMenuDropdown"
+              class="p-2 hover:bg-gray-100 rounded-lg"
+              @click="previousDays"
             >
               <svg
-                class="w-4 h-4"
+                class="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -72,22 +27,58 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                  d="M15 19l-7-7 7-7"
                 />
               </svg>
             </button>
-            <!-- ドロップダウンメニュー -->
-            <div
-              v-if="showMenuDropdown"
-              class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50"
-              @click="showMenuDropdown = false"
+
+            <h1 class="text-base font-semibold text-gray-900 px-2">
+              {{ currentMonthText }}
+            </h1>
+
+            <button
+              class="p-2 hover:bg-gray-100 rounded-lg"
+              @click="nextDays"
             >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- 右側エリア：カレンダーボタン、今日に戻るボタン、メニュー -->
+          <div class="flex-1 flex justify-end gap-2">
+            <button
+              class="px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors"
+              @click="showCalendarModal = true"
+            >
+              カレンダー
+            </button>
+            <button
+              class="px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors"
+              @click="goToToday"
+            >
+              今日に戻る
+            </button>
+
+            <!-- ドロップダウンメニュー -->
+            <div class="relative">
               <button
-                class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
-                @click="logout"
+                class="p-1.5 border border-gray-800 rounded-full hover:bg-gray-100 transition-colors"
+                @click="showMenuDropdown = !showMenuDropdown"
               >
                 <svg
-                  class="w-4 h-4 mr-2 text-red-500"
+                  class="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -96,66 +87,76 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                   />
                 </svg>
-                ログアウト
               </button>
+              <!-- ドロップダウンメニュー -->
+              <div
+                v-if="showMenuDropdown"
+                class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50"
+                @click="showMenuDropdown = false"
+              >
+                <button
+                  class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
+                  @click="openTagModal"
+                >
+                  <svg
+                    class="w-4 h-4 mr-2 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
+                  </svg>
+                  タグ管理
+                </button>
+                <button
+                  class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
+                  @click="showStats = true; showMenuDropdown = false"
+                >
+                  <svg
+                    class="w-4 h-4 mr-2 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                  集計
+                </button>
+                <button
+                  class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
+                  @click="logout"
+                >
+                  <svg
+                    class="w-4 h-4 mr-2 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  ログアウト
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- ナビゲーション -->
-        <div class="flex justify-between items-center">
-          <button
-            class="p-2 hover:bg-gray-100 rounded-lg"
-            @click="previousDays"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-
-          <div class="text-center">
-            <h1 class="text-sm font-semibold text-gray-900">
-              {{ currentMonthText }}
-            </h1>
-            <button
-              class="text-xs text-blue-600 hover:text-blue-700"
-              @click="goToToday"
-            >
-              今日に戻る
-            </button>
-          </div>
-
-          <button
-            class="p-2 hover:bg-gray-100 rounded-lg"
-            @click="nextDays"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
         </div>
       </div>
     </header>
@@ -169,9 +170,30 @@
       >
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold">
-              {{ selectedMonthText }}の集計
-            </h2>
+            <div class="flex items-center gap-4">
+              <button
+                class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                @click="showStats = false"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                カレンダーに戻る
+              </button>
+              <h2 class="text-lg font-semibold">
+                {{ selectedMonthText }}の集計
+              </h2>
+            </div>
             <!-- 月選択 -->
             <div class="flex items-center gap-2">
               <button
@@ -703,6 +725,114 @@
         </div>
       </div>
     </div>
+
+    <!-- カレンダーモーダル -->
+    <div
+      v-if="showCalendarModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="showCalendarModal = false"
+    >
+      <div class="bg-white rounded-2xl w-full max-w-sm">
+        <div class="p-4 border-b">
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-semibold">
+              日付を選択
+            </h2>
+            <button
+              class="p-1 hover:bg-gray-100 rounded"
+              @click="showCalendarModal = false"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-4">
+          <!-- 月選択 -->
+          <div class="flex justify-between items-center mb-4">
+            <button
+              class="p-1 hover:bg-gray-100 rounded"
+              @click="calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1)"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <h3 class="text-base font-medium text-gray-900">
+              {{ calendarMonthText }}
+            </h3>
+            <button
+              class="p-1 hover:bg-gray-100 rounded"
+              @click="calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1)"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- 曜日ヘッダー -->
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <div
+              v-for="day in ['日', '月', '火', '水', '木', '金', '土']"
+              :key="day"
+              class="text-center text-xs font-medium text-gray-500 py-1"
+            >
+              {{ day }}
+            </div>
+          </div>
+
+          <!-- 日付グリッド -->
+          <div class="grid grid-cols-7 gap-1">
+            <button
+              v-for="date in getCalendarDates()"
+              :key="date.dateStr"
+              :class="[
+                'p-2 text-sm rounded hover:bg-gray-100 transition-colors',
+                date.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
+                date.isToday ? 'bg-blue-100 text-blue-600 font-bold' : '',
+                date.isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : ''
+              ]"
+              @click="selectDate(date.date)"
+            >
+              {{ date.day }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -729,6 +859,8 @@ const showModal = ref(false)
 const showTagModal = ref(false)
 const showStats = ref(false)
 const showMenuDropdown = ref(false)
+const showCalendarModal = ref(false)
+const calendarMonth = ref(new Date())
 const editingReservation = ref(null)
 const selectedTag = ref(null)
 const newTagName = ref('')
@@ -795,6 +927,11 @@ const currentMonthText = computed(() => {
 const selectedMonthText = computed(() => {
   const date = selectedStatsMonth.value
   return `${date.getFullYear()}年${date.getMonth() + 1}月`
+})
+
+const calendarMonthText = computed(() => {
+  if (!calendarMonth.value) return ''
+  return `${calendarMonth.value.getFullYear()}年${calendarMonth.value.getMonth() + 1}月`
 })
 
 const displayHours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
@@ -928,6 +1065,47 @@ const nextDays = () => {
 
 const goToToday = () => {
   currentDate.value = new Date()
+}
+
+// カレンダーモーダル用の関数
+const getCalendarDates = () => {
+  const dates = []
+  const year = calendarMonth.value.getFullYear()
+  const month = calendarMonth.value.getMonth()
+
+  // 月の最初の日
+  const firstDay = new Date(year, month, 1)
+
+  // 最初の週の日曜日から開始
+  const startDate = new Date(firstDay)
+  startDate.setDate(startDate.getDate() - firstDay.getDay())
+
+  // 6週間分表示
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(startDate)
+    date.setDate(startDate.getDate() + i)
+
+    const dateStr = date.toISOString().split('T')[0]
+    const isCurrentMonth = date.getMonth() === month
+    const isToday = dateStr === new Date().toISOString().split('T')[0]
+    const isSelected = dateStr === currentDate.value.toISOString().split('T')[0]
+
+    dates.push({
+      date: date,
+      dateStr: dateStr,
+      day: date.getDate(),
+      isCurrentMonth: isCurrentMonth,
+      isToday: isToday,
+      isSelected: isSelected
+    })
+  }
+
+  return dates
+}
+
+const selectDate = (date) => {
+  currentDate.value = new Date(date)
+  showCalendarModal.value = false
 }
 
 // 集計月のナビゲーション

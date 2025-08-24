@@ -1,7 +1,6 @@
 /**
  * Firebase Client Plugin - 手動初期化
  */
-import { getAnalytics, isSupported } from 'firebase/analytics'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
@@ -70,21 +69,10 @@ export default defineNuxtPlugin(async () => {
         }
       }
 
-      // Analytics の初期化（本番環境のみ）
-      let analytics = null
-      if (!useEmulator && isProduction) {
-        try {
-          const analyticsSupported = await isSupported()
-          if (analyticsSupported) {
-            analytics = getAnalytics(app)
-            console.log('✅ Firebase Analytics initialized')
-          } else {
-            console.log('⚠️ Firebase Analytics not supported in this environment')
-          }
-        } catch (analyticsError) {
-          console.warn('⚠️ Firebase Analytics initialization failed:', analyticsError)
-        }
-      }
+      // Analytics の初期化（一時的に無効化）
+      const analytics = null
+      // Google Analytics を完全に無効化
+      console.log('🚫 Firebase Analytics disabled')
 
       // エミュレータ接続設定（テスト環境）
       if (useEmulator) {

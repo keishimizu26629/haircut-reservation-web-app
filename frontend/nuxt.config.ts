@@ -138,9 +138,15 @@ export default defineNuxtConfig({
         debugMode: process.env.ENABLE_DEBUG_MODE === 'true',
         devtools: process.env.ENABLE_DEVTOOLS === 'true',
         mockData: process.env.ENABLE_MOCK_DATA === 'true',
-        analytics: process.env.ENABLE_ANALYTICS === 'true',
+        analytics: false, // Google Analytics無効化
         errorReporting: process.env.ENABLE_ERROR_REPORTING === 'true',
         performanceMonitoring: process.env.ENABLE_PERFORMANCE_MONITORING === 'true'
+      },
+
+      // Google Analytics設定（無効化）
+      googleAnalytics: {
+        id: '', // 空に設定してAnalyticsを無効化
+        disabled: true
       },
 
       // Security settings - Firebase Auth対応でCSP無効化
