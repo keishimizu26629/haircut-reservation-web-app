@@ -29,9 +29,23 @@ service cloud.firestore {
 
     function hasRequiredReservationFields() {
       return request.resource.data.keys().hasAll([
-        'customerId', 'staffId', 'serviceId', 'appointmentTime',
-        'status', 'createdAt'
-      ]);
+        'customerName', 'date', 'startTime', 'status'
+      ]) && (
+        // tagId or category must be present (for compatibility)
+        request.resource.data.keys().hasAny(['tagId', 'category'])
+      );
+    }
+
+    function hasValidReservationData() {
+      let data = request.resource.data;
+      return data.customerName is string &&
+             data.date is string &&
+             data.startTime is string &&
+             data.status in ['active', 'completed', 'cancelled'] &&
+             (data.duration == null || data.duration is number) &&
+             (data.tagId == null || data.tagId is string) &&
+             (data.category == null || data.category is string) &&
+             (data.tag == null || data.tag is map);
     }
 
     // User profiles
@@ -62,17 +76,16 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
-    // Reservations
+    // Reservations - 認証済みユーザーのみアクセス可能
     match /reservations/{reservationId} {
-      allow read: if isAuthenticated() &&
-                     (isOwner(resource.data.customerId) || isStaff());
-      allow create: if isAuthenticated() &&
-                       isOwner(request.resource.data.customerId) &&
-                       hasRequiredReservationFields();
-      allow update: if isAuthenticated() &&
-                       (isOwner(resource.data.customerId) || isStaff()) &&
-                       hasRequiredReservationFields();
-      allow delete: if isStaff();
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                       hasRequiredReservationFields() &&
+                       hasValidReservationData();
+      allow update: if isAuthenticated() && 
+                       hasRequiredReservationFields() &&
+                       hasValidReservationData();
+      allow delete: if isAuthenticated();
     }
 
     // User Tags - ユーザー個別のタグ管理

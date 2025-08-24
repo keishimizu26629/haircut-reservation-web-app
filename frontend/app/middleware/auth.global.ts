@@ -41,11 +41,8 @@ export default defineNuxtRouteMiddleware(async to => {
   try {
     // サーバーサイドでは認証チェックをスキップ
     if (import.meta.server) {
-      console.log('🔒 Global Auth: Skipped (SSR)')
       return
     }
-
-    console.log(`🔒 Global Auth: Checking ${to.path}`)
 
     // 認証状態の確認を少し遅延させて、初期化を待つ
     // 本番環境では初期化により時間がかかる可能性があるため、より長い待機時間を設定
@@ -67,27 +64,12 @@ export default defineNuxtRouteMiddleware(async to => {
     const authStore = useAuthStore()
     const authStoreUser = authStore.user
 
-    console.log('🔒 Auth state comparison:', {
-      vueFireUser: !!currentUser,
-      authStoreUser: !!authStoreUser,
-      vueFireUid: currentUser?.uid,
-      authStoreUid: authStoreUser?.uid
-    })
-
     // VueFireとAuthStoreのいずれかで認証されていれば有効とする
     const effectiveUser = currentUser || authStoreUser
 
     // 2. セッション期限チェック
     const isExpired = isSessionExpired()
     const isAuthenticated = !!effectiveUser && !isExpired
-
-    console.log('🔒 Authentication check details:', {
-      effectiveUser: !!effectiveUser,
-      effectiveUserUid: effectiveUser?.uid,
-      isExpired,
-      isAuthenticated,
-      sessionCheck: !isExpired
-    })
 
     // 3. セッション活動記録更新
     if (isAuthenticated) {
@@ -101,14 +83,12 @@ export default defineNuxtRouteMiddleware(async to => {
 
     if (isPublicRoute) {
       // パブリックページは常にアクセス許可
-      console.log(`✅ Public route: ${to.path}`)
       return
     }
 
     // 5. 認証ページアクセスチェック（認証済みユーザーの認証ページアクセス制限）
     if (AUTH_CONFIG.authRoutes.includes(to.path)) {
       if (isAuthenticated) {
-        console.log(`🔒 Authenticated user accessing auth page, redirecting to dashboard`)
         return navigateTo(AUTH_CONFIG.defaultRedirect)
       }
       // 未認証ユーザーは認証ページアクセス許可
@@ -118,7 +98,6 @@ export default defineNuxtRouteMiddleware(async to => {
     // 6. 未認証ユーザーの保護されたページアクセス制限
     if (!isAuthenticated) {
       const returnUrl = encodeURIComponent(to.fullPath)
-      console.log(`🔒 Unauthenticated access to ${to.path}, redirecting to login`)
       return navigateTo(`${AUTH_CONFIG.loginRedirect}?returnUrl=${returnUrl}`)
     }
 
@@ -134,7 +113,6 @@ export default defineNuxtRouteMiddleware(async to => {
         const userRole = payload.role || payload.custom_claims?.role || 'user'
 
         if (userRole !== 'admin') {
-          console.log(`🔒 Non-admin access to ${to.path}, redirecting to dashboard`)
           return navigateTo(AUTH_CONFIG.defaultRedirect)
         }
       } catch (error) {
@@ -142,15 +120,12 @@ export default defineNuxtRouteMiddleware(async to => {
         return navigateTo(AUTH_CONFIG.defaultRedirect)
       }
     }
-
-    console.log(`✅ Access granted to ${to.path}`)
   } catch (error) {
     console.error('🔒 Global auth middleware error:', error)
 
     // エラー時の安全な処理
     const isPublicRoute = AUTH_CONFIG.publicRoutes.includes(to.path)
     if (!isPublicRoute) {
-      console.warn('🔒 Authentication error, redirecting to login')
       return navigateTo(AUTH_CONFIG.loginRedirect)
     }
   }

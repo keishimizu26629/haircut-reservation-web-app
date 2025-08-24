@@ -26,7 +26,7 @@
             タグ管理
           </button>
 
-          <!-- 統計ボタン -->
+          <!-- 集計ボタン -->
           <button
             class="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             @click="showStats = !showStats"
@@ -52,7 +52,7 @@
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <span class="hidden sm:inline">{{ showStats ? 'カレンダー' : '統計' }}</span>
+            <span class="hidden sm:inline">{{ showStats ? 'カレンダー' : '集計' }}</span>
             <span class="sm:hidden">{{ showStats ? '📅' : '📊' }}</span>
           </button>
 
@@ -162,15 +162,59 @@
 
     <!-- メインコンテンツ -->
     <main class="pb-20">
-      <!-- 統計表示（デスクトップのみ） -->
+      <!-- 集計表示（デスクトップのみ） -->
       <div
         v-if="showStats"
         class="hidden md:block max-w-7xl mx-auto px-4 py-6"
       >
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-4">
-            {{ currentMonthText }}の統計
-          </h2>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold">
+              {{ selectedMonthText }}の集計
+            </h2>
+            <!-- 月選択 -->
+            <div class="flex items-center gap-2">
+              <button
+                class="p-1 hover:bg-gray-100 rounded"
+                @click="previousMonth"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              <span class="text-sm font-medium min-w-[100px] text-center">
+                {{ selectedMonthText }}
+              </span>
+              <button
+                class="p-1 hover:bg-gray-100 rounded"
+                @click="nextMonth"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-gray-50 rounded-lg p-4">
               <div class="text-sm text-gray-600">
@@ -215,94 +259,113 @@
       >
         <!-- スクロール可能なコンテナ -->
         <div class="calendar-scroll-container">
-          <div
-            class="grid gap-px bg-gray-200"
-            :class="gridClass"
-          >
+          <div class="flex bg-gray-200">
+            <!-- 時間カラム（固定幅） -->
             <div
-              v-for="(day, index) in displayDays"
-              :key="day.date"
               class="bg-white"
+              style="width: 60px; min-width: 60px;"
             >
-              <!-- 日付ヘッダー -->
+              <!-- ヘッダースペーサー -->
               <div
-                :class="[
-                  'px-2 py-2 text-center border-b sticky top-0 bg-white z-20',
-                  day.isToday ? 'bg-blue-50 border-blue-200' : 'border-gray-200'
-                ]"
+                class="px-1 py-2 text-center border-b border-gray-200"
+                style="height: 60px;"
               >
                 <div class="text-xs font-medium text-gray-500">
-                  {{ day.dayName }}
-                </div>
-                <div
-                  :class="[
-                    'text-sm font-bold',
-                    day.isToday ? 'text-blue-600' : 'text-gray-900'
-                  ]"
-                >
-                  {{ day.dateNumber }}
+                  時間
                 </div>
               </div>
-
-              <!-- 時間軸と予約 -->
+              <!-- 時間表示エリア -->
               <div class="relative calendar-day-content">
-                <!-- 時間線 -->
                 <div
                   v-for="hour in displayHours"
                   :key="hour"
                   class="absolute left-0 right-0 border-t border-gray-100"
                   :style="{ top: `${(hour - 8) * 50}px` }"
                 >
-                  <span
-                    v-if="index === 0"
-                    class="absolute -left-1 -top-2 text-xs text-gray-400 bg-white px-1"
-                  >
+                  <span class="absolute -top-2 left-1 text-xs text-gray-500">
                     {{ hour }}:00
                   </span>
                 </div>
+              </div>
+            </div>
 
-                <!-- 予約ブロック -->
+            <!-- 日付ごとの予約表示エリア -->
+            <div class="flex-1 grid grid-cols-3 gap-px bg-gray-200">
+              <div
+                v-for="day in displayDays"
+                :key="day.date"
+                class="bg-white"
+              >
+                <!-- 日付ヘッダー -->
                 <div
-                  v-for="reservation in getReservationsForDay(day.date)"
-                  :key="reservation.id"
                   :class="[
-                    'absolute left-1 right-1 p-1 rounded text-xs cursor-pointer',
-                    getTagColor(reservation.tagId),
-                    'shadow-sm hover:shadow-md transition-shadow'
+                    'px-2 py-2 text-center border-b sticky top-0 bg-white z-20',
+                    day.isToday ? 'bg-blue-50 border-blue-200' : 'border-gray-200'
                   ]"
-                  :style="{
-                    top: `${calculatePosition(reservation.startTime)}px`,
-                    height: `${(reservation.duration / 60) * 50}px`
-                  }"
-                  @click="editReservation(reservation)"
+                  style="height: 60px;"
                 >
-                  <div class="font-medium truncate">
-                    {{ reservation.customerName }}
-                  </div>
-                  <div class="text-xs opacity-75">
-                    {{ reservation.startTime }}
+                  <div class="text-xs font-medium text-gray-500">
+                    {{ day.dayName }}
                   </div>
                   <div
-                    v-if="reservation.tag"
-                    class="mt-1 inline-block px-1 py-0.5 rounded text-xs"
-                    :class="reservation.tag.badgeClass"
+                    :class="[
+                      'text-sm font-bold',
+                      day.isToday ? 'text-blue-600' : 'text-gray-900'
+                    ]"
                   >
-                    {{ reservation.tag.label }}
+                    {{ day.dateNumber }}
                   </div>
                 </div>
 
-                <!-- 現在時刻線 -->
-                <div
-                  v-if="day.isToday"
-                  class="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
-                  :style="{ top: `${getCurrentTimePosition()}px` }"
-                />
+                <!-- 予約表示エリア -->
+                <div class="relative calendar-day-content">
+                  <!-- 時間線（補助線） -->
+                  <div
+                    v-for="hour in displayHours"
+                    :key="hour"
+                    class="absolute left-0 right-0 border-t border-gray-100"
+                    :style="{ top: `${(hour - 8) * 50}px` }"
+                  />
 
-                <!-- タップで予約追加 -->
-                <div
-                  class="absolute inset-0"
-                  @click="handleTimeClick($event, day.date)"
-                />
+                  <!-- 予約ブロック -->
+                  <div
+                    v-for="reservation in getReservationsForDay(day.date)"
+                    :key="reservation.id"
+                    :class="[
+                      'absolute p-1 rounded text-xs cursor-pointer shadow-sm hover:shadow-md transition-shadow z-10',
+                      getTagColor(reservation.tagId),
+                      reservation.status === 'completed' ? 'opacity-70' : '',
+                      reservation.status === 'cancelled' ? 'opacity-50 line-through' : ''
+                    ]"
+                    :style="getReservationStyle(reservation)"
+                    @click="editReservation(reservation)"
+                  >
+                    <div class="font-medium truncate leading-3">
+                      {{ reservation.customerName }}
+                      <span
+                        v-if="reservation.status === 'completed'"
+                        class="ml-1"
+                      >✓</span>
+                      <span
+                        v-if="reservation.status === 'cancelled'"
+                        class="ml-1"
+                      >✗</span>
+                    </div>
+                  </div>
+
+                  <!-- 現在時刻線 -->
+                  <div
+                    v-if="day.isToday"
+                    class="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
+                    :style="{ top: `${getCurrentTimePosition()}px` }"
+                  />
+
+                  <!-- タップで予約追加 -->
+                  <div
+                    class="absolute inset-0"
+                    @click="handleTimeClick($event, day.date)"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -337,10 +400,28 @@
       @click.self="closeModal"
     >
       <div class="bg-white rounded-t-2xl md:rounded-2xl w-full md:max-w-md max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-white border-b px-4 py-3 flex justify-between items-center">
-          <h2 class="text-lg font-semibold">
-            {{ editingReservation ? '予約編集' : '新規予約' }}
-          </h2>
+        <div
+          :class="[
+            'sticky top-0 border-b px-4 py-3 flex justify-between items-center',
+            editingReservation ? 'bg-blue-50' : 'bg-green-50'
+          ]"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              :class="[
+                'w-3 h-3 rounded-full',
+                editingReservation ? 'bg-blue-500' : 'bg-green-500'
+              ]"
+            />
+            <h2
+              :class="[
+                'text-lg font-semibold',
+                editingReservation ? 'text-blue-700' : 'text-green-700'
+              ]"
+            >
+              {{ editingReservation ? '📝 予約編集' : '➕ 新規予約' }}
+            </h2>
+          </div>
           <button
             class="p-2 hover:bg-gray-100 rounded-lg"
             @click="closeModal"
@@ -380,25 +461,37 @@
           </div>
 
           <!-- タグ選択 -->
-          <div>
+          <div data-screen="reservation-form">
             <label class="block text-sm font-medium text-gray-700 mb-2">
               タグ
             </label>
-            <div class="grid grid-cols-3 gap-2">
+            <div
+              v-if="tags.length > 0"
+              class="tag-selection"
+            >
               <button
                 v-for="tag in tags"
                 :key="tag.id"
                 type="button"
                 :class="[
-                  'px-3 py-2 text-sm rounded-lg transition-colors',
-                  reservationForm.tagId === tag.id
-                    ? tag.activeClass
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  'tag-option',
+                  reservationForm.tagId === tag.id ? 'selected' : ''
                 ]"
+                :data-color="tag.color"
                 @click="reservationForm.tagId = tag.id"
               >
-                {{ tag.label }}
+                <span
+                  class="swatch"
+                  aria-hidden="true"
+                />
+                <span class="tag-name">{{ tag.label }}</span>
               </button>
+            </div>
+            <div
+              v-else
+              class="text-sm text-gray-500 italic"
+            >
+              タグが設定されていません。「タグ管理」から追加してください。
             </div>
           </div>
 
@@ -435,41 +528,51 @@
             </div>
           </div>
 
-          <!-- 所要時間 -->
-          <div>
+          <!-- 状態選択（編集時のみ表示） -->
+          <div v-if="editingReservation">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              所要時間
+              状態
             </label>
             <div class="grid grid-cols-3 gap-2">
               <button
-                v-for="duration in durations"
-                :key="duration.value"
                 type="button"
                 :class="[
-                  'px-3 py-2 text-sm rounded-lg transition-colors',
-                  reservationForm.duration === duration.value
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                  'px-3 py-2 text-sm rounded-lg transition-colors font-medium',
+                  reservationForm.status === 'active'
+                    ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-300'
                 ]"
-                @click="reservationForm.duration = duration.value"
+                @click="reservationForm.status = 'active'"
               >
-                {{ duration.label }}
+                予約中
+              </button>
+              <button
+                type="button"
+                :class="[
+                  'px-3 py-2 text-sm rounded-lg transition-colors font-medium',
+                  reservationForm.status === 'completed'
+                    ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-300'
+                ]"
+                @click="reservationForm.status = 'completed'"
+              >
+                完了
+              </button>
+              <button
+                type="button"
+                :class="[
+                  'px-3 py-2 text-sm rounded-lg transition-colors font-medium',
+                  reservationForm.status === 'cancelled'
+                    ? 'bg-red-100 text-red-800 border-2 border-red-300'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-300'
+                ]"
+                @click="reservationForm.status = 'cancelled'"
+              >
+                キャンセル
               </button>
             </div>
           </div>
 
-          <!-- 備考 -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              備考
-            </label>
-            <textarea
-              v-model="reservationForm.notes"
-              rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="施術内容や特記事項など"
-            />
-          </div>
 
           <!-- ボタン -->
           <div class="flex gap-3 pt-4">
@@ -513,40 +616,49 @@
           </h2>
         </div>
 
-        <div class="p-4">
+        <div
+          class="p-4"
+          data-screen="tag-settings"
+        >
           <!-- 既存タグ一覧 -->
           <div class="mb-4">
             <h3 class="text-sm font-medium text-gray-700 mb-2">
               現在のタグ
             </h3>
-            <div class="space-y-2 max-h-60 overflow-y-auto">
-              <div
-                v-for="tag in tags"
-                :key="tag.id"
-                class="flex items-center justify-between p-2 rounded-lg"
-                :class="tag.bgClass"
-              >
-                <span class="font-medium">{{ tag.label }}</span>
-                <button
-                  v-if="tag.id.startsWith('custom_')"
-                  class="p-1 hover:bg-black hover:bg-opacity-10 rounded"
-                  @click="removeTag(tag.id)"
+            <div class="max-h-60 overflow-y-auto">
+              <ul class="tag-list">
+                <li
+                  v-for="tag in tags"
+                  :key="tag.id"
+                  class="tag-item"
+                  :data-color="tag.color"
                 >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <span
+                    class="swatch"
+                    aria-hidden="true"
+                  />
+                  <span class="tag-name">{{ tag.label }}</span>
+                  <button
+                    v-if="tag.id.startsWith('custom_')"
+                    class="ml-auto p-1 hover:bg-black hover:bg-opacity-10 rounded"
+                    @click="removeTag(tag.id)"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -612,6 +724,7 @@ const { reservations, loading, addReservation, updateReservation, deleteReservat
 
 // State
 const currentDate = ref(new Date())
+const selectedStatsMonth = ref(new Date()) // 集計用の月選択
 const showModal = ref(false)
 const showTagModal = ref(false)
 const showStats = ref(false)
@@ -627,39 +740,30 @@ const customTags = ref([])
 
 // タグカラーオプション
 const tagColors = [
-  { name: 'pink', bgClass: 'bg-pink-200', activeClass: 'bg-pink-200 text-pink-800', badgeClass: 'bg-pink-200 text-pink-700' },
-  { name: 'blue', bgClass: 'bg-blue-200', activeClass: 'bg-blue-200 text-blue-800', badgeClass: 'bg-blue-200 text-blue-700' },
-  { name: 'green', bgClass: 'bg-green-200', activeClass: 'bg-green-200 text-green-800', badgeClass: 'bg-green-200 text-green-700' },
-  { name: 'yellow', bgClass: 'bg-yellow-200', activeClass: 'bg-yellow-200 text-yellow-800', badgeClass: 'bg-yellow-200 text-yellow-700' },
-  { name: 'purple', bgClass: 'bg-purple-200', activeClass: 'bg-purple-200 text-purple-800', badgeClass: 'bg-purple-200 text-purple-700' },
-  { name: 'orange', bgClass: 'bg-orange-200', activeClass: 'bg-orange-200 text-orange-800', badgeClass: 'bg-orange-200 text-orange-700' },
-  { name: 'red', bgClass: 'bg-red-200', activeClass: 'bg-red-200 text-red-800', badgeClass: 'bg-red-200 text-red-700' },
-  { name: 'gray', bgClass: 'bg-gray-200', activeClass: 'bg-gray-300 text-gray-800', badgeClass: 'bg-gray-200 text-gray-700' },
+  { name: 'pink', bgClass: 'tag-color-picker-pink' },
+  { name: 'blue', bgClass: 'tag-color-picker-blue' },
+  { name: 'green', bgClass: 'tag-color-picker-green' },
+  { name: 'yellow', bgClass: 'tag-color-picker-yellow' },
+  { name: 'purple', bgClass: 'tag-color-picker-purple' },
+  { name: 'orange', bgClass: 'tag-color-picker-orange' },
+  { name: 'red', bgClass: 'tag-color-picker-red' },
+  { name: 'gray', bgClass: 'tag-color-picker-gray' },
 ]
 
-// 全タグ
+// 全タグ（カスタムタグのみ）
 const tags = computed(() => customTags.value)
 
 const reservationForm = reactive({
   customerName: '',
-  notes: '',
   date: '',
   startTime: '09:00',
-  duration: 60,
-  tagId: 'cut',
-  category: 'cut', // 互換性のため残す
+  duration: 60, // デフォルト1時間（内部処理用）
+  tagId: 'default',
+  category: 'default', // 互換性のため残す
   status: 'active'
 })
 
-// 所要時間オプション
-const durations = [
-  { value: 30, label: '30分' },
-  { value: 60, label: '1時間' },
-  { value: 90, label: '1.5時間' },
-  { value: 120, label: '2時間' },
-  { value: 150, label: '2.5時間' },
-  { value: 180, label: '3時間' },
-]
+
 
 // Computed
 const displayDays = computed(() => {
@@ -681,12 +785,15 @@ const displayDays = computed(() => {
   return days
 })
 
-const gridClass = computed(() => {
-  return 'grid-cols-3'
-})
+
 
 const currentMonthText = computed(() => {
   const date = currentDate.value
+  return `${date.getFullYear()}年${date.getMonth() + 1}月`
+})
+
+const selectedMonthText = computed(() => {
+  const date = selectedStatsMonth.value
   return `${date.getFullYear()}年${date.getMonth() + 1}月`
 })
 
@@ -704,13 +811,13 @@ const timeSlots = computed(() => {
 })
 
 const monthlyStats = computed(() => {
-  const currentMonth = currentDate.value.getMonth()
-  const currentYear = currentDate.value.getFullYear()
+  const selectedMonth = selectedStatsMonth.value.getMonth()
+  const selectedYear = selectedStatsMonth.value.getFullYear()
 
   const monthlyReservations = reservations.value.filter(reservation => {
     const reservationDate = new Date(reservation.date)
-    return reservationDate.getMonth() === currentMonth &&
-           reservationDate.getFullYear() === currentYear
+    return reservationDate.getMonth() === selectedMonth &&
+           reservationDate.getFullYear() === selectedYear
   })
 
   const total = monthlyReservations.length
@@ -723,9 +830,35 @@ const monthlyStats = computed(() => {
 
 // Methods
 const getReservationsForDay = (date) => {
-  return reservations.value.filter(r =>
-    r.date === date && r.status !== 'cancelled'
+  // すべての予約を表示（キャンセルされた予約も含む）
+  const dayReservations = reservations.value.filter(r =>
+    r.date === date
   )
+
+  // 同じ時間の予約をグループ化して、横並びインデックスを付与
+  const groupedByTime = {}
+  dayReservations.forEach(reservation => {
+    const time = reservation.startTime
+    if (!groupedByTime[time]) {
+      groupedByTime[time] = []
+    }
+    groupedByTime[time].push(reservation)
+  })
+
+  // 各予約に横並びインデックスと同時間の総数を付与
+  const result = []
+  Object.entries(groupedByTime).forEach(([_time, reservationsAtTime]) => {
+    const total = Math.min(reservationsAtTime.length, 3) // 最大3つまで横並び
+    reservationsAtTime.slice(0, 3).forEach((reservation, index) => {
+      result.push({
+        ...reservation,
+        horizontalIndex: index,
+        totalAtSameTime: total
+      })
+    })
+  })
+
+  return result
 }
 
 const calculatePosition = (timeStr) => {
@@ -742,7 +875,26 @@ const getCurrentTimePosition = () => {
 
 const getTagColor = (tagId) => {
   const tag = tags.value.find(t => t.id === tagId)
-  return tag ? tag.bgClass : 'bg-gray-100'
+  if (tag && tag.color) {
+    return `tag-color-${tag.color}`
+  }
+  return 'tag-color-default'
+}
+
+const getReservationStyle = (reservation) => {
+  const top = calculatePosition(reservation.startTime)
+  const total = reservation.totalAtSameTime || 1
+  const index = reservation.horizontalIndex || 0
+  const width = `calc((100% - 16px) / ${total})`
+  const left = `calc(8px + ((100% - 16px) / ${total}) * ${index})`
+
+  return {
+    top: `${top}px`,
+    left: left,
+    width: width,
+    height: '30px',
+    fontSize: '10px'
+  }
 }
 
 const handleTimeClick = (event, date) => {
@@ -778,13 +930,25 @@ const goToToday = () => {
   currentDate.value = new Date()
 }
 
+// 集計月のナビゲーション
+const previousMonth = () => {
+  const newDate = new Date(selectedStatsMonth.value)
+  newDate.setMonth(newDate.getMonth() - 1)
+  selectedStatsMonth.value = newDate
+}
+
+const nextMonth = () => {
+  const newDate = new Date(selectedStatsMonth.value)
+  newDate.setMonth(newDate.getMonth() + 1)
+  selectedStatsMonth.value = newDate
+}
+
 const openReservationModal = (date = null, startTime = null) => {
   editingReservation.value = null
   reservationForm.customerName = ''
-  reservationForm.notes = ''
   reservationForm.date = date || displayDays.value[Math.floor(displayDays.value.length / 2)].date
   reservationForm.startTime = startTime || '09:00'
-  reservationForm.duration = 60
+  reservationForm.duration = 60 // デフォルト1時間
   reservationForm.tagId = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.category = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.status = 'active'
@@ -795,13 +959,12 @@ const editReservation = (reservation) => {
   editingReservation.value = reservation
   Object.assign(reservationForm, {
     customerName: reservation.customerName,
-    notes: reservation.notes || '',
     date: reservation.date,
     startTime: reservation.startTime || reservation.timeSlot,
     duration: reservation.duration || 60,
-    tagId: reservation.tagId || reservation.category || (tags.value[0]?.id || 'default'),
-    category: reservation.category || reservation.tagId || (tags.value[0]?.id || 'default'),
-    status: reservation.status
+    tagId: reservation.tagId || reservation.category || 'default',
+    category: reservation.category || reservation.tagId || 'default',
+    status: reservation.status || 'active'
   })
   showModal.value = true
 }
@@ -813,9 +976,17 @@ const closeModal = () => {
 
 const saveReservation = async () => {
   try {
+    // Firestoreルールに合わせてデータを整形
     const data = {
-      ...reservationForm,
-      tag: tags.value.find(t => t.id === reservationForm.tagId)
+      customerName: reservationForm.customerName,
+      date: reservationForm.date,
+      startTime: reservationForm.startTime,
+      duration: reservationForm.duration || 60,
+      status: reservationForm.status || 'active',
+      // tagIdまたはcategoryを設定（互換性のため）
+      tagId: reservationForm.tagId || 'default',
+      category: reservationForm.category || reservationForm.tagId || 'default',
+      // tagオブジェクトは保存しない（表示用のみ）
     }
 
     if (editingReservation.value) {
@@ -857,12 +1028,10 @@ const closeTagModal = () => {
 const addTag = async () => {
   if (!newTagName.value.trim()) return
 
-  const colorConfig = tagColors.find(c => c.name === newTagColor.value)
   const newTag = {
     id: `custom_${Date.now()}`,
     label: newTagName.value,
-    color: newTagColor.value,
-    ...colorConfig
+    color: newTagColor.value
   }
 
   customTags.value.push(newTag)
@@ -932,6 +1101,9 @@ const loadTagsFromFirebase = async () => {
         // Firebaseに保存して移行完了
         await saveTagsToFirebase()
         localStorage.removeItem('customTags')
+      } else {
+        // 初回利用時は空の配列（ユーザーが自分で作成する）
+        customTags.value = []
       }
     }
   } catch (error) {
@@ -940,6 +1112,8 @@ const loadTagsFromFirebase = async () => {
     const saved = localStorage.getItem('customTags')
     if (saved) {
       customTags.value = JSON.parse(saved)
+    } else {
+      customTags.value = []
     }
   }
 }
