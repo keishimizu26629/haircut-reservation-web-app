@@ -57,25 +57,14 @@ export const useReservations = () => {
 
   const startRealtimeListener = () => {
     try {
-      console.log('🔄 Starting realtime listener...')
       const firestore = getFirestore()
-      console.log('🔥 Firestore instance for listener:', !!firestore)
-
       const reservationsRef = collection(firestore, 'reservations')
       // 一時的に単純クエリに変更（インデックス構築中のため）
       const q = query(reservationsRef, orderBy('date', 'asc'))
-      console.log('🔍 Query created for reservations')
 
       unsubscribe = onSnapshot(
         q,
         snapshot => {
-          console.log('📡 Snapshot received:', {
-            empty: snapshot.empty,
-            size: snapshot.size,
-            hasPendingWrites: snapshot.metadata.hasPendingWrites,
-            fromCache: snapshot.metadata.fromCache
-          })
-
           reservations.value = snapshot.docs.map(doc => {
             const data = doc.data()
             // 既存データの互換性対応：timeSlotがある場合はstartTimeに変換
@@ -92,8 +81,6 @@ export const useReservations = () => {
               ...data
             }
           }) as Reservation[]
-
-          console.log(`📅 Loaded ${reservations.value.length} reservations`)
         },
         err => {
           console.error('❌ Firestore listener error:', err)
@@ -106,15 +93,9 @@ export const useReservations = () => {
           error.value = `データの取得に失敗しました: ${errorMessage}`
         }
       )
-      console.log('✅ Realtime listener started')
     } catch (err) {
       console.error('❌ Failed to start realtime listener:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      console.error('❌ Listener startup error details:', {
-        name: err instanceof Error ? err.name : 'UnknownError',
-        message: errorMessage,
-        code: (err as { code?: string })?.code || 'unknown'
-      })
       error.value = `リアルタイム同期の開始に失敗しました: ${errorMessage}`
     }
   }
@@ -126,22 +107,9 @@ export const useReservations = () => {
     loading.value = true
     error.value = null
 
-    console.log('🔄 Adding reservation:', {
-      customerName: reservation.customerName,
-      notes: reservation.notes,
-      date: reservation.date,
-      startTime: reservation.startTime,
-      duration: reservation.duration,
-      category: reservation.category,
-      status: reservation.status
-    })
-
     try {
       const firestore = getFirestore()
-      console.log('🔥 Firestore instance:', !!firestore)
-
       const reservationsRef = collection(firestore, 'reservations')
-      console.log('📝 Collection reference created')
 
       const docData = {
         ...reservation,
@@ -149,10 +117,8 @@ export const useReservations = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }
-      console.log('📄 Document data prepared:', docData)
 
       const docRef = await addDoc(reservationsRef, docData)
-      console.log('✅ Reservation added successfully:', docRef.id)
 
       return docRef.id
     } catch (err) {
@@ -187,8 +153,6 @@ export const useReservations = () => {
         ...updateData,
         updatedAt: serverTimestamp()
       })
-
-      console.log('✅ Reservation updated:', id)
     } catch (err) {
       console.error('Failed to update reservation:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
@@ -222,19 +186,14 @@ export const useReservations = () => {
 
   // 初期化
   onMounted(async () => {
-    console.log('🚀 useSimpleReservations: Initializing...')
-
     // 認証状態を確認
     try {
       const auth = getAuth()
       const currentUser = auth.currentUser
-      console.log('👤 Current user:', currentUser ? currentUser.uid : 'Not authenticated')
 
       if (currentUser) {
-        console.log('✅ User authenticated, starting listener')
         startRealtimeListener()
       } else {
-        console.warn('⚠️ User not authenticated, skipping listener')
         error.value = '認証が必要です'
       }
     } catch (err) {

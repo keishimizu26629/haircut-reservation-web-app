@@ -57,7 +57,8 @@ export default defineNuxtConfig({
     '~/app/assets/css/design-system.css',
     '~/app/assets/css/responsive.css',
     '~/app/assets/css/cross-browser.css',
-    '~/app/assets/css/main.css'
+    '~/app/assets/css/main.css',
+    '~/app/assets/css/labels.css'
   ],
 
   // Components auto-import configuration - Nuxt 4互換モード最適化版

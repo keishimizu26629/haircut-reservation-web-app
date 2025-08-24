@@ -1,0 +1,335 @@
+/* 統一カラーパレット（パステルカラー） */
+:root {
+  --tag-pink: #f4a6cd;
+  --tag-blue: #a2d2ff;
+  --tag-green: #a8e6a3;
+  --tag-yellow: #ffd93d;
+  --tag-purple: #c8b5ff;
+  --tag-orange: #ffb366;
+  --tag-red: #ff9999;
+  --tag-gray: #b8b8b8;
+
+  /* 背景色（パステルに合わせた薄い色） */
+  --tag-pink-bg: #fef7fb;
+  --tag-blue-bg: #f0f8ff;
+  --tag-green-bg: #f0fdf0;
+  --tag-yellow-bg: #fffef0;
+  --tag-purple-bg: #f8f5ff;
+  --tag-orange-bg: #fff8f0;
+  --tag-red-bg: #fff5f5;
+  --tag-gray-bg: #f8f8f8;
+
+  /* テキスト色（パステルに合わせた濃い色） */
+  --tag-pink-text: #a0527a;
+  --tag-blue-text: #4a7ba7;
+  --tag-green-text: #52a052;
+  --tag-yellow-text: #b8860b;
+  --tag-purple-text: #7b68ee;
+  --tag-orange-text: #cd853f;
+  --tag-red-text: #cd5c5c;
+  --tag-gray-text: #696969;
+}
+
+/* ラベル管理とタグ選択のスタイル */
+
+/* タグ管理画面のスコープ */
+[data-screen='tag-settings'] .tag-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+[data-screen='tag-settings'] .tag-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  line-height: 1.2;
+  cursor: default;
+  min-height: 48px;
+  transition: background-color 0.15s ease;
+}
+
+[data-screen='tag-settings'] .tag-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-screen='tag-settings'] .tag-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+[data-screen='tag-settings'] .tag-item:focus-visible {
+  outline: 2px solid color-mix(in oklab, currentColor 60%, transparent);
+  outline-offset: 2px;
+}
+
+[data-screen='tag-settings'] .swatch {
+  width: 8px;
+  height: 18px;
+  border-radius: 4px;
+  flex: 0 0 8px;
+}
+
+[data-screen='tag-settings'] .tag-name {
+  font-weight: 500;
+  color: #333 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-screen='tag-settings'] .tag-name {
+    color: #f9fafb;
+  }
+}
+
+/* 予約入力のタグ選択スコープ */
+[data-screen='reservation-form'] .tag-selection {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+[data-screen='reservation-form'] .tag-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 44px;
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+[data-screen='reservation-form'] .tag-option:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-screen='reservation-form'] .tag-option.selected {
+  border-color: currentColor;
+  font-weight: 600;
+}
+
+[data-screen='reservation-form'] .tag-option .swatch {
+  width: 6px;
+  height: 16px;
+  border-radius: 3px;
+  flex: 0 0 6px;
+}
+
+[data-screen='reservation-form'] .tag-option .tag-name {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: #333 !important;
+}
+
+/* タグ色選択ピッカー用クラス（統一パレット使用） */
+.tag-color-picker-pink {
+  background: var(--tag-pink) !important;
+}
+
+.tag-color-picker-blue {
+  background: var(--tag-blue) !important;
+}
+
+.tag-color-picker-green {
+  background: var(--tag-green) !important;
+}
+
+.tag-color-picker-yellow {
+  background: var(--tag-yellow) !important;
+}
+
+.tag-color-picker-purple {
+  background: var(--tag-purple) !important;
+}
+
+.tag-color-picker-orange {
+  background: var(--tag-orange) !important;
+}
+
+.tag-color-picker-red {
+  background: var(--tag-red) !important;
+}
+
+.tag-color-picker-gray {
+  background: var(--tag-gray) !important;
+}
+
+/* 色マッピング（統一パレット使用） */
+.tag-item[data-color='pink'] .swatch,
+.tag-option[data-color='pink'] .swatch {
+  background: var(--tag-pink);
+}
+
+/* カレンダー予約表示用の色クラス（統一パレット使用） */
+.tag-color-pink {
+  background: var(--tag-pink-bg) !important;
+  border-left: 4px solid var(--tag-pink) !important;
+  color: var(--tag-pink-text) !important;
+}
+
+.tag-color-blue {
+  background: var(--tag-blue-bg) !important;
+  border-left: 4px solid var(--tag-blue) !important;
+  color: var(--tag-blue-text) !important;
+}
+
+.tag-color-green {
+  background: var(--tag-green-bg) !important;
+  border-left: 4px solid var(--tag-green) !important;
+  color: var(--tag-green-text) !important;
+}
+
+.tag-color-yellow {
+  background: var(--tag-yellow-bg) !important;
+  border-left: 4px solid var(--tag-yellow) !important;
+  color: var(--tag-yellow-text) !important;
+}
+
+.tag-color-purple {
+  background: var(--tag-purple-bg) !important;
+  border-left: 4px solid var(--tag-purple) !important;
+  color: var(--tag-purple-text) !important;
+}
+
+.tag-color-orange {
+  background: var(--tag-orange-bg) !important;
+  border-left: 4px solid var(--tag-orange) !important;
+  color: var(--tag-orange-text) !important;
+}
+
+.tag-color-red {
+  background: var(--tag-red-bg) !important;
+  border-left: 4px solid var(--tag-red) !important;
+  color: var(--tag-red-text) !important;
+}
+
+.tag-color-gray {
+  background: var(--tag-gray-bg) !important;
+  border-left: 4px solid var(--tag-gray) !important;
+  color: var(--tag-gray-text) !important;
+}
+
+.tag-color-default {
+  background: #f3f4f6 !important;
+  border-left: 4px solid #9ca3af !important;
+  color: #6b7280 !important;
+}
+
+.tag-item[data-color='pink'].selected,
+.tag-option[data-color='pink'].selected {
+  background: #fdf2f8;
+  color: #be185d !important;
+  border-color: #ff5ea8;
+}
+
+.tag-item[data-color='blue'] .swatch,
+.tag-option[data-color='blue'] .swatch {
+  background: var(--tag-blue);
+}
+
+.tag-item[data-color='blue'].selected,
+.tag-option[data-color='blue'].selected {
+  background: #dbeafe;
+  color: #1e40af !important;
+  border-color: #bfdbfe;
+}
+
+.tag-item[data-color='green'] .swatch,
+.tag-option[data-color='green'] .swatch {
+  background: var(--tag-green);
+}
+
+.tag-item[data-color='green'].selected,
+.tag-option[data-color='green'].selected {
+  background: #dcfce7;
+  color: #166534 !important;
+  border-color: #bbf7d0;
+}
+
+.tag-item[data-color='yellow'] .swatch,
+.tag-option[data-color='yellow'] .swatch {
+  background: var(--tag-yellow);
+}
+
+.tag-item[data-color='yellow'].selected,
+.tag-option[data-color='yellow'].selected {
+  background: #fefce8;
+  color: #a16207 !important;
+  border-color: #fef3c7;
+}
+
+.tag-item[data-color='purple'] .swatch,
+.tag-option[data-color='purple'] .swatch {
+  background: var(--tag-purple);
+}
+
+.tag-item[data-color='purple'].selected,
+.tag-option[data-color='purple'].selected {
+  background: #faf5ff;
+  color: #7c2d12 !important;
+  border-color: #e9d5ff;
+}
+
+.tag-item[data-color='orange'] .swatch,
+.tag-option[data-color='orange'] .swatch {
+  background: var(--tag-orange);
+}
+
+.tag-item[data-color='orange'].selected,
+.tag-option[data-color='orange'].selected {
+  background: #fff7ed;
+  color: #c2410c !important;
+  border-color: #fed7aa;
+}
+
+.tag-item[data-color='red'] .swatch,
+.tag-option[data-color='red'] .swatch {
+  background: var(--tag-red);
+}
+
+.tag-item[data-color='red'].selected,
+.tag-option[data-color='red'].selected {
+  background: #fef2f2;
+  color: #dc2626 !important;
+  border-color: #fecaca;
+}
+
+.tag-item[data-color='gray'] .swatch,
+.tag-option[data-color='gray'] .swatch {
+  background: var(--tag-gray);
+}
+
+.tag-item[data-color='gray'].selected,
+.tag-option[data-color='gray'].selected {
+  background: #f9fafb;
+  color: #374151 !important;
+  border-color: #e5e7eb;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 320px) {
+  [data-screen='reservation-form'] .tag-selection {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  [data-screen='reservation-form'] .tag-selection {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  [data-screen='reservation-form'] .tag-selection {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
