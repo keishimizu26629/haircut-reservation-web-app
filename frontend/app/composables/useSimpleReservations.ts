@@ -10,7 +10,8 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  where
 } from 'firebase/firestore'
 
 interface Reservation {
@@ -26,6 +27,7 @@ interface Reservation {
   createdAt?: unknown
   updatedAt?: unknown
   createdBy?: string // スタッフID
+  userId: string // ユーザーID（必須）
 }
 
 // カテゴリ別デフォルト所要時間（分）
@@ -57,10 +59,24 @@ export const useReservations = () => {
 
   const startRealtimeListener = () => {
     try {
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+
+      if (!currentUser) {
+        console.error('❌ No authenticated user found')
+        error.value = '認証が必要です'
+        return
+      }
+
       const firestore = getFirestore()
       const reservationsRef = collection(firestore, 'reservations')
-      // 一時的に単純クエリに変更（インデックス構築中のため）
-      const q = query(reservationsRef, orderBy('date', 'asc'))
+      // ユーザーごとの予約を取得するクエリ
+      const q = query(
+        reservationsRef,
+        where('userId', '==', currentUser.uid),
+        orderBy('date', 'asc'),
+        orderBy('startTime', 'asc')
+      )
 
       unsubscribe = onSnapshot(
         q,
@@ -102,17 +118,25 @@ export const useReservations = () => {
 
   // 予約追加
   const addReservation = async (
-    reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'>
+    reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt' | 'userId'>
   ) => {
     loading.value = true
     error.value = null
 
     try {
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+
+      if (!currentUser) {
+        throw new Error('認証が必要です')
+      }
+
       const firestore = getFirestore()
       const reservationsRef = collection(firestore, 'reservations')
 
       const docData = {
         ...reservation,
+        userId: currentUser.uid, // ユーザーIDを追加
         // endTimeは保存しない（動的計算のみ）
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -124,12 +148,6 @@ export const useReservations = () => {
     } catch (err) {
       console.error('❌ Failed to add reservation:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      console.error('❌ Error details:', {
-        name: err instanceof Error ? err.name : 'UnknownError',
-        message: errorMessage,
-        code: (err as { code?: string })?.code || 'unknown',
-        stack: err instanceof Error ? err.stack : 'No stack trace'
-      })
       error.value = `予約の追加に失敗しました: ${errorMessage}`
       throw err
     } finally {

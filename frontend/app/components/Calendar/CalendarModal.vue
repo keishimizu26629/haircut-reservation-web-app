@@ -2,13 +2,13 @@
   <!-- カレンダーモーダル -->
   <div
     v-if="showCalendarModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
     @click.self="$emit('close-calendar-modal')"
   >
-    <div class="bg-white rounded-2xl w-full max-w-sm">
-      <div class="p-4 border-b">
+    <div class="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm modal-content">
+      <div class="p-3 sm:p-4 border-b">
         <div class="flex justify-between items-center">
-          <h2 class="text-lg font-semibold">
+          <h2 class="text-base sm:text-lg font-semibold">
             日付を選択
           </h2>
           <button
@@ -32,7 +32,7 @@
         </div>
       </div>
 
-      <div class="p-4">
+      <div class="p-3 sm:p-4">
         <!-- 月選択 -->
         <div class="flex justify-between items-center mb-4">
           <button
@@ -77,23 +77,23 @@
         </div>
 
         <!-- 曜日ヘッダー -->
-        <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
           <div
             v-for="day in ['日', '月', '火', '水', '木', '金', '土']"
             :key="day"
-            class="text-center text-xs font-medium text-gray-500 py-1"
+            class="text-center text-xs font-medium text-gray-500 py-0.5 sm:py-1"
           >
             {{ day }}
           </div>
         </div>
 
         <!-- 日付グリッド -->
-        <div class="grid grid-cols-7 gap-1">
+        <div class="grid grid-cols-7 gap-0.5 sm:gap-1">
           <button
             v-for="date in calendarDates"
             :key="date.dateStr"
             :class="[
-              'p-2 text-sm rounded hover:bg-gray-100 transition-colors',
+              'p-1 sm:p-2 text-xs sm:text-sm rounded hover:bg-gray-100 transition-colors min-h-[32px] sm:min-h-[36px]',
               date.isCurrentMonth ? 'text-gray-900' : 'text-gray-400',
               date.isToday ? 'bg-blue-100 text-blue-600 font-bold' : '',
               date.isSelected ? 'bg-blue-500 text-white hover:bg-blue-600' : ''

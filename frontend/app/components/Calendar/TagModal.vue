@@ -2,18 +2,18 @@
   <!-- タグ管理モーダル -->
   <div
     v-if="showTagModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
     @click.self="$emit('close-tag-modal')"
   >
-    <div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto">
-      <div class="sticky top-0 bg-white border-b px-4 py-3">
-        <h2 class="text-lg font-semibold">
+    <div class="bg-white rounded-2xl w-full max-w-sm sm:max-w-md max-h-[85vh] sm:max-h-[80vh] overflow-y-auto modal-content">
+      <div class="sticky top-0 bg-white border-b px-3 sm:px-4 py-2 sm:py-3">
+        <h2 class="text-base sm:text-lg font-semibold">
           タグ管理
         </h2>
       </div>
 
       <div
-        class="p-4"
+        class="p-3 sm:p-4"
         data-screen="tag-settings"
       >
         <!-- 既存タグ一覧 -->
@@ -67,18 +67,18 @@
             :value="newTagName"
             type="text"
             placeholder="タグ名を入力"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg mb-2 text-base sm:text-sm"
             @input="$emit('update-new-tag-name', $event.target.value)"
           >
-          <div class="grid grid-cols-4 gap-2 mb-2">
+          <div class="grid grid-cols-4 gap-1 sm:gap-2 mb-2">
             <button
               v-for="color in tagColors"
               :key="color.name"
               type="button"
               :class="[
-                'h-8 rounded',
+                'h-7 sm:h-8 rounded',
                 color.bgClass,
-                newTagColor === color.name ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                newTagColor === color.name ? 'ring-2 ring-offset-1 sm:ring-offset-2 ring-blue-500' : ''
               ]"
               @click="$emit('update-new-tag-color', color.name)"
             />

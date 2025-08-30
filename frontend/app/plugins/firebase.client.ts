@@ -7,16 +7,11 @@ import { getFirestore } from 'firebase/firestore'
 
 export default defineNuxtPlugin(async () => {
   if (import.meta.client) {
-    const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
+    //  const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
     const isTest = import.meta.env.NODE_ENV === 'test' || import.meta.env.MODE === 'test'
     const useEmulator = import.meta.env.FIREBASE_USE_EMULATOR === 'true' || isTest
 
-    console.log('🔥 Firebase Client Plugin: Manual initialization')
-    console.log('🔥 Plugin timestamp:', new Date().toISOString())
-    console.log('🔥 Client environment:', import.meta.env.MODE || 'unknown')
-    console.log('🔥 Is Production:', isProduction)
-    console.log('🔥 Is Test:', isTest)
-    console.log('🔥 Use Emulator:', useEmulator)
+    console.log('🔥 Firebase initializing...')
 
     // Firebase設定をnuxt.config.tsから取得（環境変数優先、フォールバックあり）
     const config = useRuntimeConfig()
@@ -95,12 +90,7 @@ export default defineNuxtPlugin(async () => {
         }
       }
 
-      console.log('✅ Firebase initialized successfully')
-      console.log('✅ Auth instance:', !!auth)
-      console.log('✅ Firestore instance:', !!firestore)
-      console.log('✅ App instance:', !!app)
-      console.log('✅ Analytics instance:', !!analytics)
-      console.log('✅ Using emulator:', useEmulator)
+      console.log('✅ Firebase initialized')
 
       return {
         provide: {

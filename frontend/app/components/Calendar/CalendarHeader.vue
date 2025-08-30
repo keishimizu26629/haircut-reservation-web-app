@@ -1,16 +1,13 @@
 <template>
   <header class="bg-white shadow-sm border-b sticky top-0 z-40">
-    <div class="px-4 py-3">
+    <div class="px-2 sm:px-4 py-2 sm:py-3">
       <!-- ナビゲーション -->
       <div
         v-show="!showStats"
-        class="flex items-center"
+        class="flex flex-row items-center gap-2 sm:gap-0"
       >
-        <!-- 左側スペーサー -->
-        <div class="flex-1" />
-
-        <!-- 中央エリア：日送りボタンと月表示 -->
-        <div class="flex items-center gap-3">
+        <!-- 左側エリア：日送りボタンと月表示 -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-1 sm:justify-center justify-start order-1 sm:order-1">
           <button
             class="p-2 hover:bg-gray-100 rounded-lg"
             @click="$emit('previous-days')"
@@ -30,7 +27,7 @@
             </svg>
           </button>
 
-          <h1 class="text-base font-semibold text-gray-900 px-2">
+          <h1 class="text-sm sm:text-base font-semibold text-gray-900 px-1 sm:px-2">
             {{ currentMonthText }}
           </h1>
 
@@ -55,18 +52,45 @@
         </div>
 
         <!-- 右側エリア：カレンダーボタン、今日に戻るボタン、メニュー -->
-        <div class="flex-1 flex justify-end gap-2">
+        <div class="flex justify-end gap-1 sm:gap-2 order-2 sm:order-2">
           <button
-            class="px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors"
+            class="px-2 sm:px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1"
             @click="$emit('show-calendar-modal')"
           >
-            カレンダー
+            <svg
+              class="w-3 h-3 sm:hidden"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <span class="hidden sm:inline">カレンダー</span>
           </button>
           <button
-            class="px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors"
+            class="px-2 sm:px-3 py-1 text-xs border border-gray-800 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1"
             @click="$emit('go-to-today')"
           >
-            今日に戻る
+            <svg
+              class="w-3 h-3 sm:hidden"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span class="hidden sm:inline">今日に戻る</span>
+            <span class="sm:hidden">今日</span>
           </button>
 
           <!-- ドロップダウンメニュー -->
@@ -92,7 +116,7 @@
             <!-- ドロップダウンメニュー -->
             <div
               v-if="showMenuDropdown"
-              class="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-50"
+              class="absolute right-0 mt-1 w-40 sm:w-48 bg-white rounded-lg shadow-lg border z-60"
               @click="closeMenuDropdown"
             >
               <button

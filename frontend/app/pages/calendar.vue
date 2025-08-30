@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50 overflow-hidden">
     <!-- ヘッダー -->
     <CalendarHeader
       :current-month-text="currentMonthText"
@@ -14,7 +14,7 @@
     />
 
     <!-- メインコンテンツ -->
-    <main class="pb-20">
+    <main class="pb-4 px-2 sm:px-4">
       <!-- 集計表示 -->
       <CalendarStats
         :show-stats="showStats"
@@ -39,7 +39,7 @@
 
     <!-- フローティングアクションボタン（モバイル） -->
     <button
-      class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center z-30"
+      class="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center z-30 transition-all hover:scale-110"
       @click="openReservationModal()"
     >
       <svg
@@ -160,7 +160,8 @@ const reservationForm = reactive({
   duration: 60, // デフォルト1時間（内部処理用）
   tagId: 'default',
   category: 'default', // 互換性のため残す
-  status: 'active'
+  status: 'active',
+  memo: ''
 })
 
 
@@ -329,6 +330,7 @@ const openReservationModal = (date = null, startTime = null) => {
   reservationForm.tagId = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.category = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.status = 'active'
+  reservationForm.memo = ''
   showModal.value = true
 }
 
@@ -341,7 +343,8 @@ const editReservation = (reservation) => {
     duration: reservation.duration || 60,
     tagId: reservation.tagId || reservation.category || 'default',
     category: reservation.category || reservation.tagId || 'default',
-    status: reservation.status || 'active'
+    status: reservation.status || 'active',
+    memo: reservation.memo || ''
   })
   showModal.value = true
 }
@@ -363,6 +366,7 @@ const saveReservation = async () => {
       // tagIdまたはcategoryを設定（互換性のため）
       tagId: reservationForm.tagId || 'default',
       category: reservationForm.category || reservationForm.tagId || 'default',
+      memo: reservationForm.memo || '',
       // tagオブジェクトは保存しない（表示用のみ）
     }
 

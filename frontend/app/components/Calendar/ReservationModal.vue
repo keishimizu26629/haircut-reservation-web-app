@@ -2,10 +2,10 @@
   <!-- 予約モーダル -->
   <div
     v-if="showModal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-end sm:items-center justify-center z-50 px-0 sm:px-4"
     @click.self="$emit('close-modal')"
   >
-    <div class="bg-white rounded-t-2xl md:rounded-2xl w-full md:max-w-md max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[80vh] overflow-y-auto modal-content">
       <div
         :class="[
           'sticky top-0 border-b px-4 py-3 flex justify-between items-center',
@@ -49,19 +49,19 @@
       </div>
 
       <form
-        class="p-4 space-y-4"
+        class="p-3 sm:p-4 space-y-3 sm:space-y-4 modal-body"
         @submit.prevent="$emit('save-reservation')"
       >
         <!-- 顧客名 -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             顧客名 <span class="text-red-500">*</span>
           </label>
           <input
             :value="reservationForm.customerName"
             type="text"
             required
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
             placeholder="例: 田中太郎"
             @input="$emit('update-form', { field: 'customerName', value: $event.target.value })"
           >
@@ -69,7 +69,7 @@
 
         <!-- タグ選択 -->
         <div data-screen="reservation-form">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             タグ
           </label>
           <div
@@ -103,27 +103,27 @@
         </div>
 
         <!-- 日付・時間 -->
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               日付
             </label>
             <input
               :value="reservationForm.date"
               type="date"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
               @input="$emit('update-form', { field: 'date', value: $event.target.value })"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
               開始時間
             </label>
             <select
               :value="reservationForm.startTime"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
               @change="$emit('update-form', { field: 'startTime', value: $event.target.value })"
             >
               <option
@@ -137,12 +137,26 @@
           </div>
         </div>
 
+        <!-- メモ -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+            メモ
+          </label>
+          <textarea
+            :value="reservationForm.memo"
+            placeholder="施術内容やお客様の要望など..."
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-base sm:text-sm"
+            @input="$emit('update-form', { field: 'memo', value: $event.target.value })"
+          />
+        </div>
+
         <!-- 状態選択（編集時のみ表示） -->
         <div v-if="editingReservation">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
             状態
           </label>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-3 gap-1 sm:gap-2">
             <button
               type="button"
               :class="[
