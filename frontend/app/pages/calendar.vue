@@ -32,8 +32,11 @@
         :display-hours="displayHours"
         :reservations="reservations"
         :tags="tags"
+        :is-single-day-view="isSingleDayView"
+        :selected-single-date="selectedSingleDate"
         @edit-reservation="editReservation"
         @time-click="handleTimeClickFromGrid"
+        @date-header-click="handleDateHeaderClick"
       />
     </main>
 
@@ -133,7 +136,10 @@ const editingReservation = ref(null)
 const selectedTag = ref(null)
 const newTagName = ref('')
 const newTagColor = ref('blue')
-// 3日表示固定
+
+// 表示モード管理
+const isSingleDayView = ref(false)
+const selectedSingleDate = ref(null)
 
 // カスタムタグ（Firebaseで管理）
 const customTags = ref([])
@@ -189,6 +195,12 @@ const displayDays = computed(() => {
 
 
 const currentMonthText = computed(() => {
+  // 単日表示時は選択された日付の月を表示
+  if (isSingleDayView.value && selectedSingleDate.value) {
+    const selectedDate = new Date(selectedSingleDate.value)
+    return `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`
+  }
+  // 通常表示時はcurrentDateの月を表示
   const date = currentDate.value
   return `${date.getFullYear()}年${date.getMonth() + 1}月`
 })
@@ -253,19 +265,53 @@ const _selectTag = (tag) => {
 
 const previousDays = () => {
   const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() - 3)
+  if (isSingleDayView.value) {
+    // 単日表示時は1日前に移動
+    newDate.setDate(newDate.getDate() - 1)
+    selectedSingleDate.value = newDate.toISOString().split('T')[0]
+  } else {
+    // 3日表示時は3日前に移動
+    newDate.setDate(newDate.getDate() - 3)
+  }
   currentDate.value = newDate
 }
 
 const nextDays = () => {
   const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() + 3)
+  if (isSingleDayView.value) {
+    // 単日表示時は1日後に移動
+    newDate.setDate(newDate.getDate() + 1)
+    selectedSingleDate.value = newDate.toISOString().split('T')[0]
+  } else {
+    // 3日表示時は3日後に移動
+    newDate.setDate(newDate.getDate() + 3)
+  }
   currentDate.value = newDate
 }
 
 const goToToday = () => {
   currentDate.value = new Date()
+  // 今日に移動する時は3日表示に戻る
+  isSingleDayView.value = false
+  selectedSingleDate.value = null
 }
+
+// 単日表示関連のメソッド
+const handleDateHeaderClick = (date) => {
+  if (isSingleDayView.value && selectedSingleDate.value === date) {
+    // 同じ日付をクリックした場合は3日表示に戻る
+    isSingleDayView.value = false
+    selectedSingleDate.value = null
+  } else {
+    // 異なる日付をクリックした場合はその日の単日表示
+    isSingleDayView.value = true
+    selectedSingleDate.value = date
+    // currentDateも選択された日付に更新して一貫性を保つ
+    currentDate.value = new Date(date)
+  }
+}
+
+
 
 // カレンダーモーダル用の関数
 const getCalendarDates = () => {
