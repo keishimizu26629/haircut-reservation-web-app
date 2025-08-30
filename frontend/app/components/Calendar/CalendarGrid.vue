@@ -80,7 +80,7 @@
                     >
                       <span
                         class="text-gray-600 font-bold leading-none"
-                        style="font-size: clamp(6px, 1vw, 8px); transform: translateY(-50%);"
+                        style="font-size: clamp(4px, 0.67vw, 5.33px); transform: translateY(-50%);"
                       >
                         ●
                       </span>
