@@ -7,7 +7,7 @@
       @previous-days="previousDays"
       @next-days="nextDays"
       @go-to-today="goToToday"
-      @show-calendar-modal="showCalendarModal = true"
+      @show-calendar-modal="openCalendarModal"
       @open-tag-modal="openTagModal"
       @show-stats="showStats = true"
       @logout="logout"
@@ -174,35 +174,73 @@ const reservationForm = reactive({
 
 // Computed
 const displayDays = computed(() => {
+  console.log('🔍 [DEBUG] displayDays計算開始')
+  console.log('🔍 [DEBUG] displayDays - currentDate:', currentDate.value)
+  console.log('🔍 [DEBUG] displayDays - isSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] displayDays - selectedSingleDate:', selectedSingleDate.value)
+
   const days = []
   const startDate = new Date(currentDate.value)
+  console.log('🔍 [DEBUG] displayDays - startDate:', startDate)
 
   for (let i = 0; i < 3; i++) {
     const date = new Date(startDate)
     date.setDate(startDate.getDate() + i)
 
-    days.push({
-      date: date.toISOString().split('T')[0],
+    // タイムゾーンを考慮した正確な日付文字列を生成
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
+
+    const dayData = {
+      date: dateString,
       dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
       dateNumber: date.getDate(),
       isToday: date.toDateString() === new Date().toDateString()
+    }
+
+    console.log(`🔍 [DEBUG] displayDays - 日付${i}:`, {
+      originalDate: date,
+      dateString: dayData.date,
+      dateNumber: dayData.dateNumber,
+      dayName: dayData.dayName,
+      isToday: dayData.isToday,
+      generatedString: `${year}-${month}-${day}`
     })
+
+    days.push(dayData)
   }
 
+  console.log('🔍 [DEBUG] displayDays計算完了 - 結果:', days)
   return days
 })
 
 
 
 const currentMonthText = computed(() => {
+  console.log('🔍 [DEBUG] currentMonthText計算開始')
+  console.log('🔍 [DEBUG] isSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] selectedSingleDate:', selectedSingleDate.value)
+  console.log('🔍 [DEBUG] currentDate:', currentDate.value)
+
   // 単日表示時は選択された日付の月を表示
   if (isSingleDayView.value && selectedSingleDate.value) {
-    const selectedDate = new Date(selectedSingleDate.value)
-    return `${selectedDate.getFullYear()}年${selectedDate.getMonth() + 1}月`
+    // 日付文字列から直接年月を抽出（より確実）
+    const [year, month] = selectedSingleDate.value.split('-').map(Number)
+    const result = `${year}年${month}月`
+    console.log('🔍 [DEBUG] 単日表示モード - selectedSingleDate解析:', { year, month, result })
+    return result
   }
   // 通常表示時はcurrentDateの月を表示
   const date = currentDate.value
-  return `${date.getFullYear()}年${date.getMonth() + 1}月`
+  const result = `${date.getFullYear()}年${date.getMonth() + 1}月`
+  console.log('🔍 [DEBUG] 通常表示モード - currentDate解析:', {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    result
+  })
+  return result
 })
 
 const selectedMonthText = computed(() => {
@@ -264,29 +302,47 @@ const _selectTag = (tag) => {
 
 
 const previousDays = () => {
+  console.log('🔍 [DEBUG] previousDays呼び出し開始')
+  console.log('🔍 [DEBUG] previousDays - 現在のcurrentDate:', currentDate.value)
+  console.log('🔍 [DEBUG] previousDays - 現在のisSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] previousDays - 現在のselectedSingleDate:', selectedSingleDate.value)
+
   const newDate = new Date(currentDate.value)
   if (isSingleDayView.value) {
     // 単日表示時は1日前に移動
     newDate.setDate(newDate.getDate() - 1)
     selectedSingleDate.value = newDate.toISOString().split('T')[0]
+    console.log('🔍 [DEBUG] previousDays - 単日表示モード - 新しい日付:', newDate)
+    console.log('🔍 [DEBUG] previousDays - 単日表示モード - 新しいselectedSingleDate:', selectedSingleDate.value)
   } else {
     // 3日表示時は3日前に移動
     newDate.setDate(newDate.getDate() - 3)
+    console.log('🔍 [DEBUG] previousDays - 3日表示モード - 新しい日付:', newDate)
   }
   currentDate.value = newDate
+  console.log('🔍 [DEBUG] previousDays - 最終的なcurrentDate:', currentDate.value)
 }
 
 const nextDays = () => {
+  console.log('🔍 [DEBUG] nextDays呼び出し開始')
+  console.log('🔍 [DEBUG] nextDays - 現在のcurrentDate:', currentDate.value)
+  console.log('🔍 [DEBUG] nextDays - 現在のisSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] nextDays - 現在のselectedSingleDate:', selectedSingleDate.value)
+
   const newDate = new Date(currentDate.value)
   if (isSingleDayView.value) {
     // 単日表示時は1日後に移動
     newDate.setDate(newDate.getDate() + 1)
     selectedSingleDate.value = newDate.toISOString().split('T')[0]
+    console.log('🔍 [DEBUG] nextDays - 単日表示モード - 新しい日付:', newDate)
+    console.log('🔍 [DEBUG] nextDays - 単日表示モード - 新しいselectedSingleDate:', selectedSingleDate.value)
   } else {
     // 3日表示時は3日後に移動
     newDate.setDate(newDate.getDate() + 3)
+    console.log('🔍 [DEBUG] nextDays - 3日表示モード - 新しい日付:', newDate)
   }
   currentDate.value = newDate
+  console.log('🔍 [DEBUG] nextDays - 最終的なcurrentDate:', currentDate.value)
 }
 
 const goToToday = () => {
@@ -298,17 +354,32 @@ const goToToday = () => {
 
 // 単日表示関連のメソッド
 const handleDateHeaderClick = (date) => {
+  console.log('🔍 [DEBUG] handleDateHeaderClick呼び出し - クリックされた日付:', date)
+  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のisSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のselectedSingleDate:', selectedSingleDate.value)
+  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のcurrentDate:', currentDate.value)
+
   if (isSingleDayView.value && selectedSingleDate.value === date) {
     // 同じ日付をクリックした場合は3日表示に戻る
+    console.log('🔍 [DEBUG] handleDateHeaderClick - 同じ日付クリック、3日表示に戻る')
     isSingleDayView.value = false
     selectedSingleDate.value = null
   } else {
     // 異なる日付をクリックした場合はその日の単日表示
+    console.log('🔍 [DEBUG] handleDateHeaderClick - 異なる日付クリック、単日表示に切り替え')
     isSingleDayView.value = true
     selectedSingleDate.value = date
-    // currentDateも選択された日付に更新して一貫性を保つ
-    currentDate.value = new Date(date)
+    // currentDateも更新して一貫性を保つ
+    const [year, month, day] = date.split('-').map(Number)
+    console.log('🔍 [DEBUG] handleDateHeaderClick - 日付解析:', { year, month, day })
+    currentDate.value = new Date(year, month - 1, day)
+    console.log('🔍 [DEBUG] handleDateHeaderClick - currentDate更新後:', currentDate.value)
   }
+
+  console.log('🔍 [DEBUG] handleDateHeaderClick完了 - 最終状態:')
+  console.log('🔍 [DEBUG] - isSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] - selectedSingleDate:', selectedSingleDate.value)
+  console.log('🔍 [DEBUG] - currentDate:', currentDate.value)
 }
 
 
@@ -349,9 +420,27 @@ const getCalendarDates = () => {
   return dates
 }
 
+const openCalendarModal = () => {
+  // カレンダーモーダルを開く時は現在の表示日付の月を初期値にする
+  calendarMonth.value = new Date(currentDate.value)
+  showCalendarModal.value = true
+}
+
 const selectDate = (date) => {
+  console.log('🔍 [DEBUG] selectDate呼び出し - 選択された日付:', date)
+  console.log('🔍 [DEBUG] selectDate呼び出し前 - currentDate:', currentDate.value)
+  console.log('🔍 [DEBUG] selectDate呼び出し前 - isSingleDayView:', isSingleDayView.value)
+  console.log('🔍 [DEBUG] selectDate呼び出し前 - selectedSingleDate:', selectedSingleDate.value)
+
   currentDate.value = new Date(date)
+  console.log('🔍 [DEBUG] selectDate - currentDate更新後:', currentDate.value)
+
+  // カレンダーモーダルの月表示も選択した日付の月に更新
+  calendarMonth.value = new Date(date)
+  console.log('🔍 [DEBUG] selectDate - calendarMonth更新後:', calendarMonth.value)
+
   showCalendarModal.value = false
+  console.log('🔍 [DEBUG] selectDate処理完了')
 }
 
 // 集計月のナビゲーション

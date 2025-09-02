@@ -20,23 +20,22 @@
               :key="`header-${day.date}`"
               class="flex-1 px-2 py-2 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50"
               :style="{ minWidth: 'clamp(120px, 25vw, 300px)' }"
-              @click="$emit('date-header-click', day.date)"
+              @click="handleDateHeaderClick(day)"
             >
               <div
                 :class="[
-                  'flex flex-col items-center justify-center',
+                  'flex items-center justify-center',
                   day.isToday ? 'text-blue-600' : 'text-gray-900'
                 ]"
               >
-                <span class="text-xs text-gray-500">{{ day.dayName }}</span>
                 <span
                   :class="[
                     'font-bold',
                     day.isToday ? 'text-blue-600' : 'text-gray-900'
                   ]"
-                  :style="{ fontSize: 'clamp(14px, 2.5vw, 18px)' }"
+                  :style="{ fontSize: 'clamp(19.6px, 3.5vw, 25.2px)' }"
                 >
-                  {{ day.dateNumber }}
+                  {{ day.dateNumber }}日({{ day.dayName }})
                 </span>
               </div>
             </div>
@@ -52,7 +51,7 @@
               <!-- 時間カラム -->
               <div
                 class="bg-white time-column flex-shrink-0 border-l border-gray-200"
-                :style="{ width: 'clamp(25px, 4vw, 50px)', minWidth: '25px' }"
+                :style="timeColumnStyle"
               >
                 <!-- 時間表示エリア -->
                 <div class="relative calendar-day-content">
@@ -61,11 +60,11 @@
                     v-for="hour in displayHours"
                     :key="`${day.date}-hour-${hour}`"
                     class="absolute left-0 right-0"
-                    :style="{ top: `${(hour - 8) * 50}px` }"
+                    :style="{ top: `${(hour - 8) * timeHeight}px` }"
                   >
                     <span
-                      class="absolute -top-2 left-1 text-gray-500"
-                      style="font-size: clamp(9px, 1.2vw, 12px);"
+                      class="absolute -top-2 left-0 right-0 text-center text-gray-500"
+                      :style="timeTextStyle"
                     >
                       {{ hour }}<span class="hidden sm:inline">:00</span>
                     </span>
@@ -76,7 +75,7 @@
                       v-if="index < displayHours.length - 1"
                       :key="`${day.date}-half-${hour}`"
                       class="absolute left-0 right-0 flex justify-center"
-                      :style="{ top: `${(hour - 8) * 50 + 25}px` }"
+                      :style="{ top: `${(hour - 8) * timeHeight + timeHeight / 2}px` }"
                     >
                       <span
                         class="text-gray-600 font-bold leading-none"
@@ -191,6 +190,69 @@ const emit = defineEmits([
   'date-header-click'
 ])
 
+// Reactive - レスポンシブな時間高さ
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 768)
+
+const timeHeight = computed(() => {
+  if (windowWidth.value >= 1024) return 100 // PC
+  if (windowWidth.value >= 768) return 75   // タブレット
+  return 50 // モバイル
+})
+
+// 時間カラムのスタイル（単日表示時に拡大）
+const timeColumnStyle = computed(() => {
+  if (props.isSingleDayView) {
+    // 単日表示時：幅を大きく（モバイルでも明確に変化）
+    return {
+      width: 'clamp(100px, 15vw, 140px)',
+      minWidth: '100px'
+    }
+  } else {
+    // 3日表示時：通常の幅
+    return {
+      width: 'clamp(25px, 4vw, 50px)',
+      minWidth: '25px'
+    }
+  }
+})
+
+// 時間テキストのスタイル（単日表示時に拡大）
+const timeTextStyle = computed(() => {
+  if (props.isSingleDayView) {
+    // 単日表示時：フォントサイズを大きく
+    return {
+      fontSize: 'clamp(16px, 2.4vw, 20px)'
+    }
+  } else {
+    // 3日表示時：通常のフォントサイズ
+    return {
+      fontSize: 'clamp(9px, 1.2vw, 12px)'
+    }
+  }
+})
+
+// ウィンドウリサイズ監視
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', handleResize)
+  }
+})
+
+// Methods
+const handleDateHeaderClick = (day) => {
+  emit('date-header-click', day.date)
+}
+
 // Computed
 const dayGroups = computed(() => {
   if (props.isSingleDayView && props.selectedSingleDate) {
@@ -244,14 +306,14 @@ const getReservationsForDay = (date) => {
 
 const calculatePosition = (timeStr) => {
   const [hours, minutes] = timeStr.split(':').map(Number)
-  return ((hours - 8) * 50) + (minutes / 60 * 50) - 4
+  return ((hours - 8) * timeHeight.value) + (minutes / 60 * timeHeight.value) - 4
 }
 
 const getCurrentTimePosition = () => {
   const now = new Date()
   const hours = now.getHours()
   const minutes = now.getMinutes()
-  return ((hours - 8) * 50) + (minutes / 60 * 50)
+  return ((hours - 8) * timeHeight.value) + (minutes / 60 * timeHeight.value)
 }
 
 const getTagColor = (tagId) => {
@@ -281,8 +343,8 @@ const getReservationStyle = (reservation) => {
 const handleTimeClick = (event, date) => {
   const rect = event.currentTarget.getBoundingClientRect()
   const y = event.clientY - rect.top
-  const hour = Math.floor(y / 50) + 8
-  const minute = Math.round((y % 50) / 50 * 2) * 30
+  const hour = Math.floor(y / timeHeight.value) + 8
+  const minute = Math.round((y % timeHeight.value) / timeHeight.value * 2) * 30
 
   const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
   emit('time-click', { date, startTime })
@@ -333,10 +395,22 @@ const handleTimeClick = (event, date) => {
   color: #374151;
 }
 
-/* カレンダーの基本レイアウト */
+/* カレンダーの基本レイアウト - レスポンシブ高さ */
 .calendar-day-content {
-  height: 650px;
+  height: 650px; /* モバイル: 50px × 13時間 = 650px */
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .calendar-day-content {
+    height: 975px; /* タブレット: 75px × 13時間 = 975px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .calendar-day-content {
+    height: 1300px; /* PC: 100px × 13時間 = 1300px */
+  }
 }
 
 /* スクロールコンテナの調整 */

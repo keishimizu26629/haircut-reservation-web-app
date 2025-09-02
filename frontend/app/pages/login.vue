@@ -93,7 +93,6 @@
 
 <script setup>
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { getAuth } from 'firebase/auth'
 
 definePageMeta({
   layout: 'auth',
@@ -121,7 +120,9 @@ const handleLogin = async () => {
     console.log('🔐 Login timestamp:', new Date().toISOString())
     console.log('🔐 Form data:', { email: form.email, passwordLength: form.password.length })
 
-    const auth = getAuth()
+    // Firebase Auth の取得
+    const { $firebaseAuth } = useNuxtApp()
+    const auth = $firebaseAuth
     console.log('🔐 Auth instance obtained:', !!auth)
 
     // 認証永続化を確実にする（Docker環境対応）

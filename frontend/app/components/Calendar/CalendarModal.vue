@@ -8,7 +8,7 @@
     <div class="bg-white rounded-2xl w-full max-w-xs sm:max-w-sm modal-content">
       <div class="p-3 sm:p-4 border-b">
         <div class="flex justify-between items-center">
-          <h2 class="text-base sm:text-lg font-semibold">
+          <h2 class="text-base sm:text-lg font-semibold text-gray-900">
             日付を選択
           </h2>
           <button

@@ -7,7 +7,7 @@
   >
     <div class="bg-white rounded-2xl w-full max-w-sm sm:max-w-md max-h-[85vh] sm:max-h-[80vh] overflow-y-auto modal-content">
       <div class="sticky top-0 bg-white border-b px-3 sm:px-4 py-2 sm:py-3">
-        <h2 class="text-base sm:text-lg font-semibold">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900">
           タグ管理
         </h2>
       </div>
@@ -92,7 +92,7 @@
         </div>
 
         <button
-          class="w-full mt-4 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          class="w-full mt-4 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900"
           @click="$emit('close-tag-modal')"
         >
           閉じる

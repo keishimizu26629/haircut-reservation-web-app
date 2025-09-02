@@ -12,15 +12,27 @@ echo "================================================"
 if [ ! -f "../.env.dev" ]; then
     echo "❌ Error: .env.dev not found!"
     echo "📝 Creating from template..."
-    cp ../env.template ../.env.dev
-    echo "✅ Please edit .env.dev with your Firebase Dev configuration"
-    echo "💡 Use the FIREBASE_DEV_* values from the template"
+    if [ -f "../env.template" ]; then
+        cp ../env.template ../.env.dev
+        echo "✅ Created .env.dev from template"
+    else
+        echo "⚠️  Template not found, using fallback configuration"
+    fi
+    echo "💡 Using FIREBASE_DEV_* values from template"
+    echo ""
+    echo "⚠️  Using fallback Firebase configuration for now..."
+    echo "🔧 Firebase Project: haircut-reservation-dev (fallback)"
 fi
 
-# Export environment variables
-set -a  # Export all variables
-source ../.env.dev
-set +a  # Stop exporting
+# Export environment variables if file exists
+if [ -f "../.env.dev" ]; then
+    set -a  # Export all variables
+    source ../.env.dev
+    set +a  # Stop exporting
+    echo "✅ Environment variables loaded from .env.dev"
+else
+    echo "⚠️  Using fallback environment variables"
+fi
 
 # Validate required environment variables
 REQUIRED_VARS=(
@@ -41,7 +53,7 @@ done
 
 # Stop any running containers first
 echo "🛑 Stopping any existing containers..."
-cd ..
+cd ../../
 docker compose -f environments/base.yml -f environments/dev.yml down 2>/dev/null || true
 
 # Start services
