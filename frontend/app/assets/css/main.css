@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System Variables */
+@import '../scss/design-system.scss';
+
 /* カスタムCSS - Tailwindベース */
 
 /* 基本スタイル */

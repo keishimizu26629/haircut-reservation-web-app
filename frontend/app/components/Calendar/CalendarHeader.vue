@@ -28,7 +28,10 @@
               </svg>
             </button>
 
-            <h1 class="text-sm sm:text-base font-semibold text-gray-900 px-1 sm:px-2">
+            <h1
+              class="font-semibold text-gray-900 px-1 sm:px-2"
+              style="font-size: var(--calendar-month-text);"
+            >
               {{ currentMonthText }}
             </h1>
 

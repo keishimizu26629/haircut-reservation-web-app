@@ -87,8 +87,13 @@
 
     <!-- メインコンテンツ -->
     <main class="pb-20">
-      <!-- 3日分のカレンダー -->
-      <div class="grid grid-cols-3 gap-px bg-gray-200">
+      <!-- カレンダー表示（1日または3日） -->
+      <div
+        :class="[
+          'grid gap-px bg-gray-200',
+          isSingleDayView ? 'grid-cols-1' : 'grid-cols-3'
+        ]"
+      >
         <div
           v-for="(day, index) in displayDays"
           :key="day.date"
@@ -97,9 +102,11 @@
           <!-- 日付ヘッダー -->
           <div
             :class="[
-              'px-2 py-2 text-center border-b',
-              day.isToday ? 'bg-blue-50 border-blue-200' : 'border-gray-200'
+              'px-2 py-2 text-center border-b cursor-pointer',
+              day.isToday ? 'bg-blue-50 border-blue-200' : 'border-gray-200',
+              'hover:bg-gray-50'
             ]"
+            @click="handleDateHeaderClick(day.date)"
           >
             <div class="text-xs font-medium text-gray-500">
               {{ day.dayName }}
@@ -127,8 +134,11 @@
               :style="{ top: `${(hour - 8) * 50}px` }"
             >
               <span
-                v-if="index === 0"
-                class="absolute -left-1 -top-2 text-xs text-gray-400 bg-white px-1"
+                v-if="index === 0 || isSingleDayView"
+                :class="[
+                  'absolute -left-1 -top-2 bg-white px-1',
+                  isSingleDayView ? 'text-sm text-gray-600' : 'text-xs text-gray-400'
+                ]"
               >
                 {{ hour }}:00
               </span>
@@ -472,6 +482,10 @@ const selectedTag = ref(null)
 const newTagName = ref('')
 const newTagColor = ref('blue')
 
+// 表示モード管理（単日表示対応）
+const isSingleDayView = ref(false)
+const selectedSingleDate = ref(null)
+
 // カスタムタグ（Firebaseで管理）
 const customTags = ref([])
 
@@ -513,18 +527,34 @@ const durations = [
 // Computed
 const displayDays = computed(() => {
   const days = []
-  const startDate = new Date(currentDate.value)
 
-  for (let i = 0; i < 3; i++) {
-    const date = new Date(startDate)
-    date.setDate(startDate.getDate() + i)
+  // 単日表示モードの場合
+  if (isSingleDayView.value && selectedSingleDate.value) {
+    // selectedSingleDateから日付を作成
+    const [year, month, day] = selectedSingleDate.value.split('-').map(Number)
+    const date = new Date(year, month - 1, day)
 
     days.push({
-      date: date.toISOString().split('T')[0],
+      date: selectedSingleDate.value,
       dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
       dateNumber: date.getDate(),
       isToday: date.toDateString() === new Date().toDateString()
     })
+  } else {
+    // 3日表示モード
+    const startDate = new Date(currentDate.value)
+
+    for (let i = 0; i < 3; i++) {
+      const date = new Date(startDate)
+      date.setDate(startDate.getDate() + i)
+
+      days.push({
+        date: date.toISOString().split('T')[0],
+        dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
+        dateNumber: date.getDate(),
+        isToday: date.toDateString() === new Date().toDateString()
+      })
+    }
   }
 
   return days
@@ -581,18 +611,59 @@ const selectTag = (tag) => {
 
 const previousDays = () => {
   const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() - 3)
+  if (isSingleDayView.value) {
+    // 単日表示時は1日前に移動
+    newDate.setDate(newDate.getDate() - 1)
+    // 日付文字列を正確に生成
+    const year = newDate.getFullYear()
+    const month = String(newDate.getMonth() + 1).padStart(2, '0')
+    const day = String(newDate.getDate()).padStart(2, '0')
+    selectedSingleDate.value = `${year}-${month}-${day}`
+  } else {
+    // 3日表示時は3日前に移動
+    newDate.setDate(newDate.getDate() - 3)
+  }
   currentDate.value = newDate
 }
 
 const nextDays = () => {
   const newDate = new Date(currentDate.value)
-  newDate.setDate(newDate.getDate() + 3)
+  if (isSingleDayView.value) {
+    // 単日表示時は1日後に移動
+    newDate.setDate(newDate.getDate() + 1)
+    // 日付文字列を正確に生成
+    const year = newDate.getFullYear()
+    const month = String(newDate.getMonth() + 1).padStart(2, '0')
+    const day = String(newDate.getDate()).padStart(2, '0')
+    selectedSingleDate.value = `${year}-${month}-${day}`
+  } else {
+    // 3日表示時は3日後に移動
+    newDate.setDate(newDate.getDate() + 3)
+  }
   currentDate.value = newDate
 }
 
 const goToToday = () => {
   currentDate.value = new Date()
+  // 今日に移動する時は3日表示に戻る
+  isSingleDayView.value = false
+  selectedSingleDate.value = null
+}
+
+// 日付ヘッダークリック処理
+const handleDateHeaderClick = (date) => {
+  if (isSingleDayView.value && selectedSingleDate.value === date) {
+    // 同じ日付をクリックした場合は3日表示に戻る
+    isSingleDayView.value = false
+    selectedSingleDate.value = null
+  } else {
+    // 異なる日付をクリックした場合はその日の単日表示
+    isSingleDayView.value = true
+    selectedSingleDate.value = date
+    // currentDateも更新して一貫性を保つ
+    const [year, month, day] = date.split('-').map(Number)
+    currentDate.value = new Date(year, month - 1, day)
+  }
 }
 
 const openReservationModal = (date = null, startTime = null) => {

@@ -163,7 +163,7 @@ const reservationForm = reactive({
   customerName: '',
   date: '',
   startTime: '09:00',
-  duration: 60, // デフォルト1時間（内部処理用）
+  duration: 30, // デフォルト30分（内部処理用）
   tagId: 'default',
   category: 'default', // 互換性のため残す
   status: 'active',
@@ -174,15 +174,25 @@ const reservationForm = reactive({
 
 // Computed
 const displayDays = computed(() => {
-  console.log('🔍 [DEBUG] displayDays計算開始')
-  console.log('🔍 [DEBUG] displayDays - currentDate:', currentDate.value)
-  console.log('🔍 [DEBUG] displayDays - isSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] displayDays - selectedSingleDate:', selectedSingleDate.value)
-
   const days = []
-  const startDate = new Date(currentDate.value)
-  console.log('🔍 [DEBUG] displayDays - startDate:', startDate)
 
+  // 単日表示時は選択された日付のみを返す
+  if (isSingleDayView.value && selectedSingleDate.value) {
+    const [year, month, day] = selectedSingleDate.value.split('-').map(Number)
+    const date = new Date(year, month - 1, day)
+
+    const dayData = {
+      date: selectedSingleDate.value,
+      dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
+      dateNumber: date.getDate(),
+      isToday: date.toDateString() === new Date().toDateString()
+    }
+
+    return [dayData]
+  }
+
+  // 3日表示時は通常の3日分を返す
+  const startDate = new Date(currentDate.value)
   for (let i = 0; i < 3; i++) {
     const date = new Date(startDate)
     date.setDate(startDate.getDate() + i)
@@ -200,47 +210,24 @@ const displayDays = computed(() => {
       isToday: date.toDateString() === new Date().toDateString()
     }
 
-    console.log(`🔍 [DEBUG] displayDays - 日付${i}:`, {
-      originalDate: date,
-      dateString: dayData.date,
-      dateNumber: dayData.dateNumber,
-      dayName: dayData.dayName,
-      isToday: dayData.isToday,
-      generatedString: `${year}-${month}-${day}`
-    })
-
     days.push(dayData)
   }
 
-  console.log('🔍 [DEBUG] displayDays計算完了 - 結果:', days)
   return days
 })
 
 
 
 const currentMonthText = computed(() => {
-  console.log('🔍 [DEBUG] currentMonthText計算開始')
-  console.log('🔍 [DEBUG] isSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] selectedSingleDate:', selectedSingleDate.value)
-  console.log('🔍 [DEBUG] currentDate:', currentDate.value)
-
   // 単日表示時は選択された日付の月を表示
   if (isSingleDayView.value && selectedSingleDate.value) {
     // 日付文字列から直接年月を抽出（より確実）
     const [year, month] = selectedSingleDate.value.split('-').map(Number)
-    const result = `${year}年${month}月`
-    console.log('🔍 [DEBUG] 単日表示モード - selectedSingleDate解析:', { year, month, result })
-    return result
+    return `${year}年${month}月`
   }
   // 通常表示時はcurrentDateの月を表示
   const date = currentDate.value
-  const result = `${date.getFullYear()}年${date.getMonth() + 1}月`
-  console.log('🔍 [DEBUG] 通常表示モード - currentDate解析:', {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-    result
-  })
-  return result
+  return `${date.getFullYear()}年${date.getMonth() + 1}月`
 })
 
 const selectedMonthText = computed(() => {
@@ -302,47 +289,37 @@ const _selectTag = (tag) => {
 
 
 const previousDays = () => {
-  console.log('🔍 [DEBUG] previousDays呼び出し開始')
-  console.log('🔍 [DEBUG] previousDays - 現在のcurrentDate:', currentDate.value)
-  console.log('🔍 [DEBUG] previousDays - 現在のisSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] previousDays - 現在のselectedSingleDate:', selectedSingleDate.value)
-
   const newDate = new Date(currentDate.value)
   if (isSingleDayView.value) {
     // 単日表示時は1日前に移動
     newDate.setDate(newDate.getDate() - 1)
-    selectedSingleDate.value = newDate.toISOString().split('T')[0]
-    console.log('🔍 [DEBUG] previousDays - 単日表示モード - 新しい日付:', newDate)
-    console.log('🔍 [DEBUG] previousDays - 単日表示モード - 新しいselectedSingleDate:', selectedSingleDate.value)
+    // ローカル時刻ベースで日付文字列を生成（タイムゾーン問題を回避）
+    const year = newDate.getFullYear()
+    const month = String(newDate.getMonth() + 1).padStart(2, '0')
+    const day = String(newDate.getDate()).padStart(2, '0')
+    selectedSingleDate.value = `${year}-${month}-${day}`
   } else {
     // 3日表示時は3日前に移動
     newDate.setDate(newDate.getDate() - 3)
-    console.log('🔍 [DEBUG] previousDays - 3日表示モード - 新しい日付:', newDate)
   }
   currentDate.value = newDate
-  console.log('🔍 [DEBUG] previousDays - 最終的なcurrentDate:', currentDate.value)
 }
 
 const nextDays = () => {
-  console.log('🔍 [DEBUG] nextDays呼び出し開始')
-  console.log('🔍 [DEBUG] nextDays - 現在のcurrentDate:', currentDate.value)
-  console.log('🔍 [DEBUG] nextDays - 現在のisSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] nextDays - 現在のselectedSingleDate:', selectedSingleDate.value)
-
   const newDate = new Date(currentDate.value)
   if (isSingleDayView.value) {
     // 単日表示時は1日後に移動
     newDate.setDate(newDate.getDate() + 1)
-    selectedSingleDate.value = newDate.toISOString().split('T')[0]
-    console.log('🔍 [DEBUG] nextDays - 単日表示モード - 新しい日付:', newDate)
-    console.log('🔍 [DEBUG] nextDays - 単日表示モード - 新しいselectedSingleDate:', selectedSingleDate.value)
+    // ローカル時刻ベースで日付文字列を生成（タイムゾーン問題を回避）
+    const year = newDate.getFullYear()
+    const month = String(newDate.getMonth() + 1).padStart(2, '0')
+    const day = String(newDate.getDate()).padStart(2, '0')
+    selectedSingleDate.value = `${year}-${month}-${day}`
   } else {
     // 3日表示時は3日後に移動
     newDate.setDate(newDate.getDate() + 3)
-    console.log('🔍 [DEBUG] nextDays - 3日表示モード - 新しい日付:', newDate)
   }
   currentDate.value = newDate
-  console.log('🔍 [DEBUG] nextDays - 最終的なcurrentDate:', currentDate.value)
 }
 
 const goToToday = () => {
@@ -354,32 +331,18 @@ const goToToday = () => {
 
 // 単日表示関連のメソッド
 const handleDateHeaderClick = (date) => {
-  console.log('🔍 [DEBUG] handleDateHeaderClick呼び出し - クリックされた日付:', date)
-  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のisSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のselectedSingleDate:', selectedSingleDate.value)
-  console.log('🔍 [DEBUG] handleDateHeaderClick - 現在のcurrentDate:', currentDate.value)
-
   if (isSingleDayView.value && selectedSingleDate.value === date) {
     // 同じ日付をクリックした場合は3日表示に戻る
-    console.log('🔍 [DEBUG] handleDateHeaderClick - 同じ日付クリック、3日表示に戻る')
     isSingleDayView.value = false
     selectedSingleDate.value = null
   } else {
     // 異なる日付をクリックした場合はその日の単日表示
-    console.log('🔍 [DEBUG] handleDateHeaderClick - 異なる日付クリック、単日表示に切り替え')
     isSingleDayView.value = true
     selectedSingleDate.value = date
     // currentDateも更新して一貫性を保つ
     const [year, month, day] = date.split('-').map(Number)
-    console.log('🔍 [DEBUG] handleDateHeaderClick - 日付解析:', { year, month, day })
     currentDate.value = new Date(year, month - 1, day)
-    console.log('🔍 [DEBUG] handleDateHeaderClick - currentDate更新後:', currentDate.value)
   }
-
-  console.log('🔍 [DEBUG] handleDateHeaderClick完了 - 最終状態:')
-  console.log('🔍 [DEBUG] - isSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] - selectedSingleDate:', selectedSingleDate.value)
-  console.log('🔍 [DEBUG] - currentDate:', currentDate.value)
 }
 
 
@@ -427,20 +390,12 @@ const openCalendarModal = () => {
 }
 
 const selectDate = (date) => {
-  console.log('🔍 [DEBUG] selectDate呼び出し - 選択された日付:', date)
-  console.log('🔍 [DEBUG] selectDate呼び出し前 - currentDate:', currentDate.value)
-  console.log('🔍 [DEBUG] selectDate呼び出し前 - isSingleDayView:', isSingleDayView.value)
-  console.log('🔍 [DEBUG] selectDate呼び出し前 - selectedSingleDate:', selectedSingleDate.value)
-
   currentDate.value = new Date(date)
-  console.log('🔍 [DEBUG] selectDate - currentDate更新後:', currentDate.value)
 
   // カレンダーモーダルの月表示も選択した日付の月に更新
   calendarMonth.value = new Date(date)
-  console.log('🔍 [DEBUG] selectDate - calendarMonth更新後:', calendarMonth.value)
 
   showCalendarModal.value = false
-  console.log('🔍 [DEBUG] selectDate処理完了')
 }
 
 // 集計月のナビゲーション
@@ -461,7 +416,7 @@ const openReservationModal = (date = null, startTime = null) => {
   reservationForm.customerName = ''
   reservationForm.date = date || displayDays.value[Math.floor(displayDays.value.length / 2)].date
   reservationForm.startTime = startTime || '09:00'
-  reservationForm.duration = 60 // デフォルト1時間
+  reservationForm.duration = 30 // デフォルト30分
   reservationForm.tagId = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.category = selectedTag.value?.id || (tags.value[0]?.id || 'default')
   reservationForm.status = 'active'
@@ -475,7 +430,7 @@ const editReservation = (reservation) => {
     customerName: reservation.customerName,
     date: reservation.date,
     startTime: reservation.startTime || reservation.timeSlot,
-    duration: reservation.duration || 60,
+    duration: reservation.duration || 30,
     tagId: reservation.tagId || reservation.category || 'default',
     category: reservation.category || reservation.tagId || 'default',
     status: reservation.status || 'active',
@@ -496,7 +451,7 @@ const saveReservation = async () => {
       customerName: reservationForm.customerName,
       date: reservationForm.date,
       startTime: reservationForm.startTime,
-      duration: reservationForm.duration || 60,
+      duration: reservationForm.duration || 30,
       status: reservationForm.status || 'active',
       // tagIdまたはcategoryを設定（互換性のため）
       tagId: reservationForm.tagId || 'default',
@@ -578,7 +533,7 @@ const saveTagsToFirebase = async () => {
       updatedAt: new Date()
     })
 
-    console.log('✅ Tags saved to Firebase')
+
   } catch (error) {
     console.error('❌ Failed to save tags to Firebase:', error)
     // フォールバックとしてlocalStorageに保存
@@ -608,7 +563,7 @@ const loadTagsFromFirebase = async () => {
     if (docSnap.exists()) {
       const data = docSnap.data()
       customTags.value = data.tags || []
-      console.log('✅ Tags loaded from Firebase')
+
     } else {
       // Firebaseにデータがない場合はlocalStorageから移行
       const saved = localStorage.getItem('customTags')

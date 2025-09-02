@@ -33,7 +33,7 @@
                     'font-bold',
                     day.isToday ? 'text-blue-600' : 'text-gray-900'
                   ]"
-                  :style="{ fontSize: 'clamp(19.6px, 3.5vw, 25.2px)' }"
+                  :style="{ fontSize: 'var(--calendar-date-text)' }"
                 >
                   {{ day.dateNumber }}日({{ day.dayName }})
                 </span>
@@ -66,7 +66,7 @@
                       class="absolute -top-2 left-0 right-0 text-center text-gray-500"
                       :style="timeTextStyle"
                     >
-                      {{ hour }}<span class="hidden sm:inline">:00</span>
+                      {{ hour }}<span class="hidden md:inline">:00</span>
                     </span>
                   </div>
                   <!-- 30分マーカー -->
@@ -110,7 +110,7 @@
                   >
                     <div
                       class="font-medium truncate leading-tight"
-                      :style="{ fontSize: 'clamp(10px, 1.2vw, 14px)' }"
+                      :style="{ fontSize: 'var(--calendar-reservation-text)' }"
                     >
                       {{ reservation.customerName }}
                       <span
@@ -208,9 +208,9 @@ const timeColumnStyle = computed(() => {
       minWidth: '100px'
     }
   } else {
-    // 3日表示時：通常の幅
+    // 3日表示時：「11:00」表記に対応した幅
     return {
-      width: 'clamp(25px, 4vw, 50px)',
+      width: 'clamp(25px, 6vw, 60px)',
       minWidth: '25px'
     }
   }
@@ -219,14 +219,14 @@ const timeColumnStyle = computed(() => {
 // 時間テキストのスタイル（単日表示時に拡大）
 const timeTextStyle = computed(() => {
   if (props.isSingleDayView) {
-    // 単日表示時：フォントサイズを大きく
+    // 単日表示時：CSS変数を使用
     return {
-      fontSize: 'clamp(16px, 2.4vw, 20px)'
+      fontSize: 'var(--calendar-time-text-lg)'
     }
   } else {
-    // 3日表示時：通常のフォントサイズ
+    // 3日表示時：CSS変数を使用
     return {
-      fontSize: 'clamp(9px, 1.2vw, 12px)'
+      fontSize: 'var(--calendar-time-text-sm)'
     }
   }
 })
@@ -256,9 +256,8 @@ const handleDateHeaderClick = (day) => {
 // Computed
 const dayGroups = computed(() => {
   if (props.isSingleDayView && props.selectedSingleDate) {
-    // 単日表示の場合は選択された1日のみ
-    const selectedDay = props.displayDays.find(day => day.date === props.selectedSingleDate)
-    return selectedDay ? [[selectedDay]] : []
+    // 単日表示の場合：displayDaysは既に1日分のデータのみ
+    return [props.displayDays]
   }
 
   // 通常の3日表示
@@ -331,11 +330,16 @@ const getReservationStyle = (reservation) => {
   const width = total > 1 ? `calc((100% - 4px) / ${total})` : 'calc(100% - 4px)'
   const left = total > 1 ? `calc(2px + ((100% - 4px) / ${total}) * ${index})` : '2px'
 
+  // 予約の所要時間に基づいて高さを計算（30分を1ブロックとして）
+  const duration = reservation.duration || 30 // デフォルト30分
+  const blocksCount = duration / 30 // 30分を1ブロックとして計算
+  const height = blocksCount * (timeHeight.value / 2) - 4 // 4pxは上下のマージン分
+
   return {
     top: `${top}px`,
     left: left,
     width: width,
-    height: 'clamp(20px, 3vh, 35px)',
+    height: `${Math.max(20, height)}px`, // 最小20pxを保証
     fontSize: 'inherit' // CSSで制御
   }
 }
@@ -356,43 +360,43 @@ const handleTimeClick = (event, date) => {
 .tag-color-blue {
   background-color: #dbeafe;
   border: 1px solid #93c5fd;
-  color: #1e3a8a;
+  color: #212121;
 }
 .tag-color-green {
   background-color: #dcfce7;
   border: 1px solid #86efac;
-  color: #14532d;
+  color: #212121;
 }
 .tag-color-yellow {
   background-color: #fefce8;
   border: 1px solid #fde047;
-  color: #854d0e;
+  color: #212121;
 }
 .tag-color-red {
   background-color: #fee2e2;
   border: 1px solid #fca5a5;
-  color: #7f1d1d;
+  color: #212121;
 }
 .tag-color-purple {
   background-color: #f3e8ff;
   border: 1px solid #c084fc;
-  color: #581c87;
+  color: #212121;
 }
 .tag-color-pink {
   background-color: #fce7f3;
   border: 1px solid #f9a8d4;
-  color: #831843;
+  color: #212121;
 }
 .tag-color-orange {
   background-color: #fed7aa;
   border: 1px solid #fdba74;
-  color: #9a3412;
+  color: #212121;
 }
 .tag-color-gray,
 .tag-color-default {
   background-color: #f3f4f6;
   border: 1px solid #d1d5db;
-  color: #374151;
+  color: #212121;
 }
 
 /* カレンダーの基本レイアウト - レスポンシブ高さ */
