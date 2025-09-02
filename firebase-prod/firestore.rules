@@ -29,7 +29,7 @@ service cloud.firestore {
 
     function hasRequiredReservationFields() {
       return request.resource.data.keys().hasAll([
-        'customerName', 'date', 'startTime', 'status'
+        'customerName', 'date', 'startTime', 'status', 'userId'
       ]) && (
         // tagId or category must be present (for compatibility)
         request.resource.data.keys().hasAny(['tagId', 'category'])
@@ -42,10 +42,15 @@ service cloud.firestore {
              data.date is string &&
              data.startTime is string &&
              data.status in ['active', 'completed', 'cancelled'] &&
+             data.userId is string &&
              (data.duration == null || data.duration is number) &&
              (data.tagId == null || data.tagId is string) &&
              (data.category == null || data.category is string) &&
-             (data.tag == null || data.tag is map);
+             (data.tag == null || data.tag is map) &&
+             (data.notes == null || data.notes is string) &&
+             (data.memo == null || data.memo is string) &&
+             (data.createdAt == null || data.createdAt is timestamp) &&
+             (data.updatedAt == null || data.updatedAt is timestamp);
     }
 
     // User profiles
@@ -76,16 +81,28 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
-    // Reservations - 認証済みユーザーのみアクセス可能
+    // Reservations - ユーザーごとのアクセス制御
     match /reservations/{reservationId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && 
-                       hasRequiredReservationFields() &&
-                       hasValidReservationData();
-      allow update: if isAuthenticated() && 
-                       hasRequiredReservationFields() &&
-                       hasValidReservationData();
-      allow delete: if isAuthenticated();
+      // 読み取り: 認証済みユーザーは自分の予約のみ閲覧可能
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid);
+
+      // 作成: 認証済みユーザーは自分のuserIdを持つ予約のみ作成可能
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.customerName is string &&
+                       request.resource.data.date is string &&
+                       request.resource.data.startTime is string &&
+                       request.resource.data.status in ['active', 'completed', 'cancelled'];
+
+      // 更新: 予約の所有者のみ更新可能
+      allow update: if isAuthenticated() &&
+                       (resource.data.userId == request.auth.uid) &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // 削除: 予約の所有者のみ削除可能
+      allow delete: if isAuthenticated() &&
+                       (resource.data.userId == request.auth.uid);
     }
 
     // User Tags - ユーザー個別のタグ管理
