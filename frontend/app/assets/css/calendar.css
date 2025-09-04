@@ -143,17 +143,34 @@
     width: 20px !important;
     min-width: 20px !important;
   }
+
+  /* モバイル時の横スクロール防止 */
+  .calendar-scroll-container {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* モバイル時のカラム幅調整 */
+  .data-column-new {
+    min-width: 30px !important;
+    flex: 1 1 auto;
+  }
 }
 
 /* カレンダーコンテナ最適化 */
 .calendar-container {
   width: 100%;
   height: 100%;
+  overflow-x: hidden; /* 横スクロール防止 */
+  max-width: 100vw; /* ビューポート幅を超えない */
 }
 
 .calendar-scroll-container {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e0 transparent;
+  overflow-x: hidden; /* 横スクロールを無効化 */
+  width: 100%; /* 画面幅に完全に収める */
+  max-width: 100vw; /* ビューポート幅を超えない */
 }
 
 .calendar-scroll-container::-webkit-scrollbar {

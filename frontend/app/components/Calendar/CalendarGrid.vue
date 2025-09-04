@@ -19,7 +19,7 @@
               v-for="day in dayGroup"
               :key="`header-${day.date}`"
               class="flex-1 px-2 py-2 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50"
-              :style="{ minWidth: 'clamp(120px, 25vw, 300px)' }"
+              :style="{ minWidth: 'clamp(60px, 25vw, 300px)' }"
               @click="handleDateHeaderClick(day)"
             >
               <div
@@ -91,7 +91,7 @@
               <!-- 日付データカラム -->
               <div
                 class="bg-white flex-1 border-l border-gray-200 first:border-l-0"
-                :style="{ minWidth: 'clamp(80px, 20vw, 220px)' }"
+                :style="{ minWidth: 'clamp(40px, 20vw, 220px)' }"
               >
                 <!-- 予約表示エリア -->
                 <div class="relative calendar-day-content">
@@ -204,14 +204,14 @@ const timeColumnStyle = computed(() => {
   if (props.isSingleDayView) {
     // 単日表示時：幅を大きく（モバイルでも明確に変化）
     return {
-      width: 'clamp(100px, 15vw, 140px)',
-      minWidth: '100px'
+      width: 'clamp(50px, 15vw, 140px)',
+      minWidth: '50px'
     }
   } else {
     // 3日表示時：「11:00」表記に対応した幅
     return {
-      width: 'clamp(25px, 6vw, 60px)',
-      minWidth: '25px'
+      width: 'clamp(20px, 6vw, 60px)',
+      minWidth: '20px'
     }
   }
 })

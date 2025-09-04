@@ -16,10 +16,7 @@ export default defineNitroPlugin(async () => {
     const isEmulatorMode =
       useEmulator &&
       (process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST)
-    const projectId =
-      process.env.FIREBASE_DEV_PROJECT_ID ||
-      process.env.FIREBASE_PROJECT_ID ||
-      'haircut-reservation-dev'
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'haircut-reservation-dev'
 
     console.log(
       `🔧 Firebase Admin SDK - Environment: ${isDevelopment ? 'development' : 'production'}`

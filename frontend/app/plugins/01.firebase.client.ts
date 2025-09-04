@@ -6,10 +6,10 @@ import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 export default defineNuxtPlugin(async () => {
-  if (import.meta.client) {
-    //  const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
-    const isTest = import.meta.env.NODE_ENV === 'test' || import.meta.env.MODE === 'test'
-    const useEmulator = import.meta.env.FIREBASE_USE_EMULATOR === 'true' || isTest
+  if (process.client) {
+    //  const isProduction = process.env.NODE_ENV === 'production'
+    const isTest = process.env.NODE_ENV === 'test'
+    const useEmulator = process.env.FIREBASE_USE_EMULATOR === 'true' || isTest
 
     console.log('🔥 Firebase initializing...')
 
@@ -76,14 +76,14 @@ export default defineNuxtPlugin(async () => {
 
         try {
           // Auth エミュレータ接続
-          const authHost = import.meta.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099'
+          const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099'
           connectAuthEmulator(auth, `http://${authHost}`)
           console.log('🔥 Connected to Auth Emulator:', authHost)
 
           // Firestore エミュレータ接続
-          const firestoreHost = import.meta.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080'
+          const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080'
           const [host, port] = firestoreHost.split(':')
-          connectFirestoreEmulator(firestore, host, parseInt(port))
+          connectFirestoreEmulator(firestore, host!, parseInt(port!))
           console.log('🔥 Connected to Firestore Emulator:', firestoreHost)
         } catch (emulatorError) {
           console.warn('⚠️ Emulator connection error (already connected?):', emulatorError)

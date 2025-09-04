@@ -11,14 +11,7 @@ services:
     environment:
       - NODE_ENV=development
       - FIREBASE_ENV=development
-      # Remote Firebase Dev Project Configuration
-      - FIREBASE_PROJECT_ID=${FIREBASE_DEV_PROJECT_ID}
-      - FIREBASE_API_KEY=${FIREBASE_DEV_API_KEY}
-      - FIREBASE_AUTH_DOMAIN=${FIREBASE_DEV_AUTH_DOMAIN}
-      - FIREBASE_STORAGE_BUCKET=${FIREBASE_DEV_STORAGE_BUCKET}
-      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_DEV_MESSAGING_SENDER_ID}
-      - FIREBASE_APP_ID=${FIREBASE_DEV_APP_ID}
-      - API_URL=https://asia-northeast1-${FIREBASE_DEV_PROJECT_ID}.cloudfunctions.net/api
+      # Firebase variables will be loaded from .env.dev via env_file
       # No emulator settings - connects to real Firebase
     command: npm run dev
     networks:
