@@ -1,386 +1,245 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { 
-  collection, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  Timestamp,
-  type Unsubscribe
+// Vue 3 composables are auto-imported
+import { getAuth } from 'firebase/auth'
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where
 } from 'firebase/firestore'
 
-// 予約データの型定義（シンプル版）
-export interface SimpleReservation {
+interface Reservation {
   id?: string
-  date: string
-  time: string
-  customerName: string
-  customerPhone: string
-  category: 'cut' | 'color' | 'perm' | 'treatment' | 'set' | 'other'
-  details: string
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-  createdAt?: Date
-  updatedAt?: Date
-  createdBy?: string
+  customerName: string // 顧客名
+  notes?: string // 備考（オプション）
+  date: string // "2025-08-06"形式
+  startTime: string // "10:30"形式
+  duration: number // 所要時間（分）
+  // endTime は計算値のみ（Firestoreには保存しない）
+  category: 'cut' | 'color' | 'perm' | 'straight' | 'mesh' | 'other' // 色分け用カテゴリ
+  status: 'active' | 'completed' | 'cancelled' // ステータス
+  createdAt?: unknown
+  updatedAt?: unknown
+  createdBy?: string // スタッフID
+  userId: string // ユーザーID（必須）
 }
 
-// カレンダー表示用の予約データ型
-export interface CalendarAppointment {
-  id: string
-  title: string
-  startTime: Date
-  endTime: Date
-  status: string
-  customerName: string
-  duration: number
+// カテゴリ別デフォルト所要時間（分）
+const DEFAULT_DURATIONS = {
+  cut: 60, // カット：60分
+  color: 90, // カラー：90分
+  perm: 120, // パーマ：120分
+  straight: 180, // 縮毛矯正：180分
+  mesh: 90, // メッシュ：90分
+  other: 60 // その他：60分
+} as const
+
+// 時間計算ユーティリティ関数
+const calculateEndTime = (startTime: string, duration: number): string => {
+  const [hours = 0, minutes = 0] = startTime.split(':').map(Number)
+  const startMinutes = hours * 60 + minutes
+  const endMinutes = startMinutes + duration
+  const endHours = Math.floor(endMinutes / 60)
+  const endMins = endMinutes % 60
+  return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`
 }
 
-export const useSimpleReservations = () => {
-  // リアクティブな状態
-  const reservations = ref<SimpleReservation[]>([])
+export const useReservations = () => {
+  const reservations = ref<Reservation[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
-  
-  // Firestoreリスナー
-  let unsubscribe: Unsubscribe | null = null
-  
-  // カテゴリラベルのマッピング
-  const categoryLabels = {
-    'cut': 'カット',
-    'color': 'カラー',
-    'perm': 'パーマ',
-    'treatment': 'トリートメント',
-    'set': 'セット',
-    'other': 'その他'
-  }
-  
-  // 予約データをカレンダー用にフォーマット
-  const appointments = computed((): CalendarAppointment[] => {
-    return reservations.value.map(reservation => {
-      const startTime = new Date(`${reservation.date}T${reservation.time}`)
-      const endTime = new Date(startTime.getTime() + (90 * 60 * 1000)) // デフォルト90分
-      
-      return {
-        id: reservation.id || '',
-        title: categoryLabels[reservation.category] || reservation.category,
-        startTime,
-        endTime,
-        status: reservation.status,
-        customerName: reservation.customerName,
-        duration: 90
-      }
-    })
-  })
-  
-  // 統計データの計算
-  const todayReservations = computed(() => {
-    const today = new Date().toISOString().split('T')[0]
-    return reservations.value.filter(r => r.date === today)
-  })
-  
-  const pendingReservations = computed(() => {
-    return reservations.value.filter(r => r.status === 'pending')
-  })
-  
-  const confirmedReservations = computed(() => {
-    return reservations.value.filter(r => r.status === 'confirmed')
-  })
-  
-  const monthlyReservations = computed(() => {
-    const now = new Date()
-    const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
-    return reservations.value.filter(r => r.date.startsWith(currentMonth))
-  })
-  
-  // リアルタイムリスナーの開始（dev2のFirebase設定完了後に有効化）
-  const startRealtimeListener = async () => {
-    if (unsubscribe) return // 既にリスナーが存在する場合は何もしない
-    
-    loading.value = true
-    error.value = null
-    
+
+  let unsubscribe: (() => void) | null = null
+
+  const startRealtimeListener = () => {
     try {
-      // Firebase/Firestoreが利用可能かチェック
-      const { $firestore } = useNuxtApp()
-      if (!$firestore) {
-        console.log('📊 Firestore not available, using demo data')
-        initializeDemoData()
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+
+      if (!currentUser) {
+        console.error('❌ No authenticated user found')
+        error.value = '認証が必要です'
         return
       }
-      
-      const reservationsCollection = collection($firestore, 'simple-reservations')
-      const q = query(reservationsCollection, orderBy('date', 'asc'), orderBy('time', 'asc'))
-      
-      unsubscribe = onSnapshot(q, (snapshot) => {
-        const newReservations: SimpleReservation[] = []
-        
-        snapshot.forEach((doc) => {
-          const data = doc.data()
-          newReservations.push({
-            id: doc.id,
-            date: data.date,
-            time: data.time,
-            customerName: data.customerName,
-            customerPhone: data.customerPhone || '',
-            category: data.category,
-            details: data.details || '',
-            status: data.status,
-            createdAt: data.createdAt?.toDate(),
-            updatedAt: data.updatedAt?.toDate(),
-            createdBy: data.createdBy
+
+      const firestore = getFirestore()
+      const reservationsRef = collection(firestore, 'reservations')
+      // ユーザーごとの予約を取得するクエリ
+      const q = query(
+        reservationsRef,
+        where('userId', '==', currentUser.uid),
+        orderBy('date', 'asc'),
+        orderBy('startTime', 'asc')
+      )
+
+      unsubscribe = onSnapshot(
+        q,
+        snapshot => {
+          reservations.value = snapshot.docs.map(doc => {
+            const data = doc.data()
+            // 既存データの互換性対応：timeSlotがある場合はstartTimeに変換
+            if (data.timeSlot && !data.startTime) {
+              data.startTime = data.timeSlot
+              data.duration =
+                data.duration ||
+                DEFAULT_DURATIONS[data.category as keyof typeof DEFAULT_DURATIONS] ||
+                60
+            }
+            // endTimeは動的計算のみ（保存しない）
+            return {
+              id: doc.id,
+              ...data
+            }
+          }) as Reservation[]
+        },
+        err => {
+          console.error('❌ Firestore listener error:', err)
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+          console.error('❌ Listener error details:', {
+            name: err instanceof Error ? err.name : 'UnknownError',
+            message: errorMessage,
+            code: (err as { code?: string })?.code || 'unknown'
           })
-        })
-        
-        reservations.value = newReservations
-        loading.value = false
-        console.log(`✅ Loaded ${newReservations.length} reservations from Firestore`)
-      }, (err) => {
-        console.error('Error fetching reservations:', err)
-        error.value = 'データの取得に失敗しました'
-        loading.value = false
-        // フォールバックとしてデモデータを使用
-        initializeDemoData()
-      })
+          error.value = `データの取得に失敗しました: ${errorMessage}`
+        }
+      )
     } catch (err) {
-      console.error('Error setting up listener:', err)
-      error.value = 'リアルタイム同期の設定に失敗しました'
-      loading.value = false
-      // フォールバックとしてデモデータを使用
-      initializeDemoData()
+      console.error('❌ Failed to start realtime listener:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      error.value = `リアルタイム同期の開始に失敗しました: ${errorMessage}`
     }
   }
-  
-  // リアルタイムリスナーの停止
-  const stopRealtimeListener = () => {
-    if (unsubscribe) {
-      unsubscribe()
-      unsubscribe = null
-      console.log('🔌 Firestore listener stopped')
-    }
-  }
-  
-  // 新規予約の作成
-  const createReservation = async (reservationData: Omit<SimpleReservation, 'id' | 'createdAt' | 'updatedAt'>) => {
+
+  // 予約追加
+  const addReservation = async (
+    reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt' | 'userId'>
+  ) => {
     loading.value = true
     error.value = null
-    
+
     try {
-      const { $firestore } = useNuxtApp()
-      if (!$firestore) {
-        // Firestoreが利用できない場合は、ローカルで追加
-        const newReservation: SimpleReservation = {
-          ...reservationData,
-          id: Date.now().toString(),
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-        reservations.value.push(newReservation)
-        console.log('✅ Reservation created locally (Firestore not available)')
-        return newReservation.id
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+
+      if (!currentUser) {
+        throw new Error('認証が必要です')
       }
-      
-      const reservationsCollection = collection($firestore, 'simple-reservations')
-      
+
+      const firestore = getFirestore()
+      const reservationsRef = collection(firestore, 'reservations')
+
       const docData = {
-        ...reservationData,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
+        ...reservation,
+        userId: currentUser.uid, // ユーザーIDを追加
+        // endTimeは保存しない（動的計算のみ）
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       }
-      
-      const docRef = await addDoc(reservationsCollection, docData)
-      console.log('✅ Reservation created with ID:', docRef.id)
-      
+
+      const docRef = await addDoc(reservationsRef, docData)
+
       return docRef.id
     } catch (err) {
-      console.error('Error creating reservation:', err)
-      error.value = '予約の作成に失敗しました'
+      console.error('❌ Failed to add reservation:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      error.value = `予約の追加に失敗しました: ${errorMessage}`
       throw err
     } finally {
       loading.value = false
     }
   }
-  
-  // 予約の更新
-  const updateReservation = async (id: string, updates: Partial<SimpleReservation>) => {
+
+  // 予約更新
+  const updateReservation = async (id: string, updates: Partial<Reservation>) => {
     loading.value = true
     error.value = null
-    
+
     try {
-      const { $firestore } = useNuxtApp()
-      if (!$firestore) {
-        // Firestoreが利用できない場合は、ローカルで更新
-        const index = reservations.value.findIndex(r => r.id === id)
-        if (index !== -1) {
-          reservations.value[index] = {
-            ...reservations.value[index],
-            ...updates,
-            updatedAt: new Date()
-          }
-          console.log('✅ Reservation updated locally (Firestore not available)')
-        }
-        return
-      }
-      
-      const reservationRef = doc($firestore, 'simple-reservations', id)
-      
-      const updateData = {
-        ...updates,
-        updatedAt: Timestamp.now()
-      }
-      
-      await updateDoc(reservationRef, updateData)
-      console.log('✅ Reservation updated:', id)
+      const firestore = getFirestore()
+      const docRef = doc(firestore, 'reservations', id)
+
+      // endTimeは保存しない（動的計算のみ）
+      const updateData = { ...updates }
+
+      await updateDoc(docRef, {
+        ...updateData,
+        updatedAt: serverTimestamp()
+      })
     } catch (err) {
-      console.error('Error updating reservation:', err)
-      error.value = '予約の更新に失敗しました'
+      console.error('Failed to update reservation:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      error.value = `予約の更新に失敗しました: ${errorMessage}`
       throw err
     } finally {
       loading.value = false
     }
   }
-  
-  // 予約の削除
+
+  // 予約削除
   const deleteReservation = async (id: string) => {
     loading.value = true
     error.value = null
-    
+
     try {
-      const { $firestore } = useNuxtApp()
-      if (!$firestore) {
-        // Firestoreが利用できない場合は、ローカルで削除
-        const index = reservations.value.findIndex(r => r.id === id)
-        if (index !== -1) {
-          reservations.value.splice(index, 1)
-          console.log('✅ Reservation deleted locally (Firestore not available)')
-        }
-        return
-      }
-      
-      const reservationRef = doc($firestore, 'simple-reservations', id)
-      await deleteDoc(reservationRef)
+      const firestore = getFirestore()
+      const docRef = doc(firestore, 'reservations', id)
+      await deleteDoc(docRef)
+
       console.log('✅ Reservation deleted:', id)
     } catch (err) {
-      console.error('Error deleting reservation:', err)
-      error.value = '予約の削除に失敗しました'
+      console.error('Failed to delete reservation:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      error.value = `予約の削除に失敗しました: ${errorMessage}`
       throw err
     } finally {
       loading.value = false
     }
   }
-  
-  // 特定日の予約を取得
-  const getReservationsByDate = (date: string) => {
-    return reservations.value.filter(r => r.date === date)
-  }
-  
-  // 特定のIDの予約を取得
-  const getReservationById = (id: string) => {
-    return reservations.value.find(r => r.id === id)
-  }
-  
-  // 予約の空き時間をチェック
-  const getAvailableTimeSlots = (date: string, businessHours: { start: number, end: number }) => {
-    const reservedTimes = getReservationsByDate(date).map(r => r.time)
-    const availableSlots = []
-    
-    for (let hour = businessHours.start; hour < businessHours.end; hour++) {
-      const timeSlot = `${hour.toString().padStart(2, '0')}:00`
-      if (!reservedTimes.includes(timeSlot)) {
-        availableSlots.push(timeSlot)
+
+  // 初期化
+  onMounted(async () => {
+    // 認証状態を確認
+    try {
+      const auth = getAuth()
+      const currentUser = auth.currentUser
+
+      if (currentUser) {
+        startRealtimeListener()
+      } else {
+        error.value = '認証が必要です'
       }
-    }
-    
-    return availableSlots
-  }
-  
-  // デモデータの初期化（Firestore接続前のフォールバック）
-  const initializeDemoData = () => {
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
-    reservations.value = [
-      {
-        id: 'demo-1',
-        date: today.toISOString().split('T')[0],
-        time: '10:00',
-        customerName: '田中太郎',
-        customerPhone: '090-1234-5678',
-        category: 'cut',
-        details: '前回と同じスタイルで、少し短くしたい',
-        status: 'confirmed',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'demo-2',
-        date: today.toISOString().split('T')[0],
-        time: '14:00',
-        customerName: '佐藤花子',
-        customerPhone: '080-9876-5432',
-        category: 'color',
-        details: 'ブラウン系のカラーでお願いします',
-        status: 'pending',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        id: 'demo-3',
-        date: tomorrow.toISOString().split('T')[0],
-        time: '11:00',
-        customerName: '鈴木次郎',
-        customerPhone: '070-1111-2222',
-        category: 'perm',
-        details: 'ゆるめのパーマでお願いします',
-        status: 'confirmed',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ]
-    loading.value = false
-    console.log('📊 Demo data initialized (Firestore not available)')
-  }
-  
-  // ライフサイクル管理
-  onMounted(() => {
-    // Firestoreリスナーの開始またはデモデータの初期化を試行
-    if (process.client) {
+    } catch (err) {
+      console.error('❌ Failed to check authentication:', err)
+      // 認証チェックに失敗してもリスナーを開始（フォールバック）
       startRealtimeListener()
     }
   })
-  
+
+  // クリーンアップ
   onUnmounted(() => {
-    stopRealtimeListener()
+    if (unsubscribe) {
+      unsubscribe()
+    }
   })
-  
+
   return {
-    // データ
-    reservations: readonly(reservations),
-    appointments,
-    loading: readonly(loading),
-    error: readonly(error),
-    
-    // 統計
-    todayReservations,
-    pendingReservations,
-    confirmedReservations,
-    monthlyReservations,
-    
-    // メソッド
-    createReservation,
+    reservations,
+    loading,
+    error,
+    addReservation,
     updateReservation,
     deleteReservation,
-    getReservationsByDate,
-    getReservationById,
-    getAvailableTimeSlots,
-    startRealtimeListener,
-    stopRealtimeListener,
-    
-    // ユーティリティ
-    categoryLabels,
-    initializeDemoData
+    // ユーティリティ関数もエクスポート
+    calculateEndTime,
+    DEFAULT_DURATIONS
   }
 }
+
+// 後方互換性のため、旧名前でもエクスポート
+export const useSimpleReservations = useReservations

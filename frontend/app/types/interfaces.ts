@@ -61,7 +61,7 @@ export interface EmailNotificationEntity {
   status: 'pending' | 'sending' | 'sent' | 'failed' | 'retry'
   recipientEmail: string
   bookingId: string
-  templateData: Record<string, any>
+  templateData: Record<string, unknown>
   sentAt?: Date
   error?: string
   retryCount: number
@@ -203,32 +203,28 @@ export interface AvailabilityResponse {
 
 // エラー型
 export class DomainError extends Error {
-  constructor(
-    message: string,
-    public readonly code: string,
-    public readonly details?: any
-  ) {
+  constructor(message: string, public readonly code: string, public readonly details?: unknown) {
     super(message)
     this.name = 'DomainError'
   }
 }
 
 export class ValidationError extends DomainError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'VALIDATION_ERROR', details)
     this.name = 'ValidationError'
   }
 }
 
 export class NetworkError extends DomainError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'NETWORK_ERROR', details)
     this.name = 'NetworkError'
   }
 }
 
 export class AuthenticationError extends DomainError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'AUTHENTICATION_ERROR', details)
     this.name = 'AuthenticationError'
   }
@@ -241,19 +237,19 @@ export interface RepositoryResponse<T> {
   error?: {
     message: string
     code: string
-    details?: any
+    details?: unknown
   }
 }
 
 // API応答型（互換性のため維持）
-export interface ApiResponse<T = any> extends RepositoryResponse<T> {}
+export interface ApiResponse<T = unknown> extends RepositoryResponse<T> {}
 
 // イベント型
 export interface DomainEvent {
   id: string
   type: string
   aggregateId: string
-  data: any
+  data: unknown
   occurredAt: Date
 }
 
@@ -299,7 +295,7 @@ export interface ValidationResult {
 
 // サービスインターフェース
 export interface IEmailTemplateService {
-  renderTemplate(template: string, data: any): string
+  renderTemplate(template: string, data: Record<string, unknown>): string
   getDefaultTemplate(type: string): string
   validateTemplate(template: string): ValidationResult
 }
@@ -321,11 +317,8 @@ export interface IAvailabilityDomainService {
     services: ServiceEntity[],
     stylist?: StylistEntity
   ): Promise<TimeSlotEntity[]>
-  
-  isSlotAvailable(
-    slot: TimeSlotEntity,
-    existingBookings: BookingEntity[]
-  ): boolean
+
+  isSlotAvailable(slot: TimeSlotEntity, existingBookings: BookingEntity[]): boolean
 }
 
 export interface IPricingDomainService {

@@ -3,71 +3,29 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "rules/*.yml"
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          - alertmanager:9093
+  # - "first_rules.yml"
+  # - "second_rules.yml"
 
 scrape_configs:
+  # Frontend application metrics
+  - job_name: 'frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  # Frontend (Nuxt 3)
-  - job_name: 'frontend'
-    static_configs:
-      - targets: ['frontend:3000']
-    metrics_path: '/_nuxt/metrics'
-    scrape_interval: 30s
+  # Node exporter for system metrics (if needed later)
+  # - job_name: 'node'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
 
-  # Backend API
-  - job_name: 'backend'
-    static_configs:
-      - targets: ['backend:3001']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # PostgreSQL Exporter
-  - job_name: 'postgres'
-    static_configs:
-      - targets: ['postgres-exporter:9187']
-    scrape_interval: 30s
-
-  # Redis Exporter
-  - job_name: 'redis'
-    static_configs:
-      - targets: ['redis-exporter:9121']
-    scrape_interval: 30s
-
-  # Node Exporter (System metrics)
-  - job_name: 'node'
-    static_configs:
-      - targets: ['node-exporter:9100']
-    scrape_interval: 30s
-
-  # Firebase Emulator (Custom metrics)
-  - job_name: 'firebase-emulator'
-    static_configs:
-      - targets: ['firebase-emulator:4000']
-    metrics_path: '/metrics'
-    scrape_interval: 60s
-
-  # Docker Container metrics
-  - job_name: 'docker'
-    static_configs:
-      - targets: ['cadvisor:8080']
-    scrape_interval: 30s
-
-  # Application-specific metrics
-  - job_name: 'app-metrics'
-    static_configs:
-      - targets: ['backend:3001']
-    metrics_path: '/api/metrics'
-    scrape_interval: 30s
-    scrape_timeout: 10s
-    params:
-      format: ['prometheus']
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093

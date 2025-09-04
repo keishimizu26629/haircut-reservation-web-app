@@ -1,268 +1,147 @@
 <template>
-  <div class="calendar-container">
-    <!-- Calendar Header - Google Calendar Style -->
-    <div class="calendar-header bg-white rounded-lg shadow-sm border border-gray-200">
-      <div class="flex items-center justify-between p-4">
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2">
-            <button
-              class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-              @click="previousPeriod"
-              :aria-label="`前の${currentViewMode === 'month' ? '月' : currentViewMode === 'week' ? '週' : '日'}に移動`"
-            >
-              <i class="bi bi-chevron-left text-gray-600"></i>
-            </button>
-            
-            <h2 class="text-2xl font-normal text-gray-900 min-w-[200px]">
-              {{ formatTitle }}
-            </h2>
-            
-            <button
-              class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-              @click="nextPeriod"
-              :aria-label="`次の${currentViewMode === 'month' ? '月' : currentViewMode === 'week' ? '週' : '日'}に移動`"
-            >
-              <i class="bi bi-chevron-right text-gray-600"></i>
-            </button>
-          </div>
-          
-          <button
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-            @click="goToToday"
-            :class="{ 'bg-blue-50 border-blue-200 text-blue-700': isCurrentPeriod }"
-          >
-            今日
-          </button>
-        </div>
-        
-        <!-- View Mode Selector - Google Calendar Style -->
-        <div class="flex space-x-1 bg-gray-100 rounded-md p-1">
-          <button
-            class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200"
-            :class="currentViewMode === 'month' 
-              ? 'bg-white text-gray-900 shadow-sm' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
-            @click="setViewMode('month')"
-          >
-            月
-          </button>
-          <button
-            class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200"
-            :class="currentViewMode === 'week' 
-              ? 'bg-white text-gray-900 shadow-sm' 
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
-            @click="setViewMode('week')"
-          >
-            週
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Calendar Body - Excel-like Grid -->
-    <div class="calendar-body mt-4">
-      <!-- Month View - Google Calendar + Excel Style -->
-      <div v-if="currentViewMode === 'month'" class="calendar-month-view">
-        <!-- Days of Week Header - Excel Style -->
-        <div class="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
-          <div
-            v-for="(dayName, index) in ['月', '火', '水', '木', '金', '土', '日']"
-            :key="dayName"
-            class="px-4 py-3 text-sm font-medium text-gray-700 text-center border-r border-gray-200 last:border-r-0"
-            :class="{
-              'text-blue-600': index === 5, // 土曜日
-              'text-red-600': index === 6   // 日曜日
-            }"
-          >
-            {{ dayName }}
-          </div>
-        </div>
-        
-        <!-- Calendar Grid - Excel-like with Pastel Colors -->
-        <div class="grid grid-cols-7 border-l border-gray-200 bg-white">
-          <div
-            v-for="day in calendarDays"
-            :key="day.key"
-            class="min-h-[120px] border-r border-b border-gray-200 p-2 cursor-pointer transition-all duration-150 hover:bg-gray-50"
-            :class="{
-              'bg-blue-50 hover:bg-blue-100': day.isToday,
-              'bg-gray-100': day.isOtherMonth,
-              'bg-reservation-selected': day.isSelected,
-              'bg-pastel-blue': day.appointments.length > 0,
-              'opacity-50': day.isDisabled
-            }"
-            @click="selectDay(day)"
-          >
-            <!-- Day Number -->
-            <div class="flex justify-between items-start mb-1">
-              <span 
-                class="text-sm font-medium"
-                :class="{
-                  'text-blue-600 font-semibold': day.isToday,
-                  'text-gray-400': day.isOtherMonth,
-                  'text-gray-900': !day.isOtherMonth && !day.isToday
-                }"
-              >
-                {{ day.date.getDate() }}
-              </span>
-              
-              <!-- Appointment Count Badge -->
-              <span 
-                v-if="day.appointments.length > 0"
-                class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium rounded-full"
-                :class="getAppointmentBadgeClass(day.appointments)"
-              >
-                {{ day.appointments.length }}
-              </span>
-            </div>
-            
-            <!-- Appointment List -->
-            <div class="space-y-1">
-              <div
-                v-for="appointment in day.appointments.slice(0, 3)"
-                :key="appointment.id"
-                class="text-xs px-2 py-1 rounded text-gray-700 truncate"
-                :class="getAppointmentClass(appointment.status)"
-                :title="`${appointment.title} - ${appointment.customerName}`"
-              >
-                {{ appointment.title }}
-              </div>
-              <div
-                v-if="day.appointments.length > 3"
-                class="text-xs text-gray-500 px-2"
-              >
-                +{{ day.appointments.length - 3 }}件
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Week View - Google Calendar Style with Pastel Colors -->
-      <div v-else-if="currentViewMode === 'week'" class="calendar-week-view bg-white rounded-lg border border-gray-200">
-        <!-- Week Header -->
-        <div class="grid grid-cols-8 border-b border-gray-200">
-          <div class="w-16 p-2"></div>
-          <div
-            v-for="day in currentWeekDays"
-            :key="day.date.toISOString()"
-            class="p-3 text-center border-r border-gray-200 last:border-r-0"
-            :class="{
-              'bg-blue-50': day.isToday,
-              'text-blue-600': day.isToday
-            }"
-          >
-            <div class="text-xs text-gray-600 mb-1">{{ day.dayName }}</div>
-            <div 
-              class="text-lg font-medium"
-              :class="day.isToday ? 'text-blue-600' : 'text-gray-900'"
-            >
-              {{ day.date.getDate() }}
-            </div>
-          </div>
-        </div>
-        
-        <!-- Time Grid -->
-        <div class="overflow-y-auto max-h-[600px]">
-          <div
-            v-for="hour in businessTimeSlots"
-            :key="hour"
-            class="grid grid-cols-8 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
-            :class="{ 'bg-gray-50': hour % 2 === 0 }"
-          >
-            <!-- Time Label -->
-            <div class="w-16 px-3 py-4 text-right text-sm text-gray-600 border-r border-gray-200">
-              {{ formatHour(hour) }}
-            </div>
-            
-            <!-- Day Columns -->
+  <!-- カレンダー表示 -->
+  <div
+    v-show="!showStats"
+    class="calendar-container"
+  >
+    <!-- スクロール可能なコンテナ -->
+    <div class="calendar-scroll-container overflow-x-auto">
+      <div class="bg-gray-200 min-w-max">
+        <!-- 3日分のグループごとに表示 -->
+        <div
+          v-for="(dayGroup, groupIndex) in dayGroups"
+          :key="`group-${groupIndex}`"
+          class="mb-4"
+        >
+          <!-- ヘッダー部分（3カラム） -->
+          <div class="flex bg-white border-b-2 border-gray-300 sticky top-0 z-20">
             <div
-              v-for="day in currentWeekDays"
-              :key="`${day.date.toDateString()}-${hour}`"
-              class="relative min-h-[60px] border-r border-gray-200 last:border-r-0 cursor-pointer"
-              :class="{
-                'bg-blue-50': isCurrentTimeSlot(day.date, hour),
-                'hover:bg-pastel-blue': isAvailable(day.date, hour)
-              }"
-              @click="selectTimeSlot(day.date, hour)"
+              v-for="day in dayGroup"
+              :key="`header-${day.date}`"
+              class="flex-1 px-2 py-2 text-center border-r border-gray-200 last:border-r-0 cursor-pointer hover:bg-gray-50"
+              :style="{ minWidth: 'clamp(60px, 25vw, 300px)' }"
+              @click="handleDateHeaderClick(day)"
             >
-              <!-- Time Slot Appointments -->
               <div
-                v-for="appointment in getAppointmentsForTimeSlot(day.date, hour)"
-                :key="appointment.id"
-                class="absolute inset-x-1 top-1 px-2 py-1 rounded text-xs font-medium cursor-pointer z-10"
-                :class="getAppointmentClass(appointment.status)"
-                :style="{ height: `${Math.max(appointment.duration || 60, 30)}px` }"
-                @click.stop="selectAppointment(appointment)"
+                :class="[
+                  'flex items-center justify-center',
+                  day.isToday ? 'text-blue-600' : 'text-gray-900'
+                ]"
               >
-                <div class="truncate">{{ appointment.title }}</div>
-                <div class="text-xs opacity-80 truncate">{{ appointment.customerName }}</div>
-              </div>
-              
-              <!-- Available Slot Indicator -->
-              <div 
-                v-if="isAvailable(day.date, hour) && isBusinessHour(hour)"
-                class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200"
-              >
-                <i class="bi bi-plus-circle text-gray-400 text-lg"></i>
+                <span
+                  :class="[
+                    'font-bold',
+                    day.isToday ? 'text-blue-600' : 'text-gray-900'
+                  ]"
+                  :style="{ fontSize: 'var(--calendar-date-text)' }"
+                >
+                  {{ day.dateNumber }}日({{ day.dayName }})
+                </span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Day View - Simple List Style -->
-      <div v-else-if="currentViewMode === 'day'" class="calendar-day-view bg-white rounded-lg border border-gray-200">
-        <div class="p-4 border-b border-gray-200">
-          <h3 class="text-xl font-medium text-gray-900">
-            {{ formatDayTitle(currentDate) }}
-          </h3>
-          <div class="text-sm text-gray-600 mt-1">
-            {{ dayAppointments.length }}件の予約
-          </div>
-        </div>
-        
-        <div class="divide-y divide-gray-200">
-          <div
-            v-for="hour in businessTimeSlots"
-            :key="hour"
-            class="p-4 hover:bg-gray-50 transition-colors duration-150"
-          >
-            <div class="flex items-start space-x-4">
-              <div class="w-16 text-sm text-gray-600 font-medium">
-                {{ formatHour(hour) }}
-              </div>
-              
-              <div class="flex-1">
-                <div
-                  v-for="appointment in getAppointmentsForHour(hour)"
-                  :key="appointment.id"
-                  class="mb-2 p-3 rounded-lg border cursor-pointer hover:shadow-sm transition-all duration-150"
-                  :class="getAppointmentClass(appointment.status)"
-                  @click="selectAppointment(appointment)"
-                >
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <div class="font-medium text-gray-900">{{ appointment.title }}</div>
-                      <div class="text-sm text-gray-600 mt-1">{{ appointment.customerName }}</div>
-                      <div class="text-xs text-gray-500 mt-1">
-                        {{ formatTime(appointment.startTime) }} - {{ formatTime(appointment.endTime) }}
-                      </div>
+          <!-- データ部分（6カラム：時間＋日付のペアを3つ） -->
+          <div class="flex bg-gray-200">
+            <div
+              v-for="day in dayGroup"
+              :key="`data-${day.date}`"
+              class="contents"
+            >
+              <!-- 時間カラム -->
+              <div
+                class="bg-white time-column flex-shrink-0 border-l border-gray-200"
+                :style="timeColumnStyle"
+              >
+                <!-- 時間表示エリア -->
+                <div class="relative calendar-day-content">
+                  <!-- 時間表示 -->
+                  <div
+                    v-for="hour in displayHours"
+                    :key="`${day.date}-hour-${hour}`"
+                    class="absolute left-0 right-0"
+                    :style="{ top: `${(hour - 8) * timeHeight}px` }"
+                  >
+                    <span
+                      class="absolute -top-2 left-0 right-0 text-center text-gray-500"
+                      :style="timeTextStyle"
+                    >
+                      {{ hour }}<span class="hidden md:inline">:00</span>
+                    </span>
+                  </div>
+                  <!-- 30分マーカー -->
+                  <template v-for="(hour, index) in displayHours">
+                    <div
+                      v-if="index < displayHours.length - 1"
+                      :key="`${day.date}-half-${hour}`"
+                      class="absolute left-0 right-0 flex justify-center"
+                      :style="{ top: `${(hour - 8) * timeHeight + timeHeight / 2}px` }"
+                    >
+                      <span
+                        class="text-gray-600 font-bold leading-none"
+                        style="font-size: clamp(4px, 0.67vw, 5.33px); transform: translateY(-50%);"
+                      >
+                        ●
+                      </span>
                     </div>
-                    <div class="text-xs px-2 py-1 rounded-full font-medium" :class="getStatusBadgeClass(appointment.status)">
-                      {{ getStatusText(appointment.status) }}
+                  </template>
+                </div>
+              </div>
+
+              <!-- 日付データカラム -->
+              <div
+                class="bg-white flex-1 border-l border-gray-200 first:border-l-0"
+                :style="{ minWidth: 'clamp(40px, 20vw, 220px)' }"
+              >
+                <!-- 予約表示エリア -->
+                <div class="relative calendar-day-content">
+                  <!-- 予約ブロック -->
+                  <div
+                    v-for="reservation in getReservationsForDay(day.date)"
+                    :key="reservation.id"
+                    :class="[
+                      'absolute p-0.5 rounded cursor-pointer shadow-sm hover:shadow-md transition-shadow z-10 reservation-block',
+                      getTagColor(reservation.tagId),
+                      reservation.status === 'completed' ? 'opacity-70' : '',
+                      reservation.status === 'cancelled' ? 'opacity-50 line-through' : ''
+                    ]"
+                    :style="getReservationStyle(reservation)"
+                    @click="$emit('edit-reservation', reservation)"
+                  >
+                    <div
+                      class="font-medium truncate leading-tight"
+                      :style="{ fontSize: 'var(--calendar-reservation-text)' }"
+                    >
+                      {{ reservation.customerName }}
+                      <span
+                        v-if="reservation.status === 'completed'"
+                        class="ml-0.5"
+                        style="font-size: 10px;"
+                      >✓</span>
+                      <span
+                        v-if="reservation.status === 'cancelled'"
+                        class="ml-0.5"
+                        style="font-size: 10px;"
+                      >✗</span>
+                      <span
+                        v-if="reservation.memo"
+                        class="ml-0.5 text-gray-500 hidden lg:inline"
+                      >📝</span>
                     </div>
                   </div>
-                </div>
-                
-                <!-- Empty time slot -->
-                <div
-                  v-if="getAppointmentsForHour(hour).length === 0 && isBusinessHour(hour)"
-                  class="p-3 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all duration-150"
-                  @click="createAppointment(currentDate, hour)"
-                >
-                  <i class="bi bi-plus-circle text-gray-400 text-lg mb-2"></i>
-                  <div class="text-sm text-gray-500">予約を追加</div>
+
+                  <!-- 現在時刻線 -->
+                  <div
+                    v-if="day.isToday"
+                    class="absolute left-0 right-0 h-0.5 bg-red-500 z-10"
+                    :style="{ top: `${getCurrentTimePosition()}px` }"
+                  />
+
+                  <!-- タップで予約追加 -->
+                  <div
+                    class="absolute inset-0"
+                    @click="handleTimeClick($event, day.date)"
+                  />
                 </div>
               </div>
             </div>
@@ -273,410 +152,303 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, isSameMonth, isWeekend } from 'date-fns'
-import { ja } from 'date-fns/locale'
-
-// Props & Emits
-interface Props {
-  modelValue?: Date
-  appointments?: Appointment[]
-  viewMode?: 'month' | 'week' | 'day'
-  businessHours?: { start: number; end: number }
-  weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6
-  disabledDates?: Date[]
-  minDate?: Date
-  maxDate?: Date
-}
-
-interface Appointment {
-  id: string
-  title: string
-  startTime: Date
-  endTime: Date
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed'
-  customerName: string
-  duration?: number
-}
-
-interface CalendarDay {
-  date: Date
-  key: string
-  isToday: boolean
-  isSelected: boolean
-  isOtherMonth: boolean
-  isWeekend: boolean
-  isDisabled: boolean
-  appointments: Appointment[]
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  viewMode: 'month',
-  businessHours: () => ({ start: 9, end: 18 }),
-  weekStartsOn: 1,
-  appointments: () => [],
-  disabledDates: () => []
-})
-
-const emit = defineEmits<{
-  'update:modelValue': [date: Date]
-  'update:viewMode': [mode: string]
-  'select-day': [day: CalendarDay]
-  'select-appointment': [appointment: Appointment]
-  'create-appointment': [date: Date, hour?: number]
-  'select-time-slot': [date: Date, hour: number]
-}>()
-
-// Reactive State
-const currentDate = ref(props.modelValue || new Date())
-const selectedDate = ref<Date | null>(props.modelValue || null)
-const currentViewMode = ref(props.viewMode)
-
-// Pastel Color Classes for Appointments
-const getAppointmentClass = (status: string) => {
-  const classes = {
-    'confirmed': 'bg-pastel-green border-green-200 text-green-800',
-    'pending': 'bg-pastel-yellow border-yellow-200 text-yellow-800', 
-    'cancelled': 'bg-pastel-pink border-red-200 text-red-800',
-    'completed': 'bg-pastel-blue border-blue-200 text-blue-800'
-  }
-  return classes[status as keyof typeof classes] || 'bg-gray-100 border-gray-200 text-gray-800'
-}
-
-const getAppointmentBadgeClass = (appointments: Appointment[]) => {
-  const hasConfirmed = appointments.some(apt => apt.status === 'confirmed')
-  const hasPending = appointments.some(apt => apt.status === 'pending')
-  
-  if (hasConfirmed) return 'bg-green-100 text-green-800'
-  if (hasPending) return 'bg-yellow-100 text-yellow-800'
-  return 'bg-gray-100 text-gray-800'
-}
-
-const getStatusBadgeClass = (status: string) => {
-  const classes = {
-    'confirmed': 'bg-green-100 text-green-800',
-    'pending': 'bg-yellow-100 text-yellow-800',
-    'cancelled': 'bg-red-100 text-red-800',
-    'completed': 'bg-blue-100 text-blue-800'
-  }
-  return classes[status as keyof typeof classes] || 'bg-gray-100 text-gray-800'
-}
-
-const getStatusText = (status: string) => {
-  const texts = {
-    'confirmed': '確定',
-    'pending': '保留',
-    'cancelled': 'キャンセル',
-    'completed': '完了'
-  }
-  return texts[status as keyof typeof texts] || status
-}
-
-// Time Configuration
-const timeSlots = computed(() => {
-  const slots = []
-  for (let hour = 0; hour < 24; hour++) {
-    slots.push(hour)
-  }
-  return slots
-})
-
-// Business Hours Time Slots (9:00 - 18:00)
-const businessTimeSlots = computed(() => {
-  const slots = []
-  for (let hour = props.businessHours.start; hour < props.businessHours.end; hour++) {
-    slots.push(hour)
-  }
-  return slots
-})
-
-// Current Week Days for Week View
-const currentWeekDays = computed(() => {
-  const weekStart = startOfWeek(currentDate.value, { weekStartsOn: props.weekStartsOn })
-  const weekEnd = endOfWeek(currentDate.value, { weekStartsOn: props.weekStartsOn })
-  
-  return eachDayOfInterval({ start: weekStart, end: weekEnd }).map(date => ({
-    date,
-    dayName: format(date, 'E', { locale: ja }),
-    isToday: isToday(date),
-    isWeekend: isWeekend(date)
-  }))
-})
-
-
-// Calendar Computeds
-const formatTitle = computed(() => {
-  switch (currentViewMode.value) {
-    case 'month':
-      return format(currentDate.value, 'yyyy年M月', { locale: ja })
-    case 'week':
-      const weekStart = startOfWeek(currentDate.value, { weekStartsOn: props.weekStartsOn })
-      const weekEnd = endOfWeek(currentDate.value, { weekStartsOn: props.weekStartsOn })
-      return `${format(weekStart, 'M月d日', { locale: ja })} - ${format(weekEnd, 'M月d日', { locale: ja })}`
-    case 'day':
-      return format(currentDate.value, 'yyyy年M月d日（E）', { locale: ja })
-    default:
-      return ''
+<script setup>
+const props = defineProps({
+  showStats: {
+    type: Boolean,
+    default: false
+  },
+  displayDays: {
+    type: Array,
+    required: true
+  },
+  displayHours: {
+    type: Array,
+    default: () => [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+  },
+  reservations: {
+    type: Array,
+    default: () => []
+  },
+  tags: {
+    type: Array,
+    default: () => []
+  },
+  isSingleDayView: {
+    type: Boolean,
+    default: false
+  },
+  selectedSingleDate: {
+    type: String,
+    default: null
   }
 })
 
-const isCurrentPeriod = computed(() => {
-  const today = new Date()
-  switch (currentViewMode.value) {
-    case 'month':
-      return isSameMonth(currentDate.value, today)
-    case 'week':
-      const weekStart = startOfWeek(today, { weekStartsOn: props.weekStartsOn })
-      const weekEnd = endOfWeek(today, { weekStartsOn: props.weekStartsOn })
-      return currentDate.value >= weekStart && currentDate.value <= weekEnd
-    case 'day':
-      return isSameDay(currentDate.value, today)
-    default:
-      return false
+const emit = defineEmits([
+  'edit-reservation',
+  'time-click',
+  'date-header-click'
+])
+
+// Reactive - レスポンシブな時間高さ
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 768)
+
+const timeHeight = computed(() => {
+  if (windowWidth.value >= 1024) return 100 // PC
+  if (windowWidth.value >= 768) return 75   // タブレット
+  return 50 // モバイル
+})
+
+// 時間カラムのスタイル（単日表示時に拡大）
+const timeColumnStyle = computed(() => {
+  if (props.isSingleDayView) {
+    // 単日表示時：幅を大きく（モバイルでも明確に変化）
+    return {
+      width: 'clamp(50px, 15vw, 140px)',
+      minWidth: '50px'
+    }
+  } else {
+    // 3日表示時：「11:00」表記に対応した幅
+    return {
+      width: 'clamp(20px, 6vw, 60px)',
+      minWidth: '20px'
+    }
   }
 })
 
-const calendarDays = computed((): CalendarDay[] => {
-  if (currentViewMode.value !== 'month') return []
-  
-  const monthStart = startOfMonth(currentDate.value)
-  const monthEnd = endOfMonth(currentDate.value)
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: props.weekStartsOn })
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: props.weekStartsOn })
-  
-  return eachDayOfInterval({ start: calendarStart, end: calendarEnd }).map(date => ({
-    date,
-    key: date.toISOString(),
-    isToday: isToday(date),
-    isSelected: selectedDate.value ? isSameDay(date, selectedDate.value) : false,
-    isOtherMonth: !isSameMonth(date, currentDate.value),
-    isWeekend: isWeekend(date),
-    isDisabled: isDateDisabled(date),
-    appointments: getAppointmentsForDate(date)
-  }))
+// 時間テキストのスタイル（単日表示時に拡大）
+const timeTextStyle = computed(() => {
+  if (props.isSingleDayView) {
+    // 単日表示時：CSS変数を使用
+    return {
+      fontSize: 'var(--calendar-time-text-lg)'
+    }
+  } else {
+    // 3日表示時：CSS変数を使用
+    return {
+      fontSize: 'var(--calendar-time-text-sm)'
+    }
+  }
 })
 
-const dayAppointments = computed(() => {
-  return getAppointmentsForDate(currentDate.value)
-})
-
-// Helper Functions
-const isDateDisabled = (date: Date): boolean => {
-  if (props.minDate && date < props.minDate) return true
-  if (props.maxDate && date > props.maxDate) return true
-  return props.disabledDates.some(disabledDate => isSameDay(date, disabledDate))
+// ウィンドウリサイズ監視
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
 }
 
-const getAppointmentsForDate = (date: Date): Appointment[] => {
-  return props.appointments.filter(appointment =>
-    isSameDay(appointment.startTime, date)
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', handleResize)
+  }
+})
+
+// Methods
+const handleDateHeaderClick = (day) => {
+  emit('date-header-click', day.date)
+}
+
+// Computed
+const dayGroups = computed(() => {
+  if (props.isSingleDayView && props.selectedSingleDate) {
+    // 単日表示の場合：displayDaysは既に1日分のデータのみ
+    return [props.displayDays]
+  }
+
+  // 通常の3日表示
+  const groups = []
+  for (let i = 0; i < props.displayDays.length; i += 3) {
+    groups.push(props.displayDays.slice(i, i + 3))
+  }
+  return groups
+})
+
+// Methods
+const getReservationsForDay = (date) => {
+  // すべての予約を表示（キャンセルされた予約も含む）
+  const dayReservations = props.reservations.filter(r =>
+    r.date === date
   )
-}
 
-const getAppointmentsForTimeSlot = (date: Date, hour: number): Appointment[] => {
-  return props.appointments.filter(appointment => {
-    const appointmentHour = appointment.startTime.getHours()
-    return isSameDay(appointment.startTime, date) && appointmentHour === hour
+  // 同じ時間の予約をグループ化して、横並びインデックスを付与
+  const groupedByTime = {}
+  dayReservations.forEach(reservation => {
+    const time = reservation.startTime
+    if (!groupedByTime[time]) {
+      groupedByTime[time] = []
+    }
+    groupedByTime[time].push(reservation)
   })
+
+  // 各予約に横並びインデックスと同時間の総数を付与
+  const result = []
+  Object.entries(groupedByTime).forEach(([_time, reservationsAtTime]) => {
+    const total = Math.min(reservationsAtTime.length, 3) // 最大3つまで横並び
+    reservationsAtTime
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .slice(0, 3).forEach((reservation, index) => {
+        result.push({
+          ...reservation,
+          horizontalIndex: index,
+          totalAtSameTime: total
+        })
+      })
+  })
+
+  return result
 }
 
-const getAppointmentsForHour = (hour: number): Appointment[] => {
-  return dayAppointments.value.filter(appointment =>
-    appointment.startTime.getHours() === hour
-  )
+const calculatePosition = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number)
+  return ((hours - 8) * timeHeight.value) + (minutes / 60 * timeHeight.value) - 4
 }
 
-const isBusinessHour = (hour: number): boolean => {
-  return hour >= props.businessHours.start && hour < props.businessHours.end
-}
-
-const isAvailable = (date: Date, hour: number): boolean => {
-  if (!isBusinessHour(hour)) return false
-  const appointments = getAppointmentsForTimeSlot(date, hour)
-  return appointments.length === 0
-}
-
-const isCurrentTimeSlot = (date: Date, hour: number): boolean => {
+const getCurrentTimePosition = () => {
   const now = new Date()
-  return isSameDay(date, now) && now.getHours() === hour
+  const hours = now.getHours()
+  const minutes = now.getMinutes()
+  return ((hours - 8) * timeHeight.value) + (minutes / 60 * timeHeight.value)
 }
 
-const formatHour = (hour: number): string => {
-  return `${hour.toString().padStart(2, '0')}:00`
+const getTagColor = (tagId) => {
+  const tag = props.tags.find(t => t.id === tagId)
+  if (tag && tag.color) {
+    return `tag-color-${tag.color}`
+  }
+  return 'tag-color-default'
 }
 
-const formatTime = (date: Date): string => {
-  return format(date, 'HH:mm')
-}
+const getReservationStyle = (reservation) => {
+  const top = calculatePosition(reservation.startTime)
+  const total = reservation.totalAtSameTime || 1
+  const index = reservation.horizontalIndex || 0
+  const width = total > 1 ? `calc((100% - 4px) / ${total})` : 'calc(100% - 4px)'
+  const left = total > 1 ? `calc(2px + ((100% - 4px) / ${total}) * ${index})` : '2px'
 
-const formatDayTitle = (date: Date): string => {
-  return format(date, 'M月d日（E）', { locale: ja })
-}
+  // 予約の所要時間に基づいて高さを計算（30分を1ブロックとして）
+  const duration = reservation.duration || 30 // デフォルト30分
+  const blocksCount = duration / 30 // 30分を1ブロックとして計算
+  const height = blocksCount * (timeHeight.value / 2) - 4 // 4pxは上下のマージン分
 
-const formatDayLabel = (day: CalendarDay): string => {
-  const dateStr = format(day.date, 'yyyy年M月d日', { locale: ja })
-  const appointmentCount = day.appointments.length
-  const appointmentStr = appointmentCount > 0 ? `、${appointmentCount}件の予約` : ''
-  return `${dateStr}${appointmentStr}`
-}
-
-// Event Handlers
-const selectDay = (day: CalendarDay) => {
-  if (day.isDisabled) return
-  
-  selectedDate.value = day.date
-  currentDate.value = day.date
-  emit('update:modelValue', day.date)
-  emit('select-day', day)
-}
-
-const selectAppointment = (appointment: Appointment) => {
-  emit('select-appointment', appointment)
-}
-
-const createAppointment = (date: Date, hour?: number) => {
-  emit('create-appointment', date, hour)
-}
-
-const selectTimeSlot = (date: Date, hour: number) => {
-  emit('select-time-slot', date, hour)
-}
-
-const setViewMode = (mode: string) => {
-  currentViewMode.value = mode as 'month' | 'week' | 'day'
-  emit('update:viewMode', mode)
-}
-
-const previousPeriod = () => {
-  switch (currentViewMode.value) {
-    case 'month':
-      currentDate.value = subMonths(currentDate.value, 1)
-      break
-    case 'week':
-      currentDate.value = subWeeks(currentDate.value, 1)
-      break
-    case 'day':
-      currentDate.value = subDays(currentDate.value, 1)
-      break
+  return {
+    top: `${top}px`,
+    left: left,
+    width: width,
+    height: `${Math.max(20, height)}px`, // 最小20pxを保証
+    fontSize: 'inherit' // CSSで制御
   }
 }
 
-const nextPeriod = () => {
-  switch (currentViewMode.value) {
-    case 'month':
-      currentDate.value = addMonths(currentDate.value, 1)
-      break
-    case 'week':
-      currentDate.value = addWeeks(currentDate.value, 1)
-      break
-    case 'day':
-      currentDate.value = addDays(currentDate.value, 1)
-      break
-  }
+const handleTimeClick = (event, date) => {
+  const rect = event.currentTarget.getBoundingClientRect()
+  const y = event.clientY - rect.top
+  const hour = Math.floor(y / timeHeight.value) + 8
+  const minute = Math.round((y % timeHeight.value) / timeHeight.value * 2) * 30
+
+  const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+  emit('time-click', { date, startTime })
 }
-
-const goToToday = () => {
-  const today = new Date()
-  currentDate.value = today
-  selectedDate.value = today
-  emit('update:modelValue', today)
-}
-
-const handleDayKeydown = (event: KeyboardEvent, day: CalendarDay) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault()
-    selectDay(day)
-  }
-}
-
-// Watchers
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-    currentDate.value = newValue
-    selectedDate.value = newValue
-  }
-})
-
-watch(() => props.viewMode, (newMode) => {
-  currentViewMode.value = newMode
-})
 </script>
 
 <style scoped>
-/* Tailwind CSSで置き換えられたため、カスタムスタイルのみ残す */
-.calendar-container {
-  @apply w-full max-w-6xl mx-auto;
+/* タグカラークラス */
+.tag-color-blue {
+  background-color: #dbeafe;
+  border: 1px solid #93c5fd;
+  color: #212121;
+}
+.tag-color-green {
+  background-color: #dcfce7;
+  border: 1px solid #86efac;
+  color: #212121;
+}
+.tag-color-yellow {
+  background-color: #fefce8;
+  border: 1px solid #fde047;
+  color: #212121;
+}
+.tag-color-red {
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #212121;
+}
+.tag-color-purple {
+  background-color: #f3e8ff;
+  border: 1px solid #c084fc;
+  color: #212121;
+}
+.tag-color-pink {
+  background-color: #fce7f3;
+  border: 1px solid #f9a8d4;
+  color: #212121;
+}
+.tag-color-orange {
+  background-color: #fed7aa;
+  border: 1px solid #fdba74;
+  color: #212121;
+}
+.tag-color-gray,
+.tag-color-default {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #212121;
 }
 
-/* パステルカラーのカスタム定義 */
-.bg-pastel-pink {
-  background-color: #FFE4E1;
+/* カレンダーの基本レイアウト - レスポンシブ高さ */
+.calendar-day-content {
+  height: 650px; /* モバイル: 50px × 13時間 = 650px */
+  position: relative;
 }
 
-.bg-pastel-blue {
-  background-color: #E0E4FF;
-}
-
-.bg-pastel-green {
-  background-color: #E1F5E4;
-}
-
-.bg-pastel-yellow {
-  background-color: #FFF7E0;
-}
-
-.bg-pastel-purple {
-  background-color: #F0E4FF;
-}
-
-.bg-pastel-mint {
-  background-color: #E0F7FA;
-}
-
-/* 予約状態用のカスタムスタイル */
-.bg-reservation-available {
-  background-color: #E1F5E4;
-}
-
-.bg-reservation-booked {
-  background-color: #FFE4E1;
-}
-
-.bg-reservation-closed {
-  background-color: #F5F5F5;
-}
-
-.bg-reservation-selected {
-  background-color: #E0E4FF;
-}
-
-.bg-reservation-pending {
-  background-color: #FFF7E0;
-}
-
-.bg-reservation-confirmed {
-  background-color: #E0F7FA;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .calendar-container {
-    @apply px-2;
+@media (min-width: 768px) {
+  .calendar-day-content {
+    height: 975px; /* タブレット: 75px × 13時間 = 975px */
   }
 }
 
-@media (max-width: 640px) {
-  .calendar-header {
-    @apply flex-col space-y-4;
+@media (min-width: 1024px) {
+  .calendar-day-content {
+    height: 1300px; /* PC: 100px × 13時間 = 1300px */
   }
-  
-  .calendar-header .flex:first-child {
-    @apply flex-col space-y-2 space-x-0;
+}
+
+/* スクロールコンテナの調整 */
+.calendar-scroll-container {
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: auto;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 transparent;
+}
+
+@media (min-width: 768px) {
+  .calendar-scroll-container {
+    height: calc(100vh - 100px);
   }
-  
-  .calendar-header .flex:first-child > div:first-child {
-    @apply flex-col space-x-0 space-y-2;
-  }
+}
+
+/* Chrome, Safari */
+.calendar-scroll-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: #a0aec0;
 }
 </style>

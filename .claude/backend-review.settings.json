@@ -1,0 +1,17 @@
+{
+  "model": "gemini-2.5-flash",
+  "max_turns": 3,
+  "temperature": 0.1,
+  "allowed_tools": [
+    "Read",
+    "Grep",
+    "Glob",
+    "LS"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[REVIEW MODE] Analyzing Backend code...'"
+    }
+  },
+  "custom_instructions": "You are in REVIEW MODE. Focus only on code review feedback. Check API design, security vulnerabilities (SQL injection, auth), error handling, and performance. DO NOT modify code, only provide feedback."
+}

@@ -6,9 +6,18 @@
           <div class="error-card text-center">
             <!-- Error Icon -->
             <div class="error-icon mb-4">
-              <i v-if="error.statusCode === 404" class="bi bi-compass display-1 text-warning"></i>
-              <i v-else-if="error.statusCode >= 500" class="bi bi-exclamation-triangle display-1 text-danger"></i>
-              <i v-else class="bi bi-shield-exclamation display-1 text-info"></i>
+              <i
+                v-if="error.statusCode === 404"
+                class="bi bi-compass display-1 text-warning"
+              />
+              <i
+                v-else-if="error.statusCode >= 500"
+                class="bi bi-exclamation-triangle display-1 text-danger"
+              />
+              <i
+                v-else
+                class="bi bi-shield-exclamation display-1 text-info"
+              />
             </div>
 
             <!-- Error Title -->
@@ -22,7 +31,10 @@
             </p>
 
             <!-- Error Details (Development Only) -->
-            <details v-if="isDevelopment && error.stack" class="error-details mb-4">
+            <details
+              v-if="isDevelopment && error.stack"
+              class="error-details mb-4"
+            >
               <summary class="btn btn-outline-secondary btn-sm">
                 Technical Details
               </summary>
@@ -31,22 +43,28 @@
 
             <!-- Action Buttons -->
             <div class="error-actions">
-              <button 
-                @click="goBack" 
+              <button
                 class="btn btn-primary me-3"
                 :disabled="!canGoBack"
+                @click="goBack"
               >
-                <i class="bi bi-arrow-left me-2"></i>
+                <i class="bi bi-arrow-left me-2" />
                 戻る
               </button>
-              
-              <NuxtLink to="/" class="btn btn-outline-primary me-3">
-                <i class="bi bi-house me-2"></i>
+
+              <NuxtLink
+                to="/"
+                class="btn btn-outline-primary me-3"
+              >
+                <i class="bi bi-house me-2" />
                 ホームへ
               </NuxtLink>
 
-              <button @click="refresh" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise me-2"></i>
+              <button
+                class="btn btn-outline-secondary"
+                @click="refresh"
+              >
+                <i class="bi bi-arrow-clockwise me-2" />
                 再読み込み
               </button>
             </div>
@@ -68,6 +86,9 @@
 </template>
 
 <script setup lang="ts">
+// Nuxt composables
+import { useHead } from '@unhead/vue'
+
 // Error handling props
 interface ErrorProps {
   error: {
@@ -75,7 +96,7 @@ interface ErrorProps {
     statusMessage?: string
     message?: string
     stack?: string
-    data?: any
+    data?: unknown
   }
 }
 
@@ -88,7 +109,7 @@ const canGoBack = process.client && window.history.length > 1
 // Error categorization
 const getErrorTitle = (): string => {
   const { statusCode } = props.error
-  
+
   switch (statusCode) {
     case 404:
       return 'ページが見つかりません'
@@ -105,7 +126,7 @@ const getErrorTitle = (): string => {
 
 const getErrorDescription = (): string => {
   const { statusCode, statusMessage } = props.error
-  
+
   switch (statusCode) {
     case 404:
       return 'お探しのページは存在しないか、移動された可能性があります。'
@@ -132,7 +153,7 @@ const goBack = (): void => {
   if (process.client && window.history.length > 1) {
     window.history.back()
   } else {
-    navigateTo('/')
+    window.location.href = '/'
   }
 }
 
@@ -222,13 +243,13 @@ if (process.client && !isDevelopment) {
     padding: 2rem 1.5rem;
     margin: 1rem;
   }
-  
+
   .error-actions .btn {
     width: 100%;
     margin-bottom: 0.75rem;
     margin-right: 0 !important;
   }
-  
+
   .error-actions .btn:last-child {
     margin-bottom: 0;
   }

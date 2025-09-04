@@ -1,0 +1,48 @@
+{
+  "executionSummary": {
+    "timestamp": "2025-08-05T21:32:57.717Z",
+    "environment": {
+      "frontend": true,
+      "firebase": true,
+      "testFiles": true
+    },
+    "testExecution": {
+      "exitCode": 1,
+      "success": false,
+      "duration": 924,
+      "stdout": "",
+      "stderr": "error: unknown option '--output-dir=test-results/run-2025-08-05T21-32-56-725Z'\n",
+      "timestamp": "2025-08-05T21:32:57.717Z"
+    },
+    "analysis": {
+      "timestamp": "2025-08-05T21:32:57.717Z",
+      "success": false,
+      "exitCode": 1,
+      "duration": 924,
+      "testResults": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0
+      },
+      "failedTests": [],
+      "performance": {
+        "averageTestTime": 0,
+        "slowestTest": null,
+        "fastestTest": null
+      },
+      "errors": [],
+      "warnings": []
+    }
+  },
+  "qualityAssessment": {
+    "overallSuccess": false,
+    "testCoverage": "Incomplete",
+    "reliability": "High",
+    "performance": "Good"
+  },
+  "recommendations": [
+    "全テストケースの実行確認が必要です"
+  ]
+}

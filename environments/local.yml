@@ -33,13 +33,13 @@ services:
   firebase-emulator:
     image: node:20-alpine
     ports:
-      - "4000:4000" # Firebase Emulator UI
-      - "8080:8080" # Firestore
-      - "9099:9099" # Auth
-      - "9000:9000" # Realtime Database
-      - "5001:5001" # Functions
-      - "9199:9199" # Storage
-      - "8085:8085" # Pub/Sub
+      - '4000:4000' # Firebase Emulator UI
+      - '8080:8080' # Firestore
+      - '9099:9099' # Auth
+      - '9000:9000' # Realtime Database
+      - '5001:5001' # Functions
+      - '9199:9199' # Storage
+      - '8085:8085' # Pub/Sub
     volumes:
       - ../firebase:/app
       - firebase-data:/app/data

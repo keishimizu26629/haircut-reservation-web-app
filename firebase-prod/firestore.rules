@@ -1,0 +1,168 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions for authentication and authorization
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.admin == true;
+    }
+
+    function isStaff() {
+      return request.auth != null &&
+             (request.auth.token.admin == true ||
+              request.auth.token.staff == true);
+    }
+
+    // Validate required fields for different document types
+    function hasRequiredUserFields() {
+      return request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']);
+    }
+
+    function hasRequiredReservationFields() {
+      return request.resource.data.keys().hasAll([
+        'customerName', 'date', 'startTime', 'status', 'userId'
+      ]) && (
+        // tagId or category must be present (for compatibility)
+        request.resource.data.keys().hasAny(['tagId', 'category'])
+      );
+    }
+
+    function hasValidReservationData() {
+      let data = request.resource.data;
+      return data.customerName is string &&
+             data.date is string &&
+             data.startTime is string &&
+             data.status in ['active', 'completed', 'cancelled'] &&
+             data.userId is string &&
+             (data.duration == null || data.duration is number) &&
+             (data.tagId == null || data.tagId is string) &&
+             (data.category == null || data.category is string) &&
+             (data.tag == null || data.tag is map) &&
+             (data.notes == null || data.notes is string) &&
+             (data.memo == null || data.memo is string) &&
+             (data.createdAt == null || data.createdAt is timestamp) &&
+             (data.updatedAt == null || data.updatedAt is timestamp);
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isStaff());
+      allow create: if isAuthenticated() && isOwner(userId) && hasRequiredUserFields();
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin()) && hasRequiredUserFields();
+      allow delete: if isAdmin();
+    }
+
+    // Customer profiles (extended user data)
+    match /customers/{customerId} {
+      allow read: if isAuthenticated() && (isOwner(customerId) || isStaff());
+      allow create: if isAuthenticated() && isOwner(customerId);
+      allow update: if isAuthenticated() && (isOwner(customerId) || isStaff());
+      allow delete: if isAdmin();
+    }
+
+    // Staff profiles
+    match /staff/{staffId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Services/Menu items
+    match /services/{serviceId} {
+      allow read: if true; // Public read access for service listings
+      allow write: if isStaff();
+    }
+
+    // Reservations - ユーザーごとのアクセス制御
+    match /reservations/{reservationId} {
+      // 読み取り: 認証済みユーザーは自分の予約のみ閲覧可能
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid);
+
+      // 作成: 認証済みユーザーは自分のuserIdを持つ予約のみ作成可能
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.customerName is string &&
+                       request.resource.data.date is string &&
+                       request.resource.data.startTime is string &&
+                       request.resource.data.status in ['active', 'completed', 'cancelled'];
+
+      // 更新: 予約の所有者のみ更新可能
+      allow update: if isAuthenticated() &&
+                       (resource.data.userId == request.auth.uid) &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // 削除: 予約の所有者のみ削除可能
+      allow delete: if isAuthenticated() &&
+                       (resource.data.userId == request.auth.uid);
+    }
+
+    // User Tags - ユーザー個別のタグ管理
+    match /userTags/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Business hours and availability
+    match /availability/{availabilityId} {
+      allow read: if true; // Public read access
+      allow write: if isStaff();
+    }
+
+    // Business settings and configuration
+    match /settings/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Tenant/multi-location support
+    match /tenants/{tenantId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      // Nested tenant-specific data
+      match /{document=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // Analytics and reporting data
+    match /analytics/{document=**} {
+      allow read: if isStaff();
+      allow write: if isStaff();
+    }
+
+    // Audit logs
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated(); // System can create logs
+      allow update, delete: if false; // Logs are immutable
+    }
+
+    // Notification settings
+    match /notifications/{userId} {
+      allow read, write: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+
+    // Reviews and ratings
+    match /reviews/{reviewId} {
+      allow read: if true; // Public read access
+      allow create: if isAuthenticated() && isOwner(request.resource.data.customerId);
+      allow update: if isAuthenticated() && isOwner(resource.data.customerId);
+      allow delete: if isAdmin() || isOwner(resource.data.customerId);
+    }
+
+    // Default deny rule for any unmatched paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

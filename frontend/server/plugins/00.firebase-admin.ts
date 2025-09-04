@@ -1,4 +1,4 @@
-import { initializeApp, getApps, credential, cert } from 'firebase-admin/app'
+import { cert, getApps, initializeApp } from 'firebase-admin/app'
 
 // Firebase Admin SDK 安全初期化プラグイン
 export default defineNitroPlugin(async () => {
@@ -12,15 +12,20 @@ export default defineNitroPlugin(async () => {
 
     // 環境検出
     const isDevelopment = process.env.NODE_ENV === 'development'
-    const isEmulatorMode = process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST
-    const projectId = process.env.FIREBASE_PROJECT_ID || (isDevelopment ? 'demo-project' : 'demo-project')
+    const useEmulator = process.env.FIREBASE_USE_EMULATOR === 'true'
+    const isEmulatorMode =
+      useEmulator &&
+      (process.env.FIRESTORE_EMULATOR_HOST || process.env.FIREBASE_AUTH_EMULATOR_HOST)
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'haircut-reservation-dev'
 
-    console.log(`🔧 Firebase Admin SDK - Environment: ${isDevelopment ? 'development' : 'production'}`)
+    console.log(
+      `🔧 Firebase Admin SDK - Environment: ${isDevelopment ? 'development' : 'production'}`
+    )
     console.log(`🔧 Firebase Admin SDK - Project ID: ${projectId}`)
     console.log(`🔧 Firebase Admin SDK - Emulator Mode: ${!!isEmulatorMode}`)
 
     // Emulatorモードでの初期化
-    if (isDevelopment || isEmulatorMode) {
+    if (isEmulatorMode) {
       // Emulator環境用の環境変数設定
       if (!process.env.FIRESTORE_EMULATOR_HOST) {
         process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080'
@@ -38,7 +43,7 @@ export default defineNitroPlugin(async () => {
       console.log(`   - Firestore Emulator: ${process.env.FIRESTORE_EMULATOR_HOST}`)
       console.log(`   - Auth Emulator: ${process.env.FIREBASE_AUTH_EMULATOR_HOST}`)
     } else {
-      // 本番環境での初期化
+      // 実際のFirebaseプロジェクトでの初期化（開発・本番共通）
       const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
 
       if (serviceAccount) {
@@ -48,7 +53,7 @@ export default defineNitroPlugin(async () => {
             credential: cert(serviceAccountKey),
             projectId: projectId
           })
-          console.log('✅ Firebase Admin SDK initialized for Production with Service Account')
+          console.log('✅ Firebase Admin SDK initialized with Service Account')
         } catch (error) {
           console.error('❌ Service Account parsing failed:', error)
           throw error
@@ -66,13 +71,16 @@ export default defineNitroPlugin(async () => {
     const initializedApps = getApps()
     if (initializedApps && initializedApps.length > 0) {
       const app = initializedApps[0]
-      console.log(`✅ Firebase Admin App initialized: ${app.name} (${app.options.projectId})`)
+      console.log(`✅ Firebase Admin App initialized: ${app?.name} (${app?.options?.projectId})`)
     }
-
   } catch (error) {
     console.error('❌ Firebase Admin SDK initialization failed:', error)
-    
+
     // Critical error - do not continue with broken initialization
-    throw new Error(`Firebase Admin SDK initialization failed: ${error instanceof Error ? error.message : String(error)}`)
+    throw new Error(
+      `Firebase Admin SDK initialization failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    )
   }
 })

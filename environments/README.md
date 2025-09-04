@@ -29,23 +29,23 @@ environments/
 ### 2. Development Environment (Remote Firebase Dev)
 
 ```bash
-# 環境変数設定
-cp environments/.env.example environments/.env.dev
-vim environments/.env.dev  # Firebase Dev設定を編集
-
-# 起動
+# 起動（初回は自動で環境変数ファイルが作成されます）
 ./environments/scripts/start-dev.sh
+
+# 環境変数を手動で設定する場合
+cp environments/env.template environments/.env.dev
+vim environments/.env.dev  # FIREBASE_DEV_* 値を設定
 ```
 
 ### 3. Production Environment (Remote Firebase Prod)
 
 ```bash
-# 環境変数設定
-cp environments/.env.example environments/.env.prod
-vim environments/.env.prod  # Firebase Prod設定を編集
-
-# 起動（確認プロンプト付き）
+# 起動（初回は自動で環境変数ファイルが作成されます）
 ./environments/scripts/start-prod.sh
+
+# 環境変数を手動で設定する場合
+cp environments/env.template environments/.env.prod
+vim environments/.env.prod  # FIREBASE_PROD_* 値とセキュアなパスワードを設定
 ```
 
 ## 🔧 Manual Operation

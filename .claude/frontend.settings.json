@@ -1,0 +1,20 @@
+{
+  "model": "claude-sonnet-4@20250514",
+  "max_turns": 5,
+  "temperature": 0.2,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Grep",
+    "Glob",
+    "LS",
+    "WebSearch"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo 'Reviewing Frontend code...'"
+    }
+  },
+  "custom_instructions": "Focus on React/TypeScript best practices, performance, and accessibility. Always check for XSS vulnerabilities and proper state management."
+}

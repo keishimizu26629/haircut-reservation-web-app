@@ -12,47 +12,53 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }]
   ],
-  
+
   // グローバルセットアップ
   globalSetup: './tests/e2e/global-setup.ts',
-  
+
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    
+
     // Firebase Emulator環境用の設定
     ignoreHTTPSErrors: true,
     headless: !!process.env.CI,
     actionTimeout: 30000,
-    navigationTimeout: 30000,
+    navigationTimeout: 30000
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'] }
     },
     // CI環境以外では複数ブラウザテストを無効化（高速化のため）
-    ...(process.env.CI ? [
-      {
-        name: 'firefox',
-        use: { ...devices['Desktop Firefox'] },
-      },
-      {
-        name: 'webkit',
-        use: { ...devices['Desktop Safari'] },
-      },
-    ] : []),
+    ...(process.env.CI
+      ? [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] }
+          },
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] }
+          }
+        ]
+      : [])
   ],
 
-  webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    stderr: 'pipe',
-    stdout: 'pipe',
-  },
+  webServer: process.env.SKIP_WEBSERVER
+    ? []
+    : [
+        {
+          command: 'npm run dev',
+          url: 'http://localhost:3000',
+          reuseExistingServer: !process.env.CI,
+          timeout: 120 * 1000,
+          stderr: 'pipe',
+          stdout: 'pipe'
+        }
+      ]
 })

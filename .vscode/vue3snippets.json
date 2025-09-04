@@ -1,0 +1,44 @@
+{
+  "Vue 3 Setup Script": {
+    "prefix": "v3setup",
+    "body": [
+      "<template>",
+      "  <div>",
+      "    $0",
+      "  </div>",
+      "</template>",
+      "",
+      "<script setup>",
+      "",
+      "</script>",
+      "",
+      "<style scoped>",
+      "",
+      "</style>"
+    ],
+    "description": "Vue 3 Composition API setup template"
+  },
+  "Vue 3 definePageMeta": {
+    "prefix": "v3meta",
+    "body": [
+      "definePageMeta({",
+      "  layout: '${1:default}',",
+      "  middleware: '${2:auth}',",
+      "  ssr: ${3:false}",
+      "})"
+    ],
+    "description": "Nuxt 3 definePageMeta"
+  },
+  "Vue 3 useHead": {
+    "prefix": "v3head",
+    "body": [
+      "useHead({",
+      "  title: '${1:Page Title}',",
+      "  meta: [",
+      "    { name: 'description', content: '${2:Page description}' }",
+      "  ]",
+      "})"
+    ],
+    "description": "Nuxt 3 useHead composable"
+  }
+}

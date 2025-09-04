@@ -1,0 +1,60 @@
+
+=== MANUAL E2E LOGIN TEST INSTRUCTIONS ===
+
+🎯 Test Objective: Verify login functionality works end-to-end
+
+📋 Pre-Test Checklist:
+✅ Site is accessible: https://haircut-reservation-dev.web.app
+✅ Login page loads: https://haircut-reservation-dev.web.app/login  
+✅ Diagnostic tool available: https://haircut-reservation-dev.web.app/diagnose-login.html
+
+🔐 Test Credentials:
+Email: testaccount@test.com
+Password: testtest
+
+📝 Manual Test Steps:
+
+STEP 1: Open Login Page
+- Navigate to: https://haircut-reservation-dev.web.app/login
+- Verify page loads without errors
+- Check browser console for any errors
+- Confirm login form is visible
+
+STEP 2: Enter Credentials
+- Email field: testaccount@test.com
+- Password field: testtest
+- Click "ログイン" button
+
+STEP 3: Monitor Authentication
+- Watch browser console for Firebase auth logs
+- Look for authentication success messages
+- Check for any CSP or security errors
+
+STEP 4: Verify Redirect
+- Should redirect to main calendar page (/)
+- Verify user is authenticated
+- Check that logout button is visible
+
+STEP 5: Test Navigation
+- Try accessing protected pages
+- Verify authentication persists
+- Test logout functionality
+
+🔧 Diagnostic Tool Test:
+- Open: https://haircut-reservation-dev.web.app/diagnose-login.html
+- Click "ログインテスト" button
+- Verify Firebase initialization status
+- Check authentication state
+
+❌ Troubleshooting:
+- If page freezes: Check infinite redirect loops
+- If login fails: Verify Firebase Auth errors
+- If blank page: Check CSP violations
+- If network errors: Check Firebase API calls
+
+📊 Expected Results:
+✅ Smooth login without freezing
+✅ Successful authentication
+✅ Proper redirect to calendar
+✅ Persistent authentication state
+✅ No console errors

@@ -109,6 +109,12 @@ firebase-export-*/
 *-service-account-key.json
 service-account-*.json
 
+# Firebase configuration files with credentials
+*-config.json
+firebase-*-config.json
+*-dev-config.json
+*-prod-config.json
+
 # ===============================================
 # Docker 関連
 # ===============================================
