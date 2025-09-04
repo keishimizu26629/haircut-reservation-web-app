@@ -9,16 +9,17 @@ echo "🚀 Starting Production Environment (Remote Firebase Prod)"
 echo "================================================"
 
 # Check if .env.prod exists
-if [ ! -f "environments/.env.prod" ]; then
-    echo "❌ Error: environments/.env.prod not found!"
-    echo "📝 Please create environments/.env.prod with your Firebase Production configuration"
-    echo "💡 Copy from environments/.env.example and configure Firebase Production settings"
-    exit 1
+if [ ! -f "../.env.prod" ]; then
+    echo "❌ Error: .env.prod not found!"
+    echo "📝 Creating from template..."
+    cp ../env.template ../.env.prod
+    echo "✅ Please edit .env.prod with your Firebase Production configuration"
+    echo "💡 Use the FIREBASE_PROD_* values from the template and set secure passwords"
 fi
 
 # Export environment variables
 set -a  # Export all variables
-source environments/.env.prod
+source ../.env.prod
 set +a  # Stop exporting
 
 # Validate required environment variables
@@ -26,8 +27,10 @@ REQUIRED_VARS=(
     "FIREBASE_PROD_PROJECT_ID"
     "FIREBASE_PROD_API_KEY"
     "FIREBASE_PROD_AUTH_DOMAIN"
-    "DATABASE_URL_PROD"
-    "JWT_SECRET_PROD"
+    "FIREBASE_PROD_STORAGE_BUCKET"
+    "FIREBASE_PROD_MESSAGING_SENDER_ID"
+    "FIREBASE_PROD_APP_ID"
+    "GRAFANA_ADMIN_PASSWORD_PROD"
 )
 
 for var in "${REQUIRED_VARS[@]}"; do
@@ -48,19 +51,23 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+# Stop any running containers first
+echo "🛑 Stopping any existing containers..."
+cd ..
+docker compose -f environments/base.yml -f environments/prod.yml down 2>/dev/null || true
+
 # Start services
 echo "🔧 Starting Production Environment..."
-cd environments
-docker compose -f base.yml -f prod.yml up --build -d
+docker compose -f environments/base.yml -f environments/prod.yml up --build -d
 
 echo ""
 echo "✅ Production Environment Started!"
 echo "================================================"
 echo "🌐 Frontend:           http://localhost:3000"
-echo "🔧 Backend API:        http://localhost:3001"
+echo "🔧 Backend API:        Firebase Cloud Functions"
 echo "🔥 Firebase Project:   ${FIREBASE_PROD_PROJECT_ID}"
 echo "📊 Prometheus:         http://localhost:9090"
 echo "📈 Grafana:            http://localhost:3030"
 echo "================================================"
-echo "🛑 To stop: cd environments && docker compose -f base.yml -f prod.yml down"
-echo "📋 To view logs: cd environments && docker compose -f base.yml -f prod.yml logs -f"
+echo "🛑 To stop: docker compose -f environments/base.yml -f environments/prod.yml down"
+echo "📋 To view logs: docker compose -f environments/base.yml -f environments/prod.yml logs -f"

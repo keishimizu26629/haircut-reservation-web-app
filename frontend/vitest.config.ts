@@ -1,8 +1,9 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
 import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  // @ts-expect-error Vite plugin type compatibility issue
   plugins: [vue()],
   test: {
     environment: 'happy-dom',
@@ -36,12 +37,7 @@ export default defineConfig({
       'composables/**/*.{test,spec}.{js,ts,vue}',
       'utils/**/*.{test,spec}.{js,ts,vue}'
     ],
-    exclude: [
-      'node_modules/',
-      '.nuxt/',
-      'dist/',
-      'tests/e2e/'
-    ]
+    exclude: ['node_modules/', '.nuxt/', 'dist/', 'tests/e2e/']
   },
   resolve: {
     alias: {

@@ -3,7 +3,29 @@
  * 環境設定の妥当性をチェック
  */
 
-import type { FirebaseConfig, EmulatorConfig, Environment } from '~/types/environment'
+import type { EmulatorConfig, Environment, FirebaseConfig } from '../types/environment'
+
+// 設定の型定義
+interface SecurityConfig {
+  httpsRedirect?: boolean
+  hsts?: boolean
+  csp?: boolean
+}
+
+interface FeaturesConfig {
+  debugMode?: boolean
+  mockData?: boolean
+}
+
+interface ValidatorConfig {
+  firebaseConfig?: FirebaseConfig
+  firebaseEmulators?: EmulatorConfig
+  nodeEnv?: string
+  nuxtEnv?: string
+  firebaseEnv?: string | Environment
+  security?: SecurityConfig
+  features?: FeaturesConfig
+}
 
 export class EnvironmentValidator {
   /**
@@ -11,10 +33,14 @@ export class EnvironmentValidator {
    */
   static validateFirebaseConfig(config: FirebaseConfig): boolean {
     const requiredFields = [
-      'apiKey', 'authDomain', 'projectId', 
-      'storageBucket', 'messagingSenderId', 'appId'
+      'apiKey',
+      'authDomain',
+      'projectId',
+      'storageBucket',
+      'messagingSenderId',
+      'appId'
     ]
-    
+
     return requiredFields.every(field => {
       const value = config[field as keyof FirebaseConfig]
       return value && typeof value === 'string' && value.trim() !== ''
@@ -26,7 +52,7 @@ export class EnvironmentValidator {
    */
   static validateEmulatorConfig(config: EmulatorConfig): boolean {
     const hostPattern = /^[a-zA-Z0-9.-]+:\d+$/
-    
+
     // ホスト形式のチェック（設定されている場合のみ）
     const hosts = [
       config.authHost,
@@ -35,7 +61,7 @@ export class EnvironmentValidator {
       config.storageHost,
       config.functionsHost
     ].filter(Boolean)
-    
+
     return hosts.every(host => hostPattern.test(host!))
   }
 
@@ -45,7 +71,7 @@ export class EnvironmentValidator {
   static validateEnvironmentConsistency(
     nodeEnv: string,
     nuxtEnv: string,
-    firebaseEnv: Environment
+    firebaseEnv: string
   ): { valid: boolean; warnings: string[] } {
     const warnings: string[] = []
     let valid = true
@@ -80,15 +106,15 @@ export class EnvironmentValidator {
     services: Record<string, boolean>
   }> {
     const services: Record<string, boolean> = {}
-    
-    const checkService = async (name: string, host?: string): Promise<boolean> => {
+
+    const checkService = async (_name: string, host?: string): Promise<boolean> => {
       if (!host) return false
-      
+
       try {
         const response = await fetch(`http://${host}`, {
           method: 'GET',
           timeout: 3000
-        } as any)
+        } as RequestInit)
         return response.status < 500
       } catch {
         return false
@@ -103,14 +129,17 @@ export class EnvironmentValidator {
     services.functions = await checkService('functions', config.functionsHost)
 
     const connected = Object.values(services).some(Boolean)
-    
+
     return { connected, services }
   }
 
   /**
    * 本番環境のセキュリティ設定をチェック
    */
-  static validateProductionSecurity(environment: Environment, config: any): {
+  static validateProductionSecurity(
+    environment: Environment,
+    config: ValidatorConfig
+  ): {
     secure: boolean
     issues: string[]
   } {
@@ -155,7 +184,7 @@ export class EnvironmentValidator {
   /**
    * 総合的な環境バリデーション
    */
-  static async validateEnvironment(config: any): Promise<{
+  static async validateEnvironment(config: ValidatorConfig): Promise<{
     valid: boolean
     warnings: string[]
     errors: string[]
@@ -164,15 +193,15 @@ export class EnvironmentValidator {
     const warnings: string[] = []
     const errors: string[] = []
     const securityIssues: string[] = []
-    
+
     try {
       // Firebase設定チェック
-      if (!this.validateFirebaseConfig(config.firebaseConfig)) {
+      if (config.firebaseConfig && !this.validateFirebaseConfig(config.firebaseConfig)) {
         errors.push('Invalid Firebase configuration')
       }
 
       // エミュレーター設定チェック（ローカル環境の場合）
-      if (config.firebaseEnv === 'local') {
+      if (config.firebaseEnv === 'local' && config.firebaseEmulators) {
         if (!this.validateEmulatorConfig(config.firebaseEmulators)) {
           errors.push('Invalid emulator configuration')
         }
@@ -180,24 +209,26 @@ export class EnvironmentValidator {
 
       // 環境一貫性チェック
       const consistency = this.validateEnvironmentConsistency(
-        config.nodeEnv,
-        config.nuxtEnv,
-        config.firebaseEnv
+        config.nodeEnv || '',
+        config.nuxtEnv || '',
+        (config.firebaseEnv as string) || ''
       )
       warnings.push(...consistency.warnings)
 
       // セキュリティチェック
-      const security = this.validateProductionSecurity(config.firebaseEnv, config)
+      const security = this.validateProductionSecurity(
+        (config.firebaseEnv as Environment) || 'development',
+        config
+      )
       securityIssues.push(...security.issues)
 
       // エミュレーター接続チェック（ローカル環境の場合）
-      if (config.firebaseEnv === 'local' && process.client) {
+      if (config.firebaseEnv === 'local' && process.client && config.firebaseEmulators) {
         const connectivity = await this.checkEmulatorConnectivity(config.firebaseEmulators)
         if (!connectivity.connected) {
           warnings.push('Firebase emulators are not running')
         }
       }
-
     } catch (error) {
       errors.push(`Validation error: ${error}`)
     }

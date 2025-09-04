@@ -3,46 +3,73 @@
     <!-- フォームヘッダー -->
     <div class="form-header">
       <h2 class="form-title">
-        <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
+        <i
+          class="bi bi-box-arrow-in-right me-2"
+          aria-hidden="true"
+        />
         ログイン
       </h2>
-      <p class="form-subtitle">アカウント情報を入力してください</p>
+      <p class="form-subtitle">
+        アカウント情報を入力してください
+      </p>
     </div>
 
     <!-- メインフォーム -->
-    <form @submit.prevent="handleSubmit" novalidate class="login-form">
+    <form
+      novalidate
+      class="login-form"
+      @submit.prevent="handleSubmit"
+    >
       <!-- メールアドレス -->
-      <FormField
-        id="email"
-        v-model="form.email"
-        type="email"
-        label="メールアドレス"
-        placeholder="example@email.com"
-        icon="bi-envelope"
-        :error="errors.email"
-        :required="true"
-        autocomplete="email"
-        @input="clearError('email')"
-        @blur="validateField('email')"
-      />
+      <div class="form-group">
+        <label for="email">メールアドレス</label>
+        <input
+          id="email"
+          v-model="form.email"
+          type="email"
+          placeholder="example@email.com"
+          required
+          autocomplete="email"
+          @input="clearError('email')"
+          @blur="validateField('email')"
+        >
+        <div
+          v-if="errors.email"
+          class="error-message"
+        >
+          {{ errors.email }}
+        </div>
+      </div>
 
       <!-- パスワード -->
-      <FormField
-        id="password"
-        v-model="form.password"
-        :type="showPassword ? 'text' : 'password'"
-        label="パスワード"
-        placeholder="パスワードを入力"
-        icon="bi-lock"
-        :error="errors.password"
-        :required="true"
-        autocomplete="current-password"
-        :show-password-toggle="true"
-        :password-visible="showPassword"
-        @input="clearError('password')"
-        @blur="validateField('password')"
-        @toggle-password="togglePassword"
-      />
+      <div class="form-group">
+        <label for="password">パスワード</label>
+        <div class="password-input">
+          <input
+            id="password"
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="パスワードを入力"
+            required
+            autocomplete="current-password"
+            @input="clearError('password')"
+            @blur="validateField('password')"
+          >
+          <button
+            type="button"
+            class="password-toggle"
+            @click="togglePassword"
+          >
+            <i :class="showPassword ? 'bi-eye-slash' : 'bi-eye'" />
+          </button>
+        </div>
+        <div
+          v-if="errors.password"
+          class="error-message"
+        >
+          {{ errors.password }}
+        </div>
+      </div>
 
       <!-- Remember Me & Forgot Password -->
       <div class="form-options">
@@ -52,12 +79,12 @@
             type="checkbox"
             class="form-checkbox"
           >
-          <span class="checkmark"></span>
+          <span class="checkmark" />
           <span class="label-text">ログイン状態を保持</span>
         </label>
-        
-        <NuxtLink 
-          to="/forgot-password" 
+
+        <NuxtLink
+          to="/forgot-password"
           class="forgot-password-link"
         >
           パスワードを忘れた方
@@ -66,8 +93,15 @@
 
       <!-- グローバルエラー -->
       <transition name="error-slide">
-        <div v-if="globalError" class="global-error" role="alert">
-          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+        <div
+          v-if="globalError"
+          class="global-error"
+          role="alert"
+        >
+          <i
+            class="bi bi-exclamation-triangle"
+            aria-hidden="true"
+          />
           <div>
             <h4>ログインエラー</h4>
             <p>{{ globalError }}</p>
@@ -76,16 +110,17 @@
       </transition>
 
       <!-- ログインボタン -->
-      <LoadingButton
+      <button
         type="submit"
-        :loading="loading"
-        :disabled="!isFormValid"
+        :disabled="!isFormValid || loading ? true : false"
         class="login-button"
-        loading-text="ログイン中..."
       >
-        <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
-        ログイン
-      </LoadingButton>
+        <i
+          class="bi bi-box-arrow-in-right me-2"
+          aria-hidden="true"
+        />
+        {{ loading ? 'ログイン中...' : 'ログイン' }}
+      </button>
     </form>
 
     <!-- Divider -->
@@ -94,16 +129,23 @@
     </div>
 
     <!-- Googleログイン -->
-    <SocialLoginButton
-      provider="google"
-      :loading="loading"
+    <button
+      type="button"
+      class="google-login-button"
+      :disabled="loading ? true : false"
       @click="$emit('googleLogin')"
-    />
+    >
+      <i class="bi bi-google" />
+      Googleでログイン
+    </button>
 
     <!-- 新規登録リンク -->
     <div class="signup-link">
       <p>アカウントをお持ちでない方は</p>
-      <NuxtLink to="/register" class="signup-button">
+      <NuxtLink
+        to="/register"
+        class="signup-button"
+      >
         新規登録
       </NuxtLink>
     </div>
@@ -111,9 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import FormField from '@/components/Form/FormField.vue'
-import LoadingButton from '@/components/UI/LoadingButton.vue'
-import SocialLoginButton from '@/components/Auth/SocialLoginButton.vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 
 // =====================================
 // Props & Emits
@@ -129,7 +169,7 @@ interface Emits {
   (event: 'googleLogin'): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loading: false,
   globalError: ''
 })
@@ -158,9 +198,9 @@ const errors = reactive({
 // =====================================
 
 const isFormValid = computed(() => {
-  return form.email.length > 0 && 
-         form.password.length >= 6 && 
-         !errors.email && 
+  return form.email.length > 0 &&
+         form.password.length >= 6 &&
+         !errors.email &&
          !errors.password
 })
 
@@ -170,17 +210,17 @@ const isFormValid = computed(() => {
 
 const validateEmail = (email: string): string => {
   if (!email) return 'メールアドレスは必須です'
-  
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(email)) return '有効なメールアドレスを入力してください'
-  
+
   return ''
 }
 
 const validatePassword = (password: string): string => {
   if (!password) return 'パスワードは必須です'
   if (password.length < 6) return 'パスワードは6文字以上で入力してください'
-  
+
   return ''
 }
 
@@ -200,7 +240,7 @@ const clearError = (field: 'email' | 'password') => {
 const validateForm = (): boolean => {
   errors.email = validateEmail(form.email)
   errors.password = validatePassword(form.password)
-  
+
   return !errors.email && !errors.password
 }
 
@@ -214,7 +254,7 @@ const togglePassword = () => {
 
 const handleSubmit = () => {
   if (!validateForm()) return
-  
+
   emit('submit', {
     email: form.email,
     password: form.password,
@@ -462,7 +502,7 @@ onMounted(() => {
     align-items: flex-start;
     gap: 0.75rem;
   }
-  
+
   .forgot-password-link {
     align-self: flex-end;
   }

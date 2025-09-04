@@ -1,6 +1,6 @@
 <template>
   <div class="auth-layout">
-    <div class="auth-background"></div>
+    <div class="auth-background" />
     <div class="auth-content">
       <slot />
     </div>
@@ -9,7 +9,7 @@
 
 <style scoped>
 /* =====================================
-   認証レイアウト - モダンデザイン
+  認証レイアウト - モダンデザイン
    ===================================== */
 
 .auth-layout {

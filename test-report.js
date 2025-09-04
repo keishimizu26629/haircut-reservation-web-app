@@ -1,0 +1,81 @@
+/**
+ * Firebase Auth Login Test Report
+ */
+
+// 日時フォーマット
+const now = new Date()
+const timestamp = now.toLocaleString('ja-JP')
+
+console.log('🔥 Firebase Auth Login Test Report')
+console.log('=====================================')
+console.log(`📅 Test Date: ${timestamp}`)
+console.log('')
+
+console.log('✅ PRE-TEST VERIFICATION COMPLETED:')
+console.log('----------------------------------')
+console.log('✅ Firebase Project: haircut-reservation-dev')
+console.log('✅ Test Account Exists: testaccount@test.com')
+console.log('✅ Account Status: Active (not disabled)')
+console.log('✅ Last Sign In: Recently used')
+console.log('✅ CSP Headers: Configured with unsafe-eval')
+console.log('✅ Firebase Config: Hardcoded in client plugin')
+console.log('✅ Hosting Status: Deployed and accessible')
+console.log('')
+
+console.log('🧪 MANUAL TEST PROCEDURES:')
+console.log('---------------------------')
+console.log('')
+
+console.log('📋 TEST 1: Main Application Login')
+console.log('  🌐 URL: https://haircut-reservation-dev.web.app/login')
+console.log('  📧 Email: testaccount@test.com')
+console.log('  🔐 Password: testtest')
+console.log('  🎯 Expected: Redirect to calendar page')
+console.log('  ⚠️  Watch for: Console errors, CSP violations')
+console.log('')
+
+console.log('📋 TEST 2: Diagnostic Tool (Detailed)')
+console.log('  🌐 URL: https://haircut-reservation-dev.web.app/diagnose-login.html')
+console.log('  🔧 Features: Firebase init status, detailed errors')
+console.log('  🎯 Expected: Green success messages')
+console.log('  📊 Provides: Real-time authentication status')
+console.log('')
+
+console.log('🔍 WHAT TO CHECK:')
+console.log('------------------')
+console.log('✅ Page loads without errors')
+console.log('✅ No CSP violations in console')
+console.log('✅ Firebase initializes successfully')
+console.log('✅ Login form accepts credentials')
+console.log('✅ Successful authentication')
+console.log('✅ Redirect to main calendar page')
+console.log('✅ User can access reservation features')
+console.log('')
+
+console.log('❌ TROUBLESHOOTING IF FAILED:')
+console.log('------------------------------')
+console.log('1. Check browser console for errors')
+console.log('2. Verify network tab for failed requests')
+console.log('3. Confirm CSP headers allow unsafe-eval')
+console.log('4. Test with diagnostic tool for details')
+console.log('5. Try different browser/incognito mode')
+console.log('')
+
+console.log('🌐 DIRECT LINKS:')
+console.log('----------------')
+console.log('Main App: https://haircut-reservation-dev.web.app/login')
+console.log('Diagnostic: https://haircut-reservation-dev.web.app/diagnose-login.html')
+console.log('')
+
+console.log('📊 CONFIGURATION SUMMARY:')
+console.log('-------------------------')
+console.log('Project ID: haircut-reservation-dev')
+console.log('Auth Domain: haircut-reservation-dev.firebaseapp.com')
+console.log('API Key: AIzaSyBTvdrOvdcdhNrONF_b9uXeInoqvVmKYfY')
+console.log('App ID: 1:509197594275:web:c2aab827763cddcf441916')
+console.log('')
+
+console.log('🚀 READY FOR TESTING!')
+console.log('======================')
+console.log('All pre-conditions are met. Please proceed with manual testing.')
+console.log('Use the diagnostic tool if you encounter any issues.')

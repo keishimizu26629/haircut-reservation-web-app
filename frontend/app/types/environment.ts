@@ -68,7 +68,7 @@ export interface RuntimeConfiguration {
 export interface TenantInfo {
   id: string
   name: string
-  settings: Record<string, any>
+  settings: Record<string, unknown>
 }
 
 export interface EnvironmentSwitchEvent {

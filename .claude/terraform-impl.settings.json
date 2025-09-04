@@ -1,0 +1,25 @@
+{
+  "model": "claude-3-7-sonnet@20250219",
+  "max_turns": 8,
+  "temperature": 0.2,
+  "allowed_tools": [
+    "Read",
+    "Edit",
+    "MultiEdit",
+    "Write",
+    "Grep",
+    "Glob",
+    "LS",
+    "Bash(terraform init)",
+    "Bash(terraform fmt)",
+    "Bash(terraform validate)",
+    "Bash(terraform plan)",
+    "TodoWrite"
+  ],
+  "hooks": {
+    "preToolUse": {
+      "command": "echo '[IMPLEMENTATION MODE] Creating Terraform code...'"
+    }
+  },
+  "custom_instructions": "You are in IMPLEMENTATION MODE. Actively write Terraform configurations. Create modules, resources, and variables. Always run terraform fmt and validate. Focus on security, cost optimization, and reusability."
+}
