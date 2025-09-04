@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ユーザーが認証済みかどうかをチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // リクエストしたユーザーのUIDを取得
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    // ユーザーが必要なフィールドを持っているかチェック（本番環境では厳格）
+    function hasRequiredUserFields(userData) {
+      return userData.keys().hasAll(['email', 'displayName', 'createdAt']) &&
+             userData.email is string &&
+             userData.displayName is string &&
+             userData.createdAt is timestamp;
+    }
+    
+    // ユーザードキュメントのルール
+    match /users/{userId} {
+      allow read, write: if isAuthenticated() && 
+                          getUserId() == userId &&
+                          (request.method == 'get' || hasRequiredUserFields(request.resource.data));
+    }
+    
+    // 予約データのルール
+    match /reservations/{reservationId} {
+      allow read, write: if isAuthenticated() && 
+                          getUserId() == resource.data.userId;
+      allow create: if isAuthenticated() && 
+                    getUserId() == request.resource.data.userId;
+    }
+    
+    // タグデータのルール
+    match /tags/{tagId} {
+      allow read, write: if isAuthenticated() && 
+                          getUserId() == resource.data.userId;
+      allow create: if isAuthenticated() && 
+                    getUserId() == request.resource.data.userId;
+    }
+  }
+}

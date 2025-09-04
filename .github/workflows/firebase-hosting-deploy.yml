@@ -1,0 +1,57 @@
+name: Deploy to Firebase Production
+
+on:
+  push:
+    branches: [ci/production]
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  deploy-prod:
+    if: github.ref == 'refs/heads/ci/production'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install frontend dependencies
+        run: npm ci --legacy-peer-deps
+        working-directory: frontend
+        
+      - name: Build frontend for Prod
+        run: npm run generate
+        working-directory: frontend
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_PROD_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_PROD_AUTH_DOMAIN }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_PROD_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_PROD_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_PROD_APP_ID }}
+          NODE_ENV: production
+          FIREBASE_ENV: production
+          
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+        
+      - name: Copy build files to Firebase Prod directory
+        run: |
+          mkdir -p firebase-prod/public
+          cp -r frontend/.output/public/* firebase-prod/public/
+          
+      - name: Deploy to Firebase Prod (Hosting, Firestore, Storage)
+        run: |
+          echo "Deploying to Firebase Production..."
+          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive --project ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
+        working-directory: firebase-prod
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

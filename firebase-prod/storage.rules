@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // ユーザーが認証済みかどうかをチェック
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // ユーザー固有のファイルパスのルール
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // 一時的なアップロードファイルのルール
+    match /temp/{allPaths=**} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    // パブリックファイルのルール（読み取り専用）
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // 本番環境では書き込み禁止
+    }
+  }
+}
