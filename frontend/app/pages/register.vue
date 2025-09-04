@@ -25,8 +25,8 @@
             {{ errorMessage }}
           </div>
 
-          <!-- 名前 -->
-          <div>
+          <!-- 名前（非表示） -->
+          <div v-show="false">
             <label
               for="name"
               class="block text-sm font-medium text-gray-700 mb-2"
@@ -37,7 +37,6 @@
               id="name"
               v-model="form.name"
               type="text"
-              required
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="お名前を入力"
             >
@@ -98,13 +97,15 @@
             >
           </div>
 
-          <!-- 利用規約同意 -->
-          <div class="flex items-start">
+          <!-- 利用規約同意（非表示） -->
+          <div
+            v-show="false"
+            class="flex items-start"
+          >
             <input
               id="acceptTerms"
               v-model="form.acceptTerms"
               type="checkbox"
-              required
               class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             >
             <label
@@ -143,7 +144,6 @@
 <script setup>
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 definePageMeta({
@@ -163,15 +163,13 @@ const form = reactive({
   email: '',
   password: '',
   confirmPassword: '',
-  acceptTerms: false
+  acceptTerms: true // デフォルトでtrueに設定
 })
 
 const isFormValid = computed(() => {
-  return form.name.trim().length > 0 &&
-         form.email.trim().length > 0 &&
+  return form.email.trim().length > 0 &&
          form.password.length >= 6 &&
-         form.password === form.confirmPassword &&
-         form.acceptTerms
+         form.password === form.confirmPassword
 })
 
 const handleRegister = async () => {
@@ -185,8 +183,21 @@ const handleRegister = async () => {
 
   try {
     console.log('🔐 Starting registration process...')
-    const auth = getAuth()
-  const firestore = getFirestore()
+
+    // Firebase Auth の取得
+    const { $firebaseAuth } = useNuxtApp()
+    const auth = $firebaseAuth
+    const firestore = getFirestore()
+    console.log('🔐 Auth instance obtained:', !!auth)
+
+    // 認証永続化を確実にする（Docker環境対応）
+    try {
+      const { setPersistence, browserLocalPersistence } = await import('firebase/auth')
+      await setPersistence(auth, browserLocalPersistence)
+      console.log('🔐 Auth persistence confirmed for registration')
+    } catch (persistenceError) {
+      console.warn('🔐 Auth persistence warning:', persistenceError)
+    }
 
     // ユーザー作成
     console.log('🔐 Creating user with email and password...')
@@ -194,16 +205,17 @@ const handleRegister = async () => {
     const user = userCredential.user
     console.log('🔐 User created:', user.uid)
 
-    // プロフィール更新
+    // プロフィール更新（名前が空の場合はデフォルト名を設定）
+    const displayName = form.name.trim() || 'ユーザー'
     console.log('🔐 Updating user profile...')
     await updateProfile(user, {
-      displayName: form.name
+      displayName: displayName
     })
 
     // Firestoreにユーザー情報を保存
     console.log('🔐 Saving user data to Firestore...')
     await setDoc(doc(firestore, 'users', user.uid), {
-      displayName: form.name, // Firestoreルールで要求されるフィールド
+      displayName: displayName, // Firestoreルールで要求されるフィールド
       email: form.email,
       role: 'admin', // MVPでは全員admin
       createdAt: new Date()
@@ -222,21 +234,22 @@ const handleRegister = async () => {
     // 認証状態の完全な同期を確認
     await authStore.checkAuthState()
 
-    // VueFireの認証状態が更新されるまで少し待機
-    console.log('🔐 Waiting for VueFire auth sync...')
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Firebase Authの認証状態が更新されるまで少し待機
+    // 本番環境では同期により時間がかかることがある
+    const syncWaitTime = import.meta.env.PROD ? 2000 : 1000
+    console.log(`🔐 Waiting for Firebase auth sync... (${syncWaitTime}ms)`)
+    await new Promise(resolve => setTimeout(resolve, syncWaitTime))
 
-    // VueFireの認証状態を確認
-    const { getCurrentUser } = await import('vuefire')
-    const vueFireUser = await getCurrentUser()
-    console.log('🔐 VueFire auth state:', {
-      user: !!vueFireUser,
-      uid: vueFireUser?.uid
+    // Firebase Authの認証状態を確認
+    const currentUser = auth.currentUser
+    console.log('🔐 Firebase auth state:', {
+      user: !!currentUser,
+      uid: currentUser?.uid
     })
 
-    // 登録成功後、カレンダーページへ
-    console.log('🔐 Redirecting to calendar...')
-    await navigateTo('/calendar')
+    console.log('🔐 AuthStore updated, redirecting to calendar...')
+    // メインページにリダイレクト（認証ミドルウェアが適切に処理）
+    await navigateTo('/')
   } catch (error) {
     console.error('🔐 Registration error:', error)
     errorMessage.value = getErrorMessage(error.code)

@@ -224,6 +224,37 @@ npm run prod          # 本番環境
 npm run dev:down      # 停止
 ```
 
+### 🚀 Dev 環境制御スクリプト（推奨）
+
+**簡単な Docker Compose 操作**
+
+```bash
+# 基本操作
+./dev-control.sh start     # dev環境を起動
+./dev-control.sh stop      # dev環境を停止
+./dev-control.sh restart   # dev環境を再起動
+
+# 高度な操作
+./dev-control.sh rebuild   # イメージを再ビルドして起動
+./dev-control.sh logs      # ログを表示（Ctrl+Cで終了）
+./dev-control.sh status    # コンテナの状態確認
+./dev-control.sh clean     # 停止してボリュームも削除
+./dev-control.sh help      # ヘルプを表示
+```
+
+**実行権限の付与（初回のみ）**
+
+```bash
+chmod +x dev-control.sh
+```
+
+**起動後のアクセス先**
+
+- 🌐 フロントエンド: http://localhost:3000
+- 📊 Prometheus: http://localhost:9090
+- 📈 Grafana: http://localhost:3030
+- 🔥 Firebase Project: haircut-reservation-dev
+
 ### テスト・確認
 
 ```bash

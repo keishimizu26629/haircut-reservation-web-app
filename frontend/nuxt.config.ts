@@ -58,7 +58,8 @@ export default defineNuxtConfig({
     '~/app/assets/css/responsive.css',
     '~/app/assets/css/cross-browser.css',
     '~/app/assets/css/main.css',
-    '~/app/assets/css/labels.css'
+    '~/app/assets/css/labels.css',
+    '~/app/assets/css/calendar.css'
   ],
 
   // Components auto-import configuration - Nuxt 4互換モード最適化版
@@ -96,12 +97,12 @@ export default defineNuxtConfig({
 
       // Firebase configuration (for client-side access)
       firebase: {
-        projectId: process.env.FIREBASE_DEV_PROJECT_ID || '',
-        apiKey: process.env.FIREBASE_DEV_API_KEY || '',
-        authDomain: process.env.FIREBASE_DEV_AUTH_DOMAIN || '',
-        storageBucket: process.env.FIREBASE_DEV_STORAGE_BUCKET || '',
-        messagingSenderId: process.env.FIREBASE_DEV_MESSAGING_SENDER_ID || '',
-        appId: process.env.FIREBASE_DEV_APP_ID || ''
+        projectId: process.env.FIREBASE_PROJECT_ID || '',
+        apiKey: process.env.FIREBASE_API_KEY || '',
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN || '',
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '',
+        appId: process.env.FIREBASE_APP_ID || ''
       },
 
       // API configuration
@@ -138,9 +139,15 @@ export default defineNuxtConfig({
         debugMode: process.env.ENABLE_DEBUG_MODE === 'true',
         devtools: process.env.ENABLE_DEVTOOLS === 'true',
         mockData: process.env.ENABLE_MOCK_DATA === 'true',
-        analytics: process.env.ENABLE_ANALYTICS === 'true',
+        analytics: false, // Google Analytics無効化
         errorReporting: process.env.ENABLE_ERROR_REPORTING === 'true',
         performanceMonitoring: process.env.ENABLE_PERFORMANCE_MONITORING === 'true'
+      },
+
+      // Google Analytics設定（無効化）
+      googleAnalytics: {
+        id: '', // 空に設定してAnalyticsを無効化
+        disabled: true
       },
 
       // Security settings - Firebase Auth対応でCSP無効化
@@ -220,32 +227,31 @@ export default defineNuxtConfig({
   // App configuration - Lighthouse最適化版
   app: {
     head: {
-      title: '美容室予約システム - オンライン予約',
+      title: '予約管理帳システム',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         {
           name: 'description',
-          content:
-            '24時間オンライン美容室予約システム。簡単3ステップで予約完了。即時確認・安心予約。'
+          content: '従業員管理用の予約帳システムです'
         },
-        { name: 'keywords', content: '美容室,ヘアサロン,オンライン予約,24時間受付,即時確認' },
+        { name: 'keywords', content: '予約管理帳システム,従業員管理,予約帳,予約管理' },
         { name: 'author', content: 'Haircut Reservation System' },
         { name: 'robots', content: 'index, follow' },
         { name: 'theme-color', content: '#3b82f6' },
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
         { name: 'apple-mobile-web-app-title', content: '美容室予約' },
-        { property: 'og:title', content: '美容室予約システム - オンライン予約' },
+        { property: 'og:title', content: '予約管理帳システム' },
         {
           property: 'og:description',
-          content: '24時間オンライン美容室予約システム。簡単3ステップで予約完了。'
+          content: '従業員管理用の予約帳システムです。'
         },
         { property: 'og:type', content: 'website' },
         { property: 'og:locale', content: 'ja_JP' },
         { name: 'twitter:card', content: 'summary' },
         { name: 'twitter:title', content: '美容室予約システム' },
-        { name: 'twitter:description', content: '24時間オンライン予約受付中' }
+        { name: 'twitter:description', content: '従業員管理用の予約帳システムです。' }
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },

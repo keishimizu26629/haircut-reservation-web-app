@@ -36,6 +36,14 @@ export default {
       fontFamily: {
         sans: ['Inter', 'Noto Sans JP', 'sans-serif']
       },
+      fontSize: {
+        // CSS変数を参照するカスタムフォントサイズ
+        'calendar-time-sm': 'var(--calendar-time-text-sm)',
+        'calendar-time-lg': 'var(--calendar-time-text-lg)',
+        'calendar-month': 'var(--calendar-month-text)',
+        'calendar-reservation': 'var(--calendar-reservation-text)',
+        'calendar-date': 'var(--calendar-date-text)'
+      },
       spacing: {
         18: '4.5rem',
         88: '22rem'

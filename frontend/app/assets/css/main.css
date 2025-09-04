@@ -2,13 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System Variables */
+@import '../scss/design-system.scss';
+
 /* カスタムCSS - Tailwindベース */
 
 /* 基本スタイル */
 body {
   font-family: 'Inter', sans-serif;
   line-height: 1.6;
-  color: #1f2937;
+  color: #111827; /* gray-900 - より濃いグレーに変更 */
 }
 
 /* カスタムコンポーネント */

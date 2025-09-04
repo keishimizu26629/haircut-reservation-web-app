@@ -1,23 +1,17 @@
 /**
  * Firebase Client Plugin - 手動初期化
  */
-import { getAnalytics, isSupported } from 'firebase/analytics'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 export default defineNuxtPlugin(async () => {
-  if (import.meta.client) {
-    const isProduction = import.meta.env.MODE === 'production' || import.meta.env.PROD
-    const isTest = import.meta.env.NODE_ENV === 'test' || import.meta.env.MODE === 'test'
-    const useEmulator = import.meta.env.FIREBASE_USE_EMULATOR === 'true' || isTest
+  if (process.client) {
+    //  const isProduction = process.env.NODE_ENV === 'production'
+    const isTest = process.env.NODE_ENV === 'test'
+    const useEmulator = process.env.FIREBASE_USE_EMULATOR === 'true' || isTest
 
-    console.log('🔥 Firebase Client Plugin: Manual initialization')
-    console.log('🔥 Plugin timestamp:', new Date().toISOString())
-    console.log('🔥 Client environment:', import.meta.env.MODE || 'unknown')
-    console.log('🔥 Is Production:', isProduction)
-    console.log('🔥 Is Test:', isTest)
-    console.log('🔥 Use Emulator:', useEmulator)
+    console.log('🔥 Firebase initializing...')
 
     // Firebase設定をnuxt.config.tsから取得（環境変数優先、フォールバックあり）
     const config = useRuntimeConfig()
@@ -70,21 +64,10 @@ export default defineNuxtPlugin(async () => {
         }
       }
 
-      // Analytics の初期化（本番環境のみ）
-      let analytics = null
-      if (!useEmulator && isProduction) {
-        try {
-          const analyticsSupported = await isSupported()
-          if (analyticsSupported) {
-            analytics = getAnalytics(app)
-            console.log('✅ Firebase Analytics initialized')
-          } else {
-            console.log('⚠️ Firebase Analytics not supported in this environment')
-          }
-        } catch (analyticsError) {
-          console.warn('⚠️ Firebase Analytics initialization failed:', analyticsError)
-        }
-      }
+      // Analytics の初期化（一時的に無効化）
+      const analytics = null
+      // Google Analytics を完全に無効化
+      console.log('🚫 Firebase Analytics disabled')
 
       // エミュレータ接続設定（テスト環境）
       if (useEmulator) {
@@ -93,26 +76,21 @@ export default defineNuxtPlugin(async () => {
 
         try {
           // Auth エミュレータ接続
-          const authHost = import.meta.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099'
+          const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099'
           connectAuthEmulator(auth, `http://${authHost}`)
           console.log('🔥 Connected to Auth Emulator:', authHost)
 
           // Firestore エミュレータ接続
-          const firestoreHost = import.meta.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080'
+          const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST || 'localhost:8080'
           const [host, port] = firestoreHost.split(':')
-          connectFirestoreEmulator(firestore, host, parseInt(port))
+          connectFirestoreEmulator(firestore, host!, parseInt(port!))
           console.log('🔥 Connected to Firestore Emulator:', firestoreHost)
         } catch (emulatorError) {
           console.warn('⚠️ Emulator connection error (already connected?):', emulatorError)
         }
       }
 
-      console.log('✅ Firebase initialized successfully')
-      console.log('✅ Auth instance:', !!auth)
-      console.log('✅ Firestore instance:', !!firestore)
-      console.log('✅ App instance:', !!app)
-      console.log('✅ Analytics instance:', !!analytics)
-      console.log('✅ Using emulator:', useEmulator)
+      console.log('✅ Firebase initialized')
 
       return {
         provide: {

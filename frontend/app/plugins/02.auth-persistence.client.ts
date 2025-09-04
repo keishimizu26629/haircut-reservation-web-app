@@ -2,17 +2,21 @@
  * Firebase Auth永続化プラグイン - Docker環境対応
  * セッション情報の確実な永続化と復元を行う
  */
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { onAuthStateChanged, type Auth } from 'firebase/auth'
 
 export default defineNuxtPlugin(async () => {
   if (import.meta.client) {
     console.log('🔐 Auth Persistence Plugin: Starting...')
 
     try {
-      // 少し待機してFirebaseが初期化されるのを待つ
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Firebase アプリの初期化を待機
+      const { $firebaseAuth } = useNuxtApp()
+      if (!$firebaseAuth) {
+        console.warn('🔐 Auth Persistence Plugin: Firebase Auth not available yet')
+        return
+      }
 
-      const auth = getAuth()
+      const auth = $firebaseAuth as Auth
 
       // 認証状態の変更を監視して永続化を確実にする
       onAuthStateChanged(auth, user => {
