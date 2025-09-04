@@ -100,13 +100,13 @@ jobs:
           mkdir -p firebase-prod/public
           cp -r frontend/.output/public/* firebase-prod/public/
 
-      - name: Deploy to Firebase Prod (Hosting, Firestore, Storage)
+      - name: Deploy to Firebase Prod (Hosting, Firestore)
         working-directory: firebase-prod
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           echo "Deploying to Firebase Production..."
-          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive --project ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
+          firebase deploy --only hosting,firestore:rules,firestore:indexes --token "$FIREBASE_TOKEN" --non-interactive --project ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
 
   # Deploy summary
   deploy-summary:
