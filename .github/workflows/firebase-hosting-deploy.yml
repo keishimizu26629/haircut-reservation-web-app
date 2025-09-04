@@ -51,13 +51,13 @@ jobs:
           mkdir -p firebase-dev/public
           cp -r frontend/.output/public/* firebase-dev/public/
 
-      - name: Deploy to Firebase Dev Hosting
+      - name: Deploy to Firebase Dev (Hosting, Firestore, Storage)
         working-directory: firebase-dev
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo "Deploying to Firebase Dev Hosting..."
-          firebase deploy --only hosting --token "$FIREBASE_TOKEN" --non-interactive --project haircut-reservation-dev
+          echo "Deploying to Firebase Dev (Hosting, Rules, Indexes)..."
+          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive --project haircut-reservation-dev
 
   # Production Environment Deploy (ci/production branch)
   deploy-prod:
@@ -100,13 +100,13 @@ jobs:
           mkdir -p firebase-prod/public
           cp -r frontend/.output/public/* firebase-prod/public/
 
-      - name: Deploy to Firebase Prod Hosting
+      - name: Deploy to Firebase Prod (Hosting, Firestore, Storage)
         working-directory: firebase-prod
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          echo "Deploying to Firebase Prod Hosting..."
-          firebase deploy --only hosting --token "$FIREBASE_TOKEN" --non-interactive --project haircut-reservation-prod
+          echo "Deploying to Firebase Prod (Hosting, Rules, Indexes)..."
+          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive --project haircut-reservation-prod
 
   # Deploy summary
   deploy-summary:

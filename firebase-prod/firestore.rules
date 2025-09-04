@@ -24,7 +24,11 @@ service cloud.firestore {
 
     // Validate required fields for different document types
     function hasRequiredUserFields() {
-      return request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']);
+      return request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']) &&
+             // Strict validation for production
+             request.resource.data.email is string &&
+             request.resource.data.displayName is string &&
+             request.resource.data.createdAt is timestamp;
     }
 
     function hasRequiredReservationFields() {
