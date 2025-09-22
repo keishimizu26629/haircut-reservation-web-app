@@ -115,6 +115,9 @@ firebase-*-config.json
 *-dev-config.json
 *-prod-config.json
 
+# Generated Firebase configuration (contains API keys)
+frontend/app/config/firebase-generated.ts
+
 # ===============================================
 # Docker 関連
 # ===============================================

@@ -7,13 +7,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - '13000:3000'
     environment:
       - NODE_ENV=development
       - FIREBASE_USE_EMULATOR=true
       - FIREBASE_EMULATOR_HOST=firebase-emulator
-      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
-      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8080
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:19099
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:18080
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -27,12 +27,12 @@ services:
   firebase-emulator:
     image: node:18-alpine
     ports:
-      - '4000:4000' # Firebase UI
-      - '8080:8080' # Firestore
-      - '9099:9099' # Auth
-      - '5001:5001' # Functions
-      - '8085:8085' # Pub/Sub
-      - '9199:9199' # Storage
+      - '18040:4000' # Firebase UI
+      - '18080:8080' # Firestore
+      - '19099:9099' # Auth
+      - '15001:5001' # Functions
+      - '18085:8085' # Pub/Sub
+      - '19199:9199' # Storage
     working_dir: /firebase
     volumes:
       - ./firebase:/firebase

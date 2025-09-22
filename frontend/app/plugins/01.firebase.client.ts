@@ -5,6 +5,14 @@ import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
+// 生成されたFirebase設定を動的にインポート
+let generatedConfig: any = null
+try {
+  generatedConfig = await import('~/app/config/firebase-generated').catch(() => null)
+} catch (error) {
+  console.warn('⚠️ Generated Firebase config not found, using runtime config')
+}
+
 export default defineNuxtPlugin(async () => {
   if (process.client) {
     //  const isProduction = process.env.NODE_ENV === 'production'
@@ -13,39 +21,92 @@ export default defineNuxtPlugin(async () => {
 
     console.log('🔥 Firebase initializing...')
 
-    // Firebase設定をnuxt.config.tsから取得（環境変数優先、フォールバックあり）
+    // Firebase設定の優先順位: 1.生成された設定 > 2.ランタイム設定 > 3.フォールバック
     const config = useRuntimeConfig()
 
-    // テスト環境では demo-test プロジェクトを使用
-    const firebaseConfig = useEmulator
-      ? {
-          apiKey: 'demo-api-key',
-          authDomain: 'demo-test.firebaseapp.com',
-          projectId: 'demo-test',
-          storageBucket: 'demo-test.appspot.com',
-          messagingSenderId: '123456789',
-          appId: '1:123456789:web:demo123'
-        }
-      : {
-          apiKey: config.public.firebase.apiKey || 'AIzaSyBTvdrOvdcdhNrONF_b9uXeInoqvVmKYfY',
-          authDomain:
-            config.public.firebase.authDomain || 'haircut-reservation-dev.firebaseapp.com',
-          projectId: config.public.firebase.projectId || 'haircut-reservation-dev',
-          storageBucket:
-            config.public.firebase.storageBucket || 'haircut-reservation-dev.firebasestorage.app',
-          messagingSenderId: config.public.firebase.messagingSenderId || '509197594275',
-          appId: config.public.firebase.appId || '1:509197594275:web:c2aab827763cddcf441916'
-        }
+    // 生成された設定があれば優先使用
+    let firebaseConfig: any
+    let isProduction: boolean
+
+    if (generatedConfig?.FIREBASE_CONFIG && generatedConfig.FIREBASE_CONFIG.projectId) {
+      console.log('🔥 Using generated Firebase config')
+      firebaseConfig = generatedConfig.FIREBASE_CONFIG
+      isProduction = generatedConfig.IS_PRODUCTION || false
+    } else {
+      console.log('🔥 Using runtime Firebase config')
+      // 環境に応じたフォールバック設定を決定
+      isProduction = config.public.firebaseEnv === 'production'
+
+      // テスト環境では demo-test プロジェクトを使用
+      firebaseConfig = useEmulator
+        ? {
+            apiKey: 'demo-api-key',
+            authDomain: 'demo-test.firebaseapp.com',
+            projectId: 'demo-test',
+            storageBucket: 'demo-test.appspot.com',
+            messagingSenderId: '123456789',
+            appId: '1:123456789:web:demo123'
+          }
+        : {
+            // 環境変数が設定されていない場合のフォールバック設定を環境に応じて切り替え
+            apiKey:
+              config.public.firebase.apiKey ||
+              (isProduction
+                ? 'AIzaSyA_PROD_API_KEY_PLACEHOLDER' // 本番用プレースホルダー
+                : 'AIzaSyBTvdrOvdcdhNrONF_b9uXeInoqvVmKYfY'),
+            authDomain:
+              config.public.firebase.authDomain ||
+              (isProduction
+                ? 'haircut-reservation-prod.firebaseapp.com'
+                : 'haircut-reservation-dev.firebaseapp.com'),
+            projectId:
+              config.public.firebase.projectId ||
+              (isProduction ? 'haircut-reservation-prod' : 'haircut-reservation-dev'),
+            storageBucket:
+              config.public.firebase.storageBucket ||
+              (isProduction
+                ? 'haircut-reservation-prod.firebasestorage.app'
+                : 'haircut-reservation-dev.firebasestorage.app'),
+            messagingSenderId:
+              config.public.firebase.messagingSenderId ||
+              (isProduction
+                ? 'PROD_SENDER_ID_PLACEHOLDER' // 本番用プレースホルダー
+                : '509197594275'),
+            appId:
+              config.public.firebase.appId ||
+              (isProduction
+                ? '1:PROD_SENDER_ID:web:PROD_APP_ID_PLACEHOLDER' // 本番用プレースホルダー
+                : '1:509197594275:web:c2aab827763cddcf441916')
+          }
+    }
 
     console.log('🔥 Firebase config source:', {
       fromEnvVars: !!config.public.firebase.apiKey,
-      usingFallback: !config.public.firebase.apiKey
+      usingFallback: !config.public.firebase.apiKey,
+      environment: config.public.firebaseEnv,
+      isProduction: isProduction
+    })
+    console.log('🔥 Runtime config details:', {
+      nodeEnv: config.public.nodeEnv,
+      firebaseEnv: config.public.firebaseEnv,
+      hasProjectId: !!config.public.firebase.projectId,
+      hasApiKey: !!config.public.firebase.apiKey,
+      hasAuthDomain: !!config.public.firebase.authDomain,
+      projectIdValue: config.public.firebase.projectId || 'EMPTY',
+      authDomainValue: config.public.firebase.authDomain || 'EMPTY'
     })
     console.log('🔥 Firebase config:', {
       projectId: firebaseConfig.projectId,
       hasApiKey: !!firebaseConfig.apiKey,
-      authDomain: firebaseConfig.authDomain
+      authDomain: firebaseConfig.authDomain,
+      environment: isProduction ? 'production' : 'development'
     })
+
+    // 本番環境で環境変数が設定されていない場合はエラー
+    if (isProduction && !config.public.firebase.apiKey) {
+      console.error('❌ 本番環境でFirebase環境変数が設定されていません！')
+      throw new Error('Firebase configuration missing in production environment')
+    }
 
     try {
       // Firebase初期化

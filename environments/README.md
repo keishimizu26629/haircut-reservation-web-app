@@ -73,13 +73,13 @@ docker compose -f prod.yml logs -f
 
 ## 🌐 Access URLs
 
-| Service     | Local                 | Dev/Prod                 |
-| ----------- | --------------------- | ------------------------ |
-| Frontend    | http://localhost:3000 | http://localhost:3000    |
-| Backend API | Firebase Functions    | Firebase Cloud Functions |
-| Firebase UI | http://localhost:4000 | N/A (Remote)             |
-| Prometheus  | http://localhost:9090 | http://localhost:9090    |
-| Grafana     | http://localhost:3030 | http://localhost:3030    |
+| Service     | Local                  | Dev/Prod                 |
+| ----------- | ---------------------- | ------------------------ |
+| Frontend    | http://localhost:13000 | http://localhost:13000   |
+| Backend API | Firebase Functions     | Firebase Cloud Functions |
+| Firebase UI | http://localhost:18040 | N/A (Remote)             |
+| Prometheus  | http://localhost:9090  | http://localhost:9090    |
+| Grafana     | http://localhost:13030 | http://localhost:13030   |
 
 ## ⚙️ Environment Configuration
 
@@ -126,7 +126,7 @@ docker compose -f prod.yml logs -f
 
 ```bash
 # 使用中のポートを確認
-lsof -i :3000
+lsof -i :13000
 lsof -i :3001
 
 # Docker コンテナを完全停止
