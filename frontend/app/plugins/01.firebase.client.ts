@@ -4,14 +4,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-
-// 生成されたFirebase設定を動的にインポート
-let generatedConfig: any = null
-try {
-  generatedConfig = await import('~/app/config/firebase-generated').catch(() => null)
-} catch (error) {
-  console.warn('⚠️ Generated Firebase config not found, using runtime config')
-}
+import { loadGeneratedFirebaseConfig } from '~/app/utils/firebase-config-loader'
 
 export default defineNuxtPlugin(async () => {
   if (process.client) {
@@ -24,11 +17,14 @@ export default defineNuxtPlugin(async () => {
     // Firebase設定の優先順位: 1.生成された設定 > 2.ランタイム設定 > 3.フォールバック
     const config = useRuntimeConfig()
 
+    // 生成された設定ファイルを安全に読み込み
+    const generatedConfig = await loadGeneratedFirebaseConfig()
+
     // 生成された設定があれば優先使用
-    let firebaseConfig: any
+    let firebaseConfig: Record<string, unknown>
     let isProduction: boolean
 
-    if (generatedConfig?.FIREBASE_CONFIG && generatedConfig.FIREBASE_CONFIG.projectId) {
+    if (generatedConfig?.FIREBASE_CONFIG?.projectId) {
       console.log('🔥 Using generated Firebase config')
       firebaseConfig = generatedConfig.FIREBASE_CONFIG
       isProduction = generatedConfig.IS_PRODUCTION || false
