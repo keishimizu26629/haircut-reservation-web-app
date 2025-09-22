@@ -15,7 +15,7 @@ export interface FirebaseConfigData {
   ENVIRONMENT: string
   NODE_ENV: string
   IS_PRODUCTION: boolean
-  FALLBACK_CONFIG: any
+  FALLBACK_CONFIG: Record<string, unknown>
 }
 
 /**
@@ -29,23 +29,25 @@ export async function loadGeneratedFirebaseConfig(): Promise<FirebaseConfigData 
 
   try {
     // 動的インポートで設定ファイルを読み込み（存在しない場合はnullを返す）
-    const configModule = await import('~/app/config/firebase-generated').catch(() => {
-      console.warn('⚠️ Generated Firebase config file not found, using fallback')
+    const configModule = await import('~/app/config/firebase-generated').catch((error: unknown) => {
+      console.warn('⚠️ Generated Firebase config file not found, using fallback:', error)
       return null
     })
-    
+
     if (!configModule) {
       return null
     }
-    
-    if (configModule?.FIREBASE_CONFIG?.projectId) {
+
+    // 型安全性を確保しつつ設定を検証
+    const typedModule = configModule as Partial<FirebaseConfigData>
+    if (typedModule?.FIREBASE_CONFIG?.projectId) {
       console.log('✅ Generated Firebase config loaded successfully')
-      return configModule as FirebaseConfigData
+      return typedModule as FirebaseConfigData
     } else {
       console.warn('⚠️ Generated Firebase config is incomplete')
       return null
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.warn('⚠️ Error loading generated Firebase config:', error)
     return null
   }

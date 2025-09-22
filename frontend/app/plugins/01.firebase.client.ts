@@ -19,11 +19,11 @@ export default defineNuxtPlugin(async () => {
 
     // 生成された設定ファイルを安全に読み込み
     const generatedConfig = await loadGeneratedFirebaseConfig()
-    
+
     // 生成された設定があれば優先使用
-    let firebaseConfig: any
+    let firebaseConfig: Record<string, unknown>
     let isProduction: boolean
-    
+
     if (generatedConfig?.FIREBASE_CONFIG?.projectId) {
       console.log('🔥 Using generated Firebase config')
       firebaseConfig = generatedConfig.FIREBASE_CONFIG
