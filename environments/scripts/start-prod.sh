@@ -63,7 +63,7 @@ docker compose -f environments/base.yml -f environments/prod.yml up --build -d
 echo ""
 echo "✅ Production Environment Started!"
 echo "================================================"
-echo "🌐 Frontend:           http://localhost:3000"
+echo "🌐 Frontend:           http://localhost:13000"
 echo "🔧 Backend API:        Firebase Cloud Functions"
 echo "🔥 Firebase Project:   ${FIREBASE_PROD_PROJECT_ID}"
 echo "📊 Prometheus:         http://localhost:9090"

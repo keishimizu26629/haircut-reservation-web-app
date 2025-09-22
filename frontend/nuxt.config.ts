@@ -43,7 +43,7 @@ export default defineNuxtConfig({
   // Development server configuration
   devServer: {
     host: '0.0.0.0',
-    port: 3000
+    port: 13000
   },
 
   // TypeScript configuration
@@ -119,19 +119,19 @@ export default defineNuxtConfig({
         authHost:
           process.env.NODE_ENV === 'production'
             ? ''
-            : process.env.FIREBASE_AUTH_EMULATOR_HOST || 'firebase-emulator:9099',
+            : process.env.FIREBASE_AUTH_EMULATOR_HOST || 'firebase-emulator:19099',
         firestoreHost:
           process.env.NODE_ENV === 'production'
             ? ''
-            : process.env.FIREBASE_FIRESTORE_EMULATOR_HOST || 'firebase-emulator:8080',
+            : process.env.FIREBASE_FIRESTORE_EMULATOR_HOST || 'firebase-emulator:18080',
         storageHost:
           process.env.NODE_ENV === 'production'
             ? ''
-            : process.env.FIREBASE_STORAGE_EMULATOR_HOST || 'firebase-emulator:9199',
+            : process.env.FIREBASE_STORAGE_EMULATOR_HOST || 'firebase-emulator:19199',
         functionsHost:
           process.env.NODE_ENV === 'production'
             ? ''
-            : process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST || 'firebase-emulator:5001'
+            : process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST || 'firebase-emulator:15001'
       },
 
       // Feature flags
