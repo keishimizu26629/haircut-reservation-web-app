@@ -41,7 +41,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - '3030:3000'
+      - '13030:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD_DEV:-admin123}
     volumes:

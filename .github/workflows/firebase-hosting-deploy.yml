@@ -29,6 +29,19 @@ jobs:
         working-directory: frontend
         run: npm ci --legacy-peer-deps
 
+      - name: Generate Firebase Config for Dev
+        working-directory: frontend
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_DEV_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_DEV_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_DEV_AUTH_DOMAIN }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_DEV_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_DEV_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_DEV_APP_ID }}
+          NODE_ENV: production
+          FIREBASE_ENV: development
+        run: node firebase-config-generator.js
+
       - name: Build frontend for Dev
         working-directory: frontend
         env:
@@ -78,6 +91,19 @@ jobs:
         working-directory: frontend
         run: npm ci --legacy-peer-deps
 
+      - name: Generate Firebase Config for Prod
+        working-directory: frontend
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_PROD_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_PROD_AUTH_DOMAIN }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_PROD_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_PROD_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_PROD_APP_ID }}
+          NODE_ENV: production
+          FIREBASE_ENV: production
+        run: node firebase-config-generator.js
+
       - name: Build frontend for Prod
         working-directory: frontend
         env:
@@ -90,7 +116,20 @@ jobs:
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_PROD_APP_ID }}
           NODE_ENV: production
           FIREBASE_ENV: production
-        run: npm run generate
+        run: |
+          echo "🔍 Building for production environment..."
+          echo "Firebase Project ID: ${{ secrets.FIREBASE_PROD_PROJECT_ID }}"
+          echo "Firebase Auth Domain: ${{ secrets.FIREBASE_PROD_AUTH_DOMAIN }}"
+          echo "NODE_ENV: production"
+          echo "FIREBASE_ENV: production"
+          echo "🔍 Environment variables check:"
+          echo "FIREBASE_PROJECT_ID length: ${#FIREBASE_PROJECT_ID}"
+          echo "FIREBASE_API_KEY length: ${#FIREBASE_API_KEY}"
+          echo "FIREBASE_AUTH_DOMAIN length: ${#FIREBASE_AUTH_DOMAIN}"
+          echo "FIREBASE_STORAGE_BUCKET length: ${#FIREBASE_STORAGE_BUCKET}"
+          echo "FIREBASE_MESSAGING_SENDER_ID length: ${#FIREBASE_MESSAGING_SENDER_ID}"
+          echo "FIREBASE_APP_ID length: ${#FIREBASE_APP_ID}"
+          npm run generate
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
@@ -100,13 +139,13 @@ jobs:
           mkdir -p firebase-prod/public
           cp -r frontend/.output/public/* firebase-prod/public/
 
-      - name: Deploy to Firebase Prod (Hosting, Firestore, Storage)
+      - name: Deploy to Firebase Prod (Hosting, Firestore)
         working-directory: firebase-prod
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           echo "Deploying to Firebase Production..."
-          firebase deploy --only hosting,firestore:rules,firestore:indexes,storage --token "$FIREBASE_TOKEN" --non-interactive --project ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
+          firebase deploy --only hosting,firestore:rules,firestore:indexes --token "$FIREBASE_TOKEN" --non-interactive --project ${{ secrets.FIREBASE_PROD_PROJECT_ID }}
 
   # Deploy summary
   deploy-summary:
