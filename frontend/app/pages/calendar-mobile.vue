@@ -541,13 +541,70 @@ const displayDays = computed(() => {
       isToday: date.toDateString() === new Date().toDateString()
     })
   } else {
-    // 3日表示モード
-    const startDate = new Date(currentDate.value)
+    // 3日表示モード - 曜日ベースで表示する
+    const baseDate = new Date(currentDate.value)
+    const currentDayOfWeek = baseDate.getDay() // 0:日, 1:月, 2:火, 3:水, 4:木, 5:金, 6:土
 
-    for (let i = 0; i < 3; i++) {
-      const date = new Date(startDate)
-      date.setDate(startDate.getDate() + i)
+    const targetDates = []
 
+    if (currentDayOfWeek >= 2 && currentDayOfWeek <= 4) {
+      // 火曜日(2)、水曜日(3)、木曜日(4)の場合
+      // 火曜日を基準として火・水・木を表示
+      const tuesdayDate = new Date(baseDate)
+      tuesdayDate.setDate(baseDate.getDate() - (currentDayOfWeek - 2))
+
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(tuesdayDate)
+        date.setDate(tuesdayDate.getDate() + i)
+        targetDates.push(date)
+      }
+    } else {
+      // 金曜日(5)、土曜日(6)、日曜日(0)、月曜日(1)の場合
+      // 金曜日を基準として金・土・日を表示
+      const fridayDate = new Date(baseDate)
+
+      if (currentDayOfWeek === 5) {
+        // 金曜日の場合はそのまま
+      } else if (currentDayOfWeek === 6) {
+        // 土曜日の場合は1日戻る
+        fridayDate.setDate(baseDate.getDate() - 1)
+      } else if (currentDayOfWeek === 0) {
+        // 日曜日の場合は2日戻る
+        fridayDate.setDate(baseDate.getDate() - 2)
+      } else if (currentDayOfWeek === 1) {
+        // 月曜日の場合は次の火曜日からの火・水・木を表示
+        // 火曜日を基準とするため、火・水・木グループのロジックを使用
+        const tuesdayDate = new Date(baseDate)
+        tuesdayDate.setDate(baseDate.getDate() + 1) // 月曜日の次の日は火曜日
+
+        for (let i = 0; i < 3; i++) {
+          const date = new Date(tuesdayDate)
+          date.setDate(tuesdayDate.getDate() + i)
+          targetDates.push(date)
+        }
+
+        // 日付データを生成（月曜日の特別処理）
+        for (const date of targetDates) {
+          days.push({
+            date: date.toISOString().split('T')[0],
+            dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
+            dateNumber: date.getDate(),
+            isToday: date.toDateString() === new Date().toDateString()
+          })
+        }
+
+        return days // 月曜日の場合はここで返す
+      }
+
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(fridayDate)
+        date.setDate(fridayDate.getDate() + i)
+        targetDates.push(date)
+      }
+    }
+
+    // 日付データを生成
+    for (const date of targetDates) {
       days.push({
         date: date.toISOString().split('T')[0],
         dayName: ['日', '月', '火', '水', '木', '金', '土'][date.getDay()],
@@ -620,8 +677,29 @@ const previousDays = () => {
     const day = String(newDate.getDate()).padStart(2, '0')
     selectedSingleDate.value = `${year}-${month}-${day}`
   } else {
-    // 3日表示時は3日前に移動
-    newDate.setDate(newDate.getDate() - 3)
+    // 3日表示時は曜日グループを考慮して移動
+    const currentDayOfWeek = newDate.getDay()
+
+    if (currentDayOfWeek >= 2 && currentDayOfWeek <= 4) {
+      // 火・水・木グループの場合 -> 金・土・日グループに移動
+      // 前週の金曜日に移動（火曜日から4日戻る）
+      newDate.setDate(newDate.getDate() - (currentDayOfWeek - 2) - 4)
+    } else {
+      // 金・土・日・月グループの場合 -> 火・水・木グループに移動
+      if (currentDayOfWeek === 5) {
+        // 金曜日の場合、火曜日に移動（3日戻る）
+        newDate.setDate(newDate.getDate() - 3)
+      } else if (currentDayOfWeek === 6) {
+        // 土曜日の場合、火曜日に移動（4日戻る）
+        newDate.setDate(newDate.getDate() - 4)
+      } else if (currentDayOfWeek === 0) {
+        // 日曜日の場合、火曜日に移動（5日戻る）
+        newDate.setDate(newDate.getDate() - 5)
+      } else if (currentDayOfWeek === 1) {
+        // 月曜日の場合、前週の金曜日に移動（3日戻る）
+        newDate.setDate(newDate.getDate() - 3)
+      }
+    }
   }
   currentDate.value = newDate
 }
@@ -637,8 +715,29 @@ const nextDays = () => {
     const day = String(newDate.getDate()).padStart(2, '0')
     selectedSingleDate.value = `${year}-${month}-${day}`
   } else {
-    // 3日表示時は3日後に移動
-    newDate.setDate(newDate.getDate() + 3)
+    // 3日表示時は曜日グループを考慮して移動
+    const currentDayOfWeek = newDate.getDay()
+
+    if (currentDayOfWeek >= 2 && currentDayOfWeek <= 4) {
+      // 火・水・木グループの場合 -> 金・土・日グループに移動
+      // 金曜日に移動（木曜日から1日進む、水曜日から2日進む、火曜日から3日進む）
+      newDate.setDate(newDate.getDate() + (5 - currentDayOfWeek))
+    } else {
+      // 金・土・日・月グループの場合 -> 次の火・水・木グループに移動
+      if (currentDayOfWeek === 5) {
+        // 金曜日の場合、次週の火曜日に移動（4日進む）
+        newDate.setDate(newDate.getDate() + 4)
+      } else if (currentDayOfWeek === 6) {
+        // 土曜日の場合、次週の火曜日に移動（3日進む）
+        newDate.setDate(newDate.getDate() + 3)
+      } else if (currentDayOfWeek === 0) {
+        // 日曜日の場合、次週の火曜日に移動（2日進む）
+        newDate.setDate(newDate.getDate() + 2)
+      } else if (currentDayOfWeek === 1) {
+        // 月曜日の場合、金曜日に移動（4日進む）
+        newDate.setDate(newDate.getDate() + 4)
+      }
+    }
   }
   currentDate.value = newDate
 }

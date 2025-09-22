@@ -24,7 +24,8 @@ service cloud.firestore {
 
     // Validate required fields for different document types
     function hasRequiredUserFields() {
-      return request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']);
+      return request.resource.data.keys().hasAll(['email', 'displayName', 'createdAt']) &&
+             (request.resource.data.keys().hasAny(['role'])); // roleフィールドを許可
     }
 
     function hasRequiredReservationFields() {
