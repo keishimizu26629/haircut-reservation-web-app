@@ -90,7 +90,13 @@ jobs:
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_PROD_APP_ID }}
           NODE_ENV: production
           FIREBASE_ENV: production
-        run: npm run generate
+        run: |
+          echo "🔍 Building for production environment..."
+          echo "Firebase Project ID: ${{ secrets.FIREBASE_PROD_PROJECT_ID }}"
+          echo "Firebase Auth Domain: ${{ secrets.FIREBASE_PROD_AUTH_DOMAIN }}"
+          echo "NODE_ENV: production"
+          echo "FIREBASE_ENV: production"
+          npm run generate
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
