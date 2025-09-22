@@ -4,7 +4,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
-import { loadGeneratedFirebaseConfig } from '~/app/utils/firebase-config-loader'
+// import { loadGeneratedFirebaseConfig } from '~/app/utils/firebase-config-loader'
 
 export default defineNuxtPlugin(async () => {
   if (process.client) {
@@ -17,8 +17,23 @@ export default defineNuxtPlugin(async () => {
     // Firebase設定の優先順位: 1.生成された設定 > 2.ランタイム設定 > 3.フォールバック
     const config = useRuntimeConfig()
 
-    // 生成された設定ファイルを安全に読み込み
-    const generatedConfig = await loadGeneratedFirebaseConfig()
+        // 生成された設定ファイルを安全に読み込み
+        let generatedConfig = null
+        try {
+          const configModule = await import('~/app/config/firebase-generated').catch(() => null)
+          if (configModule?.FIREBASE_CONFIG?.projectId) {
+            generatedConfig = {
+              FIREBASE_CONFIG: configModule.FIREBASE_CONFIG,
+              ENVIRONMENT: configModule.ENVIRONMENT,
+              NODE_ENV: configModule.NODE_ENV,
+              IS_PRODUCTION: configModule.IS_PRODUCTION,
+              FALLBACK_CONFIG: configModule.FALLBACK_CONFIG
+            }
+          }
+        } catch (error: unknown) {
+          console.warn('⚠️ Error loading generated Firebase config:', error)
+          generatedConfig = null
+        }
 
     // 生成された設定があれば優先使用
     let firebaseConfig: Record<string, unknown>

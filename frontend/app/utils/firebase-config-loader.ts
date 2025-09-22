@@ -29,10 +29,14 @@ export async function loadGeneratedFirebaseConfig(): Promise<FirebaseConfigData 
 
   try {
     // 動的インポートで設定ファイルを読み込み（存在しない場合はnullを返す）
-    const configModule = await import('~/app/config/firebase-generated').catch((error: unknown) => {
+    let configModule = null
+    try {
+      // より安全な動的インポート
+      configModule = await import('~/app/config/firebase-generated')
+    } catch (error: unknown) {
       console.warn('⚠️ Generated Firebase config file not found, using fallback:', error)
-      return null
-    })
+      configModule = null
+    }
 
     if (!configModule) {
       return null
